@@ -1,19 +1,15 @@
-// ========== IMPORTAR SERVICIOS DE SUPABASE ==========
-import {
-  authService,
-  eventService,
-  faqService,
-  attendeeService,
-  dashboardService,
-  isSupabaseConfigured,
-} from "./lib/supabase.js"
-
 // ========== VARIABLES GLOBALES ==========
 let currentUser = null
 let currentMonth = new Date().getMonth()
 let currentYear = new Date().getFullYear()
 let events = []
 let faqData = []
+const isSupabaseConfigured = false // Declare isSupabaseConfigured
+const authService = null // Declare authService
+const eventService = null // Declare eventService
+const faqService = null // Declare faqService
+const attendeeService = null // Declare attendeeService
+const dashboardService = null // Declare dashboardService
 
 // Meses en español
 const monthNames = [
@@ -63,10 +59,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ========== FUNCIONES DE AUTENTICACIÓN ==========
 async function checkCurrentUser() {
   try {
-    currentUser = await authService.getCurrentUser()
-    if (currentUser) {
-      updateUIForLoggedInUser()
-      console.log("👤 Usuario logueado:", currentUser.nombre)
+    if (authService) {
+      currentUser = await authService.getCurrentUser()
+      if (currentUser) {
+        updateUIForLoggedInUser()
+        console.log("👤 Usuario logueado:", currentUser.nombre)
+      }
     }
   } catch (error) {
     console.error("Error verificando usuario:", error)
@@ -80,6 +78,11 @@ async function handleLogin(event) {
   const password = document.getElementById("loginPassword").value
 
   try {
+    if (!authService) {
+      showMessage("Servicios no disponibles. Recarga la página.", "error")
+      return
+    }
+
     const result = await authService.login(email, password)
 
     if (result.success) {
@@ -120,6 +123,11 @@ async function handleRegister(event) {
   }
 
   try {
+    if (!authService) {
+      showMessage("Servicios no disponibles. Recarga la página.", "error")
+      return
+    }
+
     const result = await authService.register(userData)
 
     if (result.success) {
@@ -138,7 +146,10 @@ async function handleRegister(event) {
 
 async function logout() {
   try {
-    await authService.logout()
+    if (authService) {
+      await authService.logout()
+    }
+
     currentUser = null
 
     // Resetear UI
@@ -171,6 +182,37 @@ async function logout() {
 async function loadEvents() {
   try {
     console.log("📅 Cargando eventos...")
+
+    if (!eventService) {
+      console.log("📅 Usando eventos de ejemplo (servicios no disponibles)")
+      events = [
+        {
+          id: "1",
+          title: "Reunión Dominical",
+          date: "2024-02-04",
+          time: "10:00",
+          location: "Lugar principal de reunión",
+          description: "Únete a nosotros para adoración y enseñanza de la Palabra",
+          audience: "todos",
+          createdBy: "Glenis",
+          rsvps: [],
+        },
+        {
+          id: "2",
+          title: "Estudio Bíblico",
+          date: "2024-02-07",
+          time: "19:00",
+          location: "Casa de oración",
+          description: "Estudio profundo de la Palabra de Dios",
+          audience: "todos",
+          createdBy: "Wilmar",
+          rsvps: [],
+        },
+      ]
+      updateCalendar()
+      updateUpcomingEvents()
+      return
+    }
 
     const { data, error } = await eventService.getEvents()
 
@@ -219,6 +261,11 @@ async function handleEventSubmit(event) {
   }
 
   try {
+    if (!eventService) {
+      showMessage("Servicios no disponibles. Recarga la página.", "error")
+      return
+    }
+
     const { data, error } = await eventService.createEvent(eventData)
 
     if (error) {
@@ -244,6 +291,11 @@ async function rsvpEvent(eventId) {
   }
 
   try {
+    if (!eventService) {
+      showMessage("Servicios no disponibles. Recarga la página.", "error")
+      return
+    }
+
     const { data, error } = await eventService.rsvpEvent(eventId, currentUser.id)
 
     if (error) {
@@ -274,6 +326,12 @@ async function submitQuestion(event) {
   }
 
   try {
+    if (!faqService) {
+      showMessage("¡Gracias por tu pregunta! (Servicios no disponibles)", "success")
+      document.getElementById("faqForm").reset()
+      return
+    }
+
     const { data, error } = await faqService.submitQuestion(questionData)
 
     if (error) {
@@ -306,6 +364,12 @@ async function submitAttendeeForm(event) {
   }
 
   try {
+    if (!attendeeService) {
+      showMessage("¡Gracias por tu información! (Servicios no disponibles)", "success")
+      event.target.reset()
+      return
+    }
+
     const { data, error } = await attendeeService.submitForm(attendeeData)
 
     if (error) {
@@ -338,6 +402,13 @@ async function showDashboard() {
 
 async function updateDashboardStats() {
   try {
+    if (!dashboardService) {
+      document.getElementById("eventsCount").textContent = "3"
+      document.getElementById("questionsCount").textContent = "5"
+      document.getElementById("formsCount").textContent = "2"
+      return
+    }
+
     const stats = await dashboardService.getStats()
 
     document.getElementById("eventsCount").textContent = stats.events
@@ -584,6 +655,11 @@ function initializeFAQ() {
 
 function displayFAQ() {
   const container = document.getElementById("faqContainer")
+  if (!container) {
+    console.error("No se encontró el contenedor de FAQ")
+    return
+  }
+
   container.innerHTML = ""
 
   faqData.forEach((faq, index) => {
@@ -610,13 +686,13 @@ function toggleFAQ(index) {
   faqItems.forEach((item) => {
     item.classList.remove("active")
     const icon = item.querySelector(".fa-chevron-down")
-    icon.style.transform = "rotate(0deg)"
+    if (icon) icon.style.transform = "rotate(0deg)"
   })
 
   if (!isActive) {
     currentItem.classList.add("active")
     const icon = currentItem.querySelector(".fa-chevron-down")
-    icon.style.transform = "rotate(180deg)"
+    if (icon) icon.style.transform = "rotate(180deg)"
   }
 }
 
@@ -643,6 +719,11 @@ function initializeGallery() {
   const galleryItems = document.querySelectorAll(".gallery-item")
   const indicatorsContainer = document.getElementById("galleryIndicators")
 
+  if (!indicatorsContainer) {
+    console.error("No se encontró el contenedor de indicadores de galería")
+    return
+  }
+
   galleryItems.forEach((_, index) => {
     const indicator = document.createElement("div")
     indicator.className = `gallery-indicator ${index === 0 ? "active" : ""}`
@@ -659,8 +740,12 @@ function changeGallerySlide(direction) {
   const items = document.querySelectorAll(".gallery-item")
   const indicators = document.querySelectorAll(".gallery-indicator")
 
+  if (items.length === 0) return
+
   items[currentGallerySlide].classList.remove("active")
-  indicators[currentGallerySlide].classList.remove("active")
+  if (indicators[currentGallerySlide]) {
+    indicators[currentGallerySlide].classList.remove("active")
+  }
 
   currentGallerySlide += direction
 
@@ -671,31 +756,45 @@ function changeGallerySlide(direction) {
   }
 
   items[currentGallerySlide].classList.add("active")
-  indicators[currentGallerySlide].classList.add("active")
+  if (indicators[currentGallerySlide]) {
+    indicators[currentGallerySlide].classList.add("active")
+  }
 }
 
 function goToGallerySlide(index) {
   const items = document.querySelectorAll(".gallery-item")
   const indicators = document.querySelectorAll(".gallery-indicator")
 
+  if (items.length === 0) return
+
   items[currentGallerySlide].classList.remove("active")
-  indicators[currentGallerySlide].classList.remove("active")
+  if (indicators[currentGallerySlide]) {
+    indicators[currentGallerySlide].classList.remove("active")
+  }
 
   currentGallerySlide = index
 
   items[currentGallerySlide].classList.add("active")
-  indicators[currentGallerySlide].classList.add("active")
+  if (indicators[currentGallerySlide]) {
+    indicators[currentGallerySlide].classList.add("active")
+  }
 }
 
 // ========== FUNCIONES DE MODAL ==========
 function openModal(modalId) {
-  document.getElementById(modalId).style.display = "block"
-  document.body.style.overflow = "hidden"
+  const modal = document.getElementById(modalId)
+  if (modal) {
+    modal.style.display = "block"
+    document.body.style.overflow = "hidden"
+  }
 }
 
 function closeModal(modalId) {
-  document.getElementById(modalId).style.display = "none"
-  document.body.style.overflow = "auto"
+  const modal = document.getElementById(modalId)
+  if (modal) {
+    modal.style.display = "none"
+    document.body.style.overflow = "auto"
+  }
 }
 
 window.addEventListener("click", (event) => {
@@ -758,7 +857,10 @@ function updateUIForLoggedInUser() {
 }
 
 function updateFooterYear() {
-  document.getElementById("currentYear").textContent = new Date().getFullYear()
+  const yearElement = document.getElementById("currentYear")
+  if (yearElement) {
+    yearElement.textContent = new Date().getFullYear()
+  }
 }
 
 // Validación de contraseña en tiempo real
@@ -770,23 +872,5 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 })
-
-// Hacer funciones globales para HTML
-window.handleLogin = handleLogin
-window.handleRegister = handleRegister
-window.logout = logout
-window.handleEventSubmit = handleEventSubmit
-window.rsvpEvent = rsvpEvent
-window.submitQuestion = submitQuestion
-window.submitAttendeeForm = submitAttendeeForm
-window.showDashboard = showDashboard
-window.openModal = openModal
-window.closeModal = closeModal
-window.scrollToSection = scrollToSection
-window.changeMonth = changeMonth
-window.toggleFAQ = toggleFAQ
-window.searchFAQ = searchFAQ
-window.changeGallerySlide = changeGallerySlide
-window.goToGallerySlide = goToGallerySlide
 
 console.log("🎉 Script principal cargado completamente")
