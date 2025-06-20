@@ -80,56 +80,6 @@ body {
   justify-content: center;
 }
 
-.hands-symbol {
-  position: relative;
-  width: 50px;
-  height: 50px;
-}
-
-.hand {
-  position: absolute;
-  width: 20px;
-  height: 30px;
-  background: var(--primary-orange);
-  border-radius: 20px 20px 8px 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.left-hand {
-  left: 5px;
-  top: 10px;
-  transform: rotate(-20deg);
-}
-
-.right-hand {
-  right: 5px;
-  top: 10px;
-  transform: rotate(20deg);
-}
-
-.cross-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 4px;
-  height: 25px;
-  background: var(--primary-dark);
-  border-radius: 2px;
-}
-
-.cross-center::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 35%;
-  transform: translate(-50%, -50%);
-  width: 15px;
-  height: 4px;
-  background: var(--primary-dark);
-  border-radius: 2px;
-}
-
 /* Church Name Styling - Following PDF typography guidelines */
 .church-name {
   font-family: var(--font-heading);
