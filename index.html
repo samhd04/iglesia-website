@@ -1,484 +1,695 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Un Lugar de Él Para Ti - Iglesia Cristiana</title>
-    <meta name="description" content="Una iglesia para todos. Guiamos a las personas a una relación auténtica con Dios a través del discipulado y el servicio.">
-    <link href="https://fonts.googleapis.com/css2?family=Cocogoose:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <meta
+      name="description"
+      content="Una iglesia para todos. Guiamos a las personas a una relación auténtica con Dios a través del discipulado y el servicio."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cocogoose:wght@400;700&family=Open+Sans:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <div class="logo-symbol">
-                    <div class="hands-symbol">
-                        <div class="hand left-hand"></div>
-                        <div class="hand right-hand"></div>
-                        <div class="cross-center"></div>
-                    </div>
-                </div>
-                <span class="church-name">un lugar de él para ti<br><span class="tagline">una iglesia para todos</span></span>
+      <div class="nav-container">
+        <div class="nav-logo">
+          <div class="logo-symbol">
+            <div class="hands-symbol">
+              <div class="hand left-hand"></div>
+              <div class="hand right-hand"></div>
+              <div class="cross-center"></div>
             </div>
-            <ul class="nav-menu" id="nav-menu">
-                <li><a href="#inicio" class="nav-link">Inicio</a></li>
-                <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
-                <li><a href="#galeria" class="nav-link">Galería</a></li>
-                <li><a href="#eventos" class="nav-link">Eventos</a></li>
-                <li><a href="#preguntas" class="nav-link">Preguntas</a></li>
-                <li><a href="#contacto" class="nav-link">Contacto</a></li>
-                <li><a href="#" class="nav-link" onclick="openModal('loginModal')" id="loginLink">Ingresar</a></li>
-            </ul>
-            <div class="hamburger" id="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
+          </div>
+          <span class="church-name"
+            >Un lugar de él para ti<br /><span class="tagline"
+              >una iglesia para todos</span
+            ></span
+          >
         </div>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#inicio" class="nav-link">Inicio</a></li>
+          <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
+          <li><a href="#galeria" class="nav-link">Galería</a></li>
+          <li><a href="#eventos" class="nav-link">Eventos</a></li>
+          <li><a href="#preguntas" class="nav-link">Preguntas</a></li>
+          <li><a href="#contacto" class="nav-link">Contacto</a></li>
+          <li>
+            <a
+              href="#"
+              class="nav-link"
+              onclick="openModal('loginModal')"
+              id="loginLink"
+              >Ingresar</a
+            >
+          </li>
+        </ul>
+        <div class="hamburger" id="hamburger">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </div>
+      </div>
     </nav>
 
     <!-- Hero Section -->
     <section id="inicio" class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">un lugar de él para ti</h1>
-            <p class="hero-subtitle">una iglesia para todos</p>
-            <p class="hero-description">Guiamos a las personas a una relación auténtica con Dios a través del discipulado y el servicio</p>
-        
-            <!-- Horarios de Reunión -->
-            <div class="hero-schedule">
-                <div class="schedule-item">
-                    <i class="fas fa-calendar-day"></i>
-                    <div>
-                        <h4>domingos</h4>
-                        <p>10:00 AM</p>
-                    </div>
-                </div>
-                <div class="schedule-item">
-                    <i class="fas fa-moon"></i>
-                    <div>
-                        <h4>miércoles</h4>
-                        <p>7:00 PM</p>
-                    </div>
-                </div>
-            </div>
+      <div class="hero-content">
+        <h1 class="hero-title">Un lugar de él para ti</h1>
+        <p class="hero-subtitle">una iglesia para todos</p>
+        <p class="hero-description">
+          Guiamos a las personas a una relación auténtica con Dios a través del
+          discipulado y el servicio
+        </p>
 
-            <!-- Estadísticas -->
-            <div class="hero-stats">
-                <div class="stat">
-                    <span class="stat-number">4+</span>
-                    <span class="stat-label">años sirviendo</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number">50+</span>
-                    <span class="stat-label">vidas transformadas</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-number">∞</span>
-                    <span class="stat-label">amor de dios</span>
-                </div>
+        <!-- Horarios de Reunión -->
+        <div class="hero-schedule">
+          <div class="schedule-item">
+            <i class="fas fa-calendar-day"></i>
+            <div>
+              <h4>domingos</h4>
+              <p>9:30 AM</p>
             </div>
-
-            <div class="hero-actions">
-                <button class="cta-button primary" onclick="scrollToSection('nosotros')">
-                    conoce más
-                </button>
-                <button class="cta-button secondary" onclick="scrollToSection('contacto')">
-                    visítanos
-                </button>
-            </div>
-
-            <!-- Versículo -->
-            <div class="hero-verse">
-                <p>"Porque donde están dos o tres congregados en mi nombre, allí estoy yo en medio de ellos."</p>
-                <span>- Mateo 18:20</span>
-            </div>
+          </div>
         </div>
-        <div class="hero-overlay"></div>
+
+        <!-- Estadísticas -->
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-number">5+</span>
+            <span class="stat-label">años sirviendo</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">50+</span>
+            <span class="stat-label">vidas transformadas</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">∞</span>
+            <span class="stat-label">amor de dios</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button
+            class="cta-button primary"
+            onclick="scrollToSection('nosotros')"
+          >
+            conoce más
+          </button>
+          <button
+            class="cta-button secondary"
+            onclick="scrollToSection('contacto')"
+          >
+            visítanos
+          </button>
+        </div>
+
+        <!-- Versículo -->
+        <div class="hero-verse">
+          <p>
+            "Porque donde están dos o tres congregados en mi nombre, allí estoy
+            yo en medio de ellos."
+          </p>
+          <span>- Mateo 18:20</span>
+        </div>
+      </div>
+      <div class="hero-overlay"></div>
     </section>
 
     <!-- About Section -->
     <section id="nosotros" class="about">
-        <div class="container">
-            <h2 class="section-title">nosotros</h2>
-            
-            <div class="founders-section">
-                <h3 class="founders-title">nuestros fundadores</h3>
-                <div class="founders-info">
-                    <div class="founder-card">
-                        <div class="founder-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <h4>glenis</h4>
-                        <p>cofundadora</p>
-                    </div>
-                    <div class="founder-card">
-                        <div class="founder-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <h4>wilmar</h4>
-                        <p>cofundador</p>
-                    </div>
-                </div>
-                <p class="founding-year">sirviendo desde 2020</p>
-            </div>
+      <div class="container">
+        <h2 class="section-title">nosotros</h2>
 
-            <div class="mission-vision">
-                <div class="mission-card">
-                    <div class="card-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <h3>nuestra misión</h3>
-                    <p>Guiar a las personas a una relación auténtica con Dios a través del discipulado y el servicio.</p>
-                </div>
-                <div class="vision-card">
-                    <div class="card-icon">
-                        <i class="fas fa-eye"></i>
-                    </div>
-                    <h3>nuestra visión</h3>
-                    <p>Formar una comunidad unida, apasionada por Dios, que impacte su entorno.</p>
-                </div>
+        <div class="founders-section">
+          <h3 class="founders-title">nuestros pastores</h3>
+          <div class="founders-info">
+            <div class="founder-card">
+              <div class="founder-avatar">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <h4>glenis</h4>
+              <p>cofundadora</p>
             </div>
+            <div class="founder-card">
+              <div class="founder-avatar">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <h4>wilmar</h4>
+              <p>cofundador</p>
+            </div>
+          </div>
+          <p class="founding-year">sirviendo desde 2020</p>
         </div>
+
+        <div class="mission-vision">
+          <div class="mission-card">
+            <div class="card-icon">
+              <i class="fas fa-heart"></i>
+            </div>
+            <h3>nuestra misión</h3>
+            <p>
+              Guiar a las personas a una relación auténtica con Dios a través
+              del discipulado y el servicio.
+            </p>
+          </div>
+          <div class="vision-card">
+            <div class="card-icon">
+              <i class="fas fa-eye"></i>
+            </div>
+            <h3>nuestra visión</h3>
+            <p>
+              Formar una comunidad unida, apasionada por Dios, que impacte su
+              entorno.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Gallery Section -->
     <section id="galeria" class="gallery">
-        <div class="container">
-            <h2 class="section-title">galería</h2>
-            <div class="gallery-container">
-                <div class="gallery-item active">
-                    <img src="/placeholder.svg?height=400&width=600" alt="Reunión dominical" loading="lazy">
-                    <div class="gallery-caption">
-                        <h4>reunión dominical</h4>
-                        <p>adoración y comunión cada domingo</p>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="/placeholder.svg?height=400&width=600" alt="Estudio bíblico" loading="lazy">
-                    <div class="gallery-caption">
-                        <h4>estudio bíblico</h4>
-                        <p>profundizando en la palabra de dios</p>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="/placeholder.svg?height=400&width=600" alt="Ministerio juvenil" loading="lazy">
-                    <div class="gallery-caption">
-                        <h4>ministerio juvenil</h4>
-                        <p>formando la próxima generación</p>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="/placeholder.svg?height=400&width=600" alt="Actividades familiares" loading="lazy">
-                    <div class="gallery-caption">
-                        <h4>actividades familiares</h4>
-                        <p>fortaleciendo los lazos familiares</p>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="/placeholder.svg?height=400&width=600" alt="Servicio comunitario" loading="lazy">
-                    <div class="gallery-caption">
-                        <h4>servicio comunitario</h4>
-                        <p>sirviendo a nuestra comunidad</p>
-                    </div>
-                </div>
-                <div class="gallery-item">
-                    <img src="/placeholder.svg?height=400&width=600" alt="Celebraciones especiales" loading="lazy">
-                    <div class="gallery-caption">
-                        <h4>celebraciones especiales</h4>
-                        <p>momentos únicos de celebración</p>
-                    </div>
-                </div>
+      <div class="container">
+        <h2 class="section-title">galería</h2>
+        <div class="gallery-container">
+          <div class="gallery-item active">
+            <img
+              src="/placeholder.svg?height=400&width=600"
+              alt="Reunión dominical"
+              loading="lazy"
+            />
+            <div class="gallery-caption">
+              <h4>reunión dominical</h4>
+              <p>adoración y comunión cada domingo</p>
             </div>
-            
-            <!-- Gallery Controls -->
-            <div class="gallery-controls">
-                <button class="gallery-btn prev" onclick="changeGallerySlide(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div class="gallery-indicators" id="galleryIndicators">
-                    <!-- Indicators will be generated by JavaScript -->
-                </div>
-                <button class="gallery-btn next" onclick="changeGallerySlide(1)">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="/placeholder.svg?height=400&width=600"
+              alt="Estudio bíblico"
+              loading="lazy"
+            />
+            <div class="gallery-caption">
+              <h4>estudio bíblico</h4>
+              <p>profundizando en la palabra de dios</p>
             </div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="/placeholder.svg?height=400&width=600"
+              alt="Ministerio juvenil"
+              loading="lazy"
+            />
+            <div class="gallery-caption">
+              <h4>ministerio juvenil</h4>
+              <p>formando la próxima generación</p>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="/placeholder.svg?height=400&width=600"
+              alt="Actividades familiares"
+              loading="lazy"
+            />
+            <div class="gallery-caption">
+              <h4>actividades familiares</h4>
+              <p>fortaleciendo los lazos familiares</p>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="/placeholder.svg?height=400&width=600"
+              alt="Servicio comunitario"
+              loading="lazy"
+            />
+            <div class="gallery-caption">
+              <h4>servicio comunitario</h4>
+              <p>sirviendo a nuestra comunidad</p>
+            </div>
+          </div>
+          <div class="gallery-item">
+            <img
+              src="/placeholder.svg?height=400&width=600"
+              alt="Celebraciones especiales"
+              loading="lazy"
+            />
+            <div class="gallery-caption">
+              <h4>celebraciones especiales</h4>
+              <p>momentos únicos de celebración</p>
+            </div>
+          </div>
         </div>
+
+        <!-- Gallery Controls -->
+        <div class="gallery-controls">
+          <button class="gallery-btn prev" onclick="changeGallerySlide(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="gallery-indicators" id="galleryIndicators">
+            <!-- Indicators will be generated by JavaScript -->
+          </div>
+          <button class="gallery-btn next" onclick="changeGallerySlide(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- Events Section -->
     <section id="eventos" class="events">
-        <div class="container">
-            <h2 class="section-title">eventos</h2>
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <button class="calendar-nav" onclick="changeMonth(-1)">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <h3 id="currentMonth"></h3>
-                    <button class="calendar-nav" onclick="changeMonth(1)">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                <div class="calendar-grid" id="calendar"></div>
-            </div>
-            <div class="event-actions" id="eventActions" style="display: none;">
-                <button class="btn btn-primary" onclick="openModal('eventModal')">crear evento</button>
-            </div>
-            <div class="upcoming-events" id="upcomingEvents">
-                <h3>próximos eventos</h3>
-                <div id="eventsList"></div>
-            </div>
+      <div class="container">
+        <h2 class="section-title">eventos</h2>
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <button class="calendar-nav" onclick="changeMonth(-1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h3 id="currentMonth"></h3>
+            <button class="calendar-nav" onclick="changeMonth(1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="calendar-grid" id="calendar"></div>
         </div>
+        <div class="event-actions" id="eventActions" style="display: none">
+          <button class="btn btn-primary" onclick="openModal('eventModal')">
+            crear evento
+          </button>
+        </div>
+        <div class="upcoming-events" id="upcomingEvents">
+          <h3>próximos eventos</h3>
+          <div id="eventsList"></div>
+        </div>
+      </div>
     </section>
 
     <!-- FAQ Section -->
     <section id="preguntas" class="faq">
-        <div class="container">
-            <h2 class="section-title">preguntas frecuentes</h2>
-            <div class="faq-search">
-                <input type="text" id="faqSearch" placeholder="buscar preguntas..." onkeyup="searchFAQ()">
-                <i class="fas fa-search"></i>
-            </div>
-            <div class="faq-container" id="faqContainer">
-                <!-- FAQ items will be populated by JavaScript -->
-            </div>
-            <div class="faq-submit">
-                <h3>¿tienes una pregunta?</h3>
-                <form id="faqForm" onsubmit="submitQuestion(event)">
-                    <input type="text" id="questionName" placeholder="tu nombre" required>
-                    <input type="email" id="questionEmail" placeholder="tu email" required>
-                    <textarea id="questionText" placeholder="tu pregunta" required></textarea>
-                    <button type="submit" class="btn btn-primary">enviar pregunta</button>
-                </form>
-            </div>
+      <div class="container">
+        <h2 class="section-title">preguntas frecuentes</h2>
+        <div class="faq-search">
+          <input
+            type="text"
+            id="faqSearch"
+            placeholder="buscar preguntas..."
+            onkeyup="searchFAQ()"
+          />
+          <i class="fas fa-search"></i>
         </div>
+        <div class="faq-container" id="faqContainer">
+          <!-- FAQ items will be populated by JavaScript -->
+        </div>
+        <div class="faq-submit">
+          <h3>¿tienes una pregunta?</h3>
+          <form id="faqForm" onsubmit="submitQuestion(event)">
+            <input
+              type="text"
+              id="questionName"
+              placeholder="tu nombre"
+              required
+            />
+            <input
+              type="email"
+              id="questionEmail"
+              placeholder="tu email"
+              required
+            />
+            <textarea
+              id="questionText"
+              placeholder="tu pregunta"
+              required
+            ></textarea>
+            <button type="submit" class="btn btn-primary">
+              enviar pregunta
+            </button>
+          </form>
+        </div>
+      </div>
     </section>
 
     <!-- Contact Section -->
     <section id="contacto" class="contact">
-        <div class="container">
-            <h2 class="section-title">contacto</h2>
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <i class="fas fa-envelope"></i>
-                        <div>
-                            <h4>correo electrónico</h4>
-                            <p><a href="mailto:unlugardeelparati@gmail.com">unlugardeelparati@gmail.com</a></p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fab fa-whatsapp"></i>
-                        <div>
-                            <h4>whatsapp</h4>
-                            <p><a href="https://wa.me/573113629196" target="_blank">+57 311 362 9196</a></p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div>
-                            <h4>ubicación</h4>
-                            <p>nos reunimos en diferentes lugares<br>contáctanos para más información</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="attendee-form">
-                    <h3>formulario de asistentes</h3>
-                    <form id="attendeeForm" onsubmit="submitAttendeeForm(event)">
-                        <input type="text" name="fullName" placeholder="nombre completo" required>
-                        <input type="email" name="email" placeholder="correo electrónico" required>
-                        
-                        <div class="radio-group">
-                            <label>¿haces parte de alguna congregación?</label>
-                            <div class="radio-options">
-                                <label><input type="radio" name="congregation" value="si" required> sí</label>
-                                <label><input type="radio" name="congregation" value="no" required> no</label>
-                            </div>
-                        </div>
-
-                        <div class="radio-group">
-                            <label>¿tienes discipulado?</label>
-                            <div class="radio-options">
-                                <label><input type="radio" name="discipleship" value="si" required> sí</label>
-                                <label><input type="radio" name="discipleship" value="no" required> no</label>
-                            </div>
-                        </div>
-
-                        <div class="radio-group">
-                            <label>¿estás bautizado?</label>
-                            <div class="radio-options">
-                                <label><input type="radio" name="baptized" value="si" required> sí</label>
-                                <label><input type="radio" name="baptized" value="no" required> no</label>
-                            </div>
-                        </div>
-
-                        <textarea name="prayerRequest" placeholder="¿tienes alguna petición de oración?"></textarea>
-
-                        <div class="radio-group">
-                            <label>¿quieres que nos contactemos contigo?</label>
-                            <div class="radio-options">
-                                <label><input type="radio" name="contact" value="si" required> sí</label>
-                                <label><input type="radio" name="contact" value="no" required> no</label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">enviar información</button>
-                    </form>
-                </div>
+      <div class="container">
+        <h2 class="section-title">contacto</h2>
+        <div class="contact-grid">
+          <div class="contact-info">
+            <div class="contact-item">
+              <i class="fas fa-envelope"></i>
+              <div>
+                <h4>correo electrónico</h4>
+                <p>
+                  <a href="mailto:unlugardeelparati@gmail.com"
+                    >unlugardeelparati@gmail.com</a
+                  >
+                </p>
+              </div>
             </div>
-            
-            <div class="map-container">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.2!2d-74.0!3d4.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwMzYnMDAuMCJOIDc0wrAwMCcwMC4wIlc!5e0!3m2!1sen!2sco!4v1234567890123"
-                    width="100%" 
-                    height="300" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy">
-                </iframe>
+            <div class="contact-item">
+              <i class="fab fa-whatsapp"></i>
+              <div>
+                <h4>whatsapp</h4>
+                <p>
+                  <a href="https://wa.me/573113629196" target="_blank"
+                    >+57 311 362 9196</a
+                  >
+                </p>
+              </div>
             </div>
+            <div class="contact-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <div>
+                <h4>ubicación</h4>
+                <p>
+                  nos reunimos en diferentes lugares<br />contáctanos para más
+                  información
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="attendee-form">
+            <h3>formulario de asistentes</h3>
+            <form id="attendeeForm" onsubmit="submitAttendeeForm(event)">
+              <input
+                type="text"
+                name="fullName"
+                placeholder="nombre completo"
+                required
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="correo electrónico"
+                required
+              />
+
+              <div class="radio-group">
+                <label>¿haces parte de alguna congregación?</label>
+                <div class="radio-options">
+                  <label
+                    ><input
+                      type="radio"
+                      name="congregation"
+                      value="si"
+                      required
+                    />
+                    sí</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="congregation"
+                      value="no"
+                      required
+                    />
+                    no</label
+                  >
+                </div>
+              </div>
+
+              <div class="radio-group">
+                <label>¿tienes discipulado?</label>
+                <div class="radio-options">
+                  <label
+                    ><input
+                      type="radio"
+                      name="discipleship"
+                      value="si"
+                      required
+                    />
+                    sí</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="discipleship"
+                      value="no"
+                      required
+                    />
+                    no</label
+                  >
+                </div>
+              </div>
+
+              <div class="radio-group">
+                <label>¿estás bautizado?</label>
+                <div class="radio-options">
+                  <label
+                    ><input type="radio" name="baptized" value="si" required />
+                    sí</label
+                  >
+                  <label
+                    ><input type="radio" name="baptized" value="no" required />
+                    no</label
+                  >
+                </div>
+              </div>
+
+              <textarea
+                name="prayerRequest"
+                placeholder="¿tienes alguna petición de oración?"
+              ></textarea>
+
+              <div class="radio-group">
+                <label>¿quieres que nos contactemos contigo?</label>
+                <div class="radio-options">
+                  <label
+                    ><input type="radio" name="contact" value="si" required />
+                    sí</label
+                  >
+                  <label
+                    ><input type="radio" name="contact" value="no" required />
+                    no</label
+                  >
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                enviar información
+              </button>
+            </form>
+          </div>
         </div>
+
+        <div class="map-container">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976.2!2d-74.0!3d4.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNMKwMzYnMDAuMCJOIDc0wrAwMCcwMC4wIlc!5e0!3m2!1sen!2sco!4v1234567890123"
+            width="100%"
+            height="300"
+            style="border: 0"
+            allowfullscreen=""
+            loading="lazy"
+          >
+          </iframe>
+        </div>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="footer-logo">
-                        <div class="logo-symbol">
-                            <div class="hands-symbol">
-                                <div class="hand left-hand"></div>
-                                <div class="hand right-hand"></div>
-                                <div class="cross-center"></div>
-                            </div>
-                        </div>
-                        <span class="church-name">un lugar de él para ti</span>
-                    </div>
-                    <p class="footer-tagline">una iglesia para todos</p>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <div class="footer-logo">
+              <div class="logo-symbol">
+                <div class="hands-symbol">
+                  <div class="hand left-hand"></div>
+                  <div class="hand right-hand"></div>
+                  <div class="cross-center"></div>
                 </div>
-                <div class="footer-section">
-                    <h4>contacto</h4>
-                    <p><a href="mailto:unlugardeelparati@gmail.com">unlugardeelparati@gmail.com</a></p>
-                    <p><a href="https://wa.me/573113629196">+57 311 362 9196</a></p>
-                </div>
-                <div class="footer-section">
-                    <h4>síguenos</h4>
-                    <div class="social-icons">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
+              </div>
+              <span class="church-name">Un lugar de él para ti</span>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"></span> un lugar de él para ti - una iglesia para todos</p>
+            <p class="footer-tagline">una iglesia para todos</p>
+          </div>
+          <div class="footer-section">
+            <h4>contacto</h4>
+            <p>
+              <a href="mailto:unlugardeelparati@gmail.com"
+                >unlugardeelparati@gmail.com</a
+              >
+            </p>
+            <p><a href="https://wa.me/573113629196">+57 311 362 9196</a></p>
+          </div>
+          <div class="footer-section">
+            <h4>síguenos</h4>
+            <div class="social-icons">
+              <a href="#" aria-label="Facebook"
+                ><i class="fab fa-facebook"></i
+              ></a>
+              <a href="#" aria-label="Instagram"
+                ><i class="fab fa-instagram"></i
+              ></a>
+              <a href="#" aria-label="YouTube"
+                ><i class="fab fa-youtube"></i
+              ></a>
             </div>
+          </div>
         </div>
+        <div class="footer-bottom">
+          <p>
+            &copy; <span id="currentYear"></span> un lugar de él para ti - una
+            iglesia para todos
+          </p>
+        </div>
+      </div>
     </footer>
 
     <!-- Modals -->
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('loginModal')">&times;</span>
-            <h2>iniciar sesión</h2>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <input type="email" id="loginEmail" placeholder="correo electrónico" required>
-                <input type="password" id="loginPassword" placeholder="contraseña" required>
-                <button type="submit" class="btn btn-primary">ingresar</button>
-                <div class="form-links">
-                    <a href="#" onclick="openModal('registerModal'); closeModal('loginModal')">registrarse</a>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('loginModal')">&times;</span>
+        <h2>iniciar sesión</h2>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="correo electrónico"
+            required
+          />
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="contraseña"
+            required
+          />
+          <button type="submit" class="btn btn-primary">ingresar</button>
+          <div class="form-links">
+            <a
+              href="#"
+              onclick="openModal('registerModal'); closeModal('loginModal')"
+              >registrarse</a
+            >
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Register Modal -->
     <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('registerModal')">&times;</span>
-            <h2>registrarse</h2>
-            <form id="registerForm" onsubmit="handleRegister(event)">
-                <input type="text" id="registerName" placeholder="nombre completo" required>
-                <input type="email" id="registerEmail" placeholder="correo electrónico" required>
-                <select id="registerRole" required>
-                    <option value="">selecciona tu rol</option>
-                    <option value="miembro">miembro</option>
-                    <option value="servidor">servidor</option>
-                    <option value="lider">líder</option>
-                    <option value="pastor">pastor</option>
-                </select>
-                <input type="password" id="registerPassword" placeholder="contraseña" required>
-                <div class="password-requirements">
-                    <p>la contraseña debe contener:</p>
-                    <ul>
-                        <li id="length">mínimo 10 caracteres</li>
-                        <li id="uppercase">una letra mayúscula</li>
-                        <li id="number">un número</li>
-                    </ul>
-                </div>
-                <input type="password" id="confirmPassword" placeholder="confirmar contraseña" required>
-                <button type="submit" class="btn btn-primary">registrarse</button>
-                <div class="form-links">
-                    <a href="#" onclick="openModal('loginModal'); closeModal('registerModal')">¿ya tienes cuenta?</a>
-                </div>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('registerModal')">&times;</span>
+        <h2>registrarse</h2>
+        <form id="registerForm" onsubmit="handleRegister(event)">
+          <input
+            type="text"
+            id="registerName"
+            placeholder="nombre completo"
+            required
+          />
+          <input
+            type="email"
+            id="registerEmail"
+            placeholder="correo electrónico"
+            required
+          />
+          <select id="registerRole" required>
+            <option value="">selecciona tu rol</option>
+            <option value="miembro">miembro</option>
+            <option value="servidor">servidor</option>
+            <option value="lider">líder</option>
+            <option value="pastor">pastor</option>
+          </select>
+          <input
+            type="password"
+            id="registerPassword"
+            placeholder="contraseña"
+            required
+          />
+          <div class="password-requirements">
+            <p>la contraseña debe contener:</p>
+            <ul>
+              <li id="length">mínimo 10 caracteres</li>
+              <li id="uppercase">una letra mayúscula</li>
+              <li id="number">un número</li>
+            </ul>
+          </div>
+          <input
+            type="password"
+            id="confirmPassword"
+            placeholder="confirmar contraseña"
+            required
+          />
+          <button type="submit" class="btn btn-primary">registrarse</button>
+          <div class="form-links">
+            <a
+              href="#"
+              onclick="openModal('loginModal'); closeModal('registerModal')"
+              >¿ya tienes cuenta?</a
+            >
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Event Modal -->
     <div id="eventModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('eventModal')">&times;</span>
-            <h2 id="eventModalTitle">crear evento</h2>
-            <form id="eventForm" onsubmit="handleEventSubmit(event)">
-                <input type="text" id="eventTitle" placeholder="título del evento" required>
-                <input type="date" id="eventDate" required>
-                <input type="time" id="eventTime" required>
-                <input type="text" id="eventLocation" placeholder="lugar">
-                <select id="eventAudience">
-                    <option value="todos">todos</option>
-                    <option value="miembros">solo miembros</option>
-                    <option value="lideres">líderes</option>
-                </select>
-                <textarea id="eventDescription" placeholder="descripción del evento"></textarea>
-                <button type="submit" class="btn btn-primary">guardar evento</button>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close" onclick="closeModal('eventModal')">&times;</span>
+        <h2 id="eventModalTitle">crear evento</h2>
+        <form id="eventForm" onsubmit="handleEventSubmit(event)">
+          <input
+            type="text"
+            id="eventTitle"
+            placeholder="título del evento"
+            required
+          />
+          <input type="date" id="eventDate" required />
+          <input type="time" id="eventTime" required />
+          <input type="text" id="eventLocation" placeholder="lugar" />
+          <select id="eventAudience">
+            <option value="todos">todos</option>
+            <option value="miembros">solo miembros</option>
+            <option value="lideres">líderes</option>
+          </select>
+          <textarea
+            id="eventDescription"
+            placeholder="descripción del evento"
+          ></textarea>
+          <button type="submit" class="btn btn-primary">guardar evento</button>
+        </form>
+      </div>
     </div>
 
     <!-- Dashboard -->
-    <div id="dashboard" class="dashboard" style="display: none;">
-        <div class="dashboard-header">
-            <h2>panel de control</h2>
-            <div class="dashboard-user">
-                <span id="dashboardUserName"></span>
-                <button class="btn btn-secondary" onclick="logout()">cerrar sesión</button>
-            </div>
+    <div id="dashboard" class="dashboard" style="display: none">
+      <div class="dashboard-header">
+        <h2>panel de control</h2>
+        <div class="dashboard-user">
+          <span id="dashboardUserName"></span>
+          <button class="btn btn-secondary" onclick="logout()">
+            cerrar sesión
+          </button>
         </div>
-        <div class="dashboard-content">
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3>eventos creados</h3>
-                    <span id="eventsCount">0</span>
-                </div>
-                <div class="stat-card">
-                    <h3>preguntas recibidas</h3>
-                    <span id="questionsCount">0</span>
-                </div>
-                <div class="stat-card">
-                    <h3>formularios enviados</h3>
-                    <span id="formsCount">0</span>
-                </div>
-            </div>
+      </div>
+      <div class="dashboard-content">
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <h3>eventos creados</h3>
+            <span id="eventsCount">0</span>
+          </div>
+          <div class="stat-card">
+            <h3>preguntas recibidas</h3>
+            <span id="questionsCount">0</span>
+          </div>
+          <div class="stat-card">
+            <h3>formularios enviados</h3>
+            <span id="formsCount">0</span>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
