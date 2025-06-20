@@ -22,6 +22,10 @@
       }
     },
     {
+      "src": "/logo.png",
+      "dest": "/public/logo.png"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
