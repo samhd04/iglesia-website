@@ -1,15 +1,14 @@
-// ========== VARIABLES GLOBALES ==========
+// Variables Globales
 let currentUser = null
 let currentMonth = new Date().getMonth()
 let currentYear = new Date().getFullYear()
 let events = []
 let faqData = []
-const isSupabaseConfigured = false // Declare isSupabaseConfigured
-const authService = null // Declare authService
-const eventService = null // Declare eventService
-const faqService = null // Declare faqService
-const attendeeService = null // Declare attendeeService
-const dashboardService = null // Declare dashboardService
+let questions = []
+let attendeeForms = []
+
+// URL de Google Sheets (configurar después)
+const GOOGLE_SHEETS_URL = "" // Pegar aquí la URL de Google Apps Script
 
 // Meses en español
 const monthNames = [
@@ -30,396 +29,27 @@ const monthNames = [
 // Días de la semana en español
 const dayHeaders = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"]
 
-// ========== INICIALIZACIÓN ==========
-document.addEventListener("DOMContentLoaded", async () => {
-  console.log("🚀 Iniciando aplicación...")
-
-  // Mostrar estado de configuración
-  if (isSupabaseConfigured) {
-    console.log("✅ Modo Supabase - Base de datos conectada")
-  } else {
-    console.log("🎭 Modo Demo - Usando datos de ejemplo")
-  }
-
+// Inicializar el sitio web
+document.addEventListener("DOMContentLoaded", () => {
   initializeNavigation()
   initializeCalendar()
   initializeFAQ()
   initializeGallery()
+  loadSampleData()
   updateFooterYear()
 
-  // Verificar usuario actual
-  await checkCurrentUser()
+  // Verificar si el usuario está logueado
+  const savedUser = localStorage.getItem("currentUser")
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser)
+    updateUIForLoggedInUser()
+  }
 
-  // Cargar eventos
-  await loadEvents()
-
-  console.log("✅ Aplicación iniciada correctamente")
+  // Cargar datos guardados
+  loadStoredData()
 })
 
-// ========== FUNCIONES DE AUTENTICACIÓN ==========
-async function checkCurrentUser() {
-  try {
-    if (authService) {
-      currentUser = await authService.getCurrentUser()
-      if (currentUser) {
-        updateUIForLoggedInUser()
-        console.log("👤 Usuario logueado:", currentUser.nombre)
-      }
-    }
-  } catch (error) {
-    console.error("Error verificando usuario:", error)
-  }
-}
-
-async function handleLogin(event) {
-  event.preventDefault()
-
-  const email = document.getElementById("loginEmail").value
-  const password = document.getElementById("loginPassword").value
-
-  try {
-    if (!authService) {
-      showMessage("Servicios no disponibles. Recarga la página.", "error")
-      return
-    }
-
-    const result = await authService.login(email, password)
-
-    if (result.success) {
-      currentUser = result.user
-      updateUIForLoggedInUser()
-      closeModal("loginModal")
-      showMessage(`¡Bienvenido de nuevo, ${result.user.nombre}!`, "success")
-      await loadEvents()
-    } else {
-      showMessage(result.error, "error")
-    }
-  } catch (error) {
-    console.error("Error en login:", error)
-    showMessage("Error al iniciar sesión", "error")
-  }
-}
-
-async function handleRegister(event) {
-  event.preventDefault()
-
-  const userData = {
-    name: document.getElementById("registerName").value,
-    email: document.getElementById("registerEmail").value,
-    role: document.getElementById("registerRole").value,
-    password: document.getElementById("registerPassword").value,
-  }
-
-  const confirmPassword = document.getElementById("confirmPassword").value
-
-  if (userData.password !== confirmPassword) {
-    showMessage("Las contraseñas no coinciden.", "error")
-    return
-  }
-
-  if (!validatePassword(userData.password)) {
-    showMessage("La contraseña no cumple con los requisitos.", "error")
-    return
-  }
-
-  try {
-    if (!authService) {
-      showMessage("Servicios no disponibles. Recarga la página.", "error")
-      return
-    }
-
-    const result = await authService.register(userData)
-
-    if (result.success) {
-      currentUser = result.data
-      updateUIForLoggedInUser()
-      closeModal("registerModal")
-      showMessage(`¡Bienvenido a Un Lugar de Él Para Ti, ${userData.name}!`, "success")
-    } else {
-      showMessage(result.error, "error")
-    }
-  } catch (error) {
-    console.error("Error en registro:", error)
-    showMessage("Error al registrarse", "error")
-  }
-}
-
-async function logout() {
-  try {
-    if (authService) {
-      await authService.logout()
-    }
-
-    currentUser = null
-
-    // Resetear UI
-    const loginLink = document.getElementById("loginLink")
-    if (loginLink) {
-      loginLink.textContent = "ingresar"
-      loginLink.onclick = () => openModal("loginModal")
-    }
-
-    const dashboard = document.getElementById("dashboard")
-    if (dashboard) {
-      dashboard.style.display = "none"
-    }
-    document.body.style.overflow = "auto"
-
-    const eventActions = document.getElementById("eventActions")
-    if (eventActions) {
-      eventActions.style.display = "none"
-    }
-
-    showMessage("Has cerrado sesión.", "success")
-    updateUpcomingEvents()
-  } catch (error) {
-    console.error("Error cerrando sesión:", error)
-    showMessage("Error al cerrar sesión", "error")
-  }
-}
-
-// ========== FUNCIONES DE EVENTOS ==========
-async function loadEvents() {
-  try {
-    console.log("📅 Cargando eventos...")
-
-    if (!eventService) {
-      console.log("📅 Usando eventos de ejemplo (servicios no disponibles)")
-      events = [
-        {
-          id: "1",
-          title: "Reunión Dominical",
-          date: "2024-02-04",
-          time: "10:00",
-          location: "Lugar principal de reunión",
-          description: "Únete a nosotros para adoración y enseñanza de la Palabra",
-          audience: "todos",
-          createdBy: "Glenis",
-          rsvps: [],
-        },
-        {
-          id: "2",
-          title: "Estudio Bíblico",
-          date: "2024-02-07",
-          time: "19:00",
-          location: "Casa de oración",
-          description: "Estudio profundo de la Palabra de Dios",
-          audience: "todos",
-          createdBy: "Wilmar",
-          rsvps: [],
-        },
-      ]
-      updateCalendar()
-      updateUpcomingEvents()
-      return
-    }
-
-    const { data, error } = await eventService.getEvents()
-
-    if (error) {
-      console.error("Error cargando eventos:", error)
-      return
-    }
-
-    events = data.map((event) => ({
-      id: event.id,
-      title: event.titulo,
-      date: event.fecha_evento,
-      time: event.hora_evento,
-      location: event.ubicacion,
-      description: event.descripcion,
-      audience: event.audiencia,
-      createdBy: event.creado_por?.nombre || "Admin",
-      rsvps: event.confirmaciones_eventos?.map((r) => r.usuario_id) || [],
-    }))
-
-    updateCalendar()
-    updateUpcomingEvents()
-
-    console.log(`✅ ${events.length} eventos cargados`)
-  } catch (error) {
-    console.error("Error cargando eventos:", error)
-  }
-}
-
-async function handleEventSubmit(event) {
-  event.preventDefault()
-
-  if (!currentUser || (currentUser.rol !== "pastor" && currentUser.rol !== "lider")) {
-    showMessage("No tienes permisos para crear eventos.", "error")
-    return
-  }
-
-  const eventData = {
-    title: document.getElementById("eventTitle").value,
-    date: document.getElementById("eventDate").value,
-    time: document.getElementById("eventTime").value,
-    location: document.getElementById("eventLocation").value,
-    audience: document.getElementById("eventAudience").value,
-    description: document.getElementById("eventDescription").value,
-    createdBy: currentUser.id,
-  }
-
-  try {
-    if (!eventService) {
-      showMessage("Servicios no disponibles. Recarga la página.", "error")
-      return
-    }
-
-    const { data, error } = await eventService.createEvent(eventData)
-
-    if (error) {
-      showMessage(error, "error")
-      return
-    }
-
-    await loadEvents()
-    closeModal("eventModal")
-    showMessage("¡Evento creado exitosamente!", "success")
-    document.getElementById("eventForm").reset()
-    await updateDashboardStats()
-  } catch (error) {
-    console.error("Error creando evento:", error)
-    showMessage("Error creando evento", "error")
-  }
-}
-
-async function rsvpEvent(eventId) {
-  if (!currentUser) {
-    openModal("loginModal")
-    return
-  }
-
-  try {
-    if (!eventService) {
-      showMessage("Servicios no disponibles. Recarga la página.", "error")
-      return
-    }
-
-    const { data, error } = await eventService.rsvpEvent(eventId, currentUser.id)
-
-    if (error) {
-      if (error.includes("23505")) {
-        showMessage("Ya has confirmado tu asistencia a este evento.", "info")
-      } else {
-        showMessage(error, "error")
-      }
-      return
-    }
-
-    showMessage("¡Asistencia confirmada!", "success")
-    await loadEvents()
-  } catch (error) {
-    console.error("Error confirmando asistencia:", error)
-    showMessage("Error confirmando asistencia", "error")
-  }
-}
-
-// ========== FUNCIONES DE PREGUNTAS FAQ ==========
-async function submitQuestion(event) {
-  event.preventDefault()
-
-  const questionData = {
-    name: document.getElementById("questionName").value,
-    email: document.getElementById("questionEmail").value,
-    question: document.getElementById("questionText").value,
-  }
-
-  try {
-    if (!faqService) {
-      showMessage("¡Gracias por tu pregunta! (Servicios no disponibles)", "success")
-      document.getElementById("faqForm").reset()
-      return
-    }
-
-    const { data, error } = await faqService.submitQuestion(questionData)
-
-    if (error) {
-      showMessage(error, "error")
-      return
-    }
-
-    showMessage("¡Gracias por tu pregunta! Te responderemos pronto.", "success")
-    document.getElementById("faqForm").reset()
-    await updateDashboardStats()
-  } catch (error) {
-    console.error("Error enviando pregunta:", error)
-    showMessage("Error enviando pregunta", "error")
-  }
-}
-
-// ========== FUNCIONES DE FORMULARIO DE ASISTENTES ==========
-async function submitAttendeeForm(event) {
-  event.preventDefault()
-
-  const formData = new FormData(event.target)
-  const attendeeData = {
-    fullName: formData.get("fullName"),
-    email: formData.get("email"),
-    congregation: formData.get("congregation"),
-    discipleship: formData.get("discipleship"),
-    baptized: formData.get("baptized"),
-    prayerRequest: formData.get("prayerRequest"),
-    contact: formData.get("contact"),
-  }
-
-  try {
-    if (!attendeeService) {
-      showMessage("¡Gracias por tu información! (Servicios no disponibles)", "success")
-      event.target.reset()
-      return
-    }
-
-    const { data, error } = await attendeeService.submitForm(attendeeData)
-
-    if (error) {
-      showMessage(error, "error")
-      return
-    }
-
-    showMessage("¡Gracias por tu información! Nos pondremos en contacto contigo pronto.", "success")
-    event.target.reset()
-    await updateDashboardStats()
-  } catch (error) {
-    console.error("Error enviando formulario:", error)
-    showMessage("Error enviando formulario", "error")
-  }
-}
-
-// ========== FUNCIONES DEL DASHBOARD ==========
-async function showDashboard() {
-  if (!currentUser) {
-    openModal("loginModal")
-    return
-  }
-
-  document.getElementById("dashboard").style.display = "block"
-  document.body.style.overflow = "hidden"
-
-  document.getElementById("dashboardUserName").textContent = currentUser.nombre
-  await updateDashboardStats()
-}
-
-async function updateDashboardStats() {
-  try {
-    if (!dashboardService) {
-      document.getElementById("eventsCount").textContent = "3"
-      document.getElementById("questionsCount").textContent = "5"
-      document.getElementById("formsCount").textContent = "2"
-      return
-    }
-
-    const stats = await dashboardService.getStats()
-
-    document.getElementById("eventsCount").textContent = stats.events
-    document.getElementById("questionsCount").textContent = stats.questions
-    document.getElementById("formsCount").textContent = stats.forms
-  } catch (error) {
-    console.error("Error actualizando estadísticas:", error)
-  }
-}
-
-// ========== FUNCIONES DE NAVEGACIÓN ==========
+// Funciones de Navegación
 function initializeNavigation() {
   const hamburger = document.getElementById("hamburger")
   const navMenu = document.getElementById("nav-menu")
@@ -430,6 +60,7 @@ function initializeNavigation() {
     navMenu.classList.toggle("active")
   })
 
+  // Cerrar menú móvil al hacer clic en un enlace
   navLinks.forEach((link) => {
     link.addEventListener("click", () => {
       hamburger.classList.remove("active")
@@ -437,6 +68,7 @@ function initializeNavigation() {
     })
   })
 
+  // Desplazamiento suave para enlaces de navegación
   navLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
       if (link.getAttribute("href").startsWith("#")) {
@@ -447,6 +79,7 @@ function initializeNavigation() {
     })
   })
 
+  // Efecto de scroll en navbar
   window.addEventListener("scroll", () => {
     const navbar = document.getElementById("navbar")
     if (window.scrollY > 100) {
@@ -469,7 +102,7 @@ function scrollToSection(sectionId) {
   }
 }
 
-// ========== FUNCIONES DEL CALENDARIO ==========
+// Funciones del Calendario
 function initializeCalendar() {
   updateCalendar()
   updateUpcomingEvents()
@@ -556,9 +189,59 @@ function showDayEvents(year, month, day) {
   if (dayEvents.length > 0) {
     const eventsList = dayEvents
       .map(
-        (event) => `
+        (event) =>
+          `<div class="event-item">
+                <h4>${event.title}</h4>
+                <p><i class="fas fa-clock"></i> ${event.time}</p>
+                <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
+                <p><i class="fas fa-users"></i> ${event.audience}</p>
+                <p>${event.description}</p>
+                ${
+                  currentUser && (currentUser.role === "pastor" || currentUser.role === "lider")
+                    ? `<div class="event-actions">
+                        <button class="btn btn-secondary" onclick="editEvent('${event.id}')">editar</button>
+                        <button class="btn btn-secondary" onclick="deleteEvent('${event.id}')">eliminar</button>
+                    </div>`
+                    : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">confirmar asistencia</button>`
+                }
+            </div>`,
+      )
+      .join("")
+
+    showMessage(`eventos para ${selectedDate.toLocaleDateString("es-ES")}:<br>${eventsList}`, "info")
+  } else {
+    if (currentUser && (currentUser.role === "pastor" || currentUser.role === "lider")) {
+      if (confirm("no hay eventos en este día. ¿te gustaría agregar uno?")) {
+        document.getElementById("eventDate").value = selectedDate.toISOString().split("T")[0]
+        openModal("eventModal")
+      }
+    } else {
+      showMessage("no hay eventos programados para este día.", "info")
+    }
+  }
+}
+
+function updateUpcomingEvents() {
+  const eventsList = document.getElementById("eventsList")
+  const today = new Date()
+
+  // Filtrar eventos futuros
+  const upcomingEvents = events
+    .filter((event) => new Date(event.date) >= today)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 3) // Mostrar solo los próximos 3 eventos
+
+  if (upcomingEvents.length === 0) {
+    eventsList.innerHTML = '<p class="text-center">no hay eventos próximos programados.</p>'
+    return
+  }
+
+  eventsList.innerHTML = upcomingEvents
+    .map(
+      (event) => `
       <div class="event-item">
         <h4>${event.title}</h4>
+        <p><i class="fas fa-calendar"></i> ${new Date(event.date).toLocaleDateString("es-ES")}</p>
         <p><i class="fas fa-clock"></i> ${event.time}</p>
         <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
         <p><i class="fas fa-users"></i> ${event.audience}</p>
@@ -570,110 +253,111 @@ function showDayEvents(year, month, day) {
         }
       </div>
     `,
-      )
-      .join("")
-
-    showMessage(`Eventos para ${selectedDate.toLocaleDateString("es-ES")}:<br>${eventsList}`, "info")
-  } else {
-    if (currentUser && (currentUser.rol === "pastor" || currentUser.rol === "lider")) {
-      if (confirm("No hay eventos en este día. ¿Te gustaría agregar uno?")) {
-        document.getElementById("eventDate").value = selectedDate.toISOString().split("T")[0]
-        openModal("eventModal")
-      }
-    } else {
-      showMessage("No hay eventos programados para este día.", "info")
-    }
-  }
-}
-
-function updateUpcomingEvents() {
-  const eventsList = document.getElementById("eventsList")
-  const today = new Date()
-
-  const upcomingEvents = events
-    .filter((event) => new Date(event.date) >= today)
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(0, 3)
-
-  if (upcomingEvents.length === 0) {
-    eventsList.innerHTML = '<p class="text-center">No hay eventos próximos programados.</p>'
-    return
-  }
-
-  eventsList.innerHTML = upcomingEvents
-    .map(
-      (event) => `
-    <div class="event-item">
-      <h4>${event.title}</h4>
-      <p><i class="fas fa-calendar"></i> ${new Date(event.date).toLocaleDateString("es-ES")}</p>
-      <p><i class="fas fa-clock"></i> ${event.time}</p>
-      <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
-      <p><i class="fas fa-users"></i> ${event.audience}</p>
-      <p>${event.description}</p>
-      ${
-        !currentUser
-          ? '<button class="btn btn-primary" onclick="openModal(\'loginModal\')">ingresar para confirmar</button>'
-          : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">confirmar asistencia</button>`
-      }
-    </div>
-  `,
     )
     .join("")
 }
 
-// ========== FUNCIONES DE FAQ ==========
+// Funciones de FAQ
 function initializeFAQ() {
   faqData = [
     {
       question: "¿cuáles son los horarios de reunión?",
       answer:
-        "Nos reunimos los domingos a las 10:00 AM y los miércoles a las 7:00 PM. También tenemos grupos pequeños durante la semana.",
+        "nos reunimos los domingos a las 10:00 AM y los miércoles a las 7:00 PM. también tenemos grupos pequeños durante la semana.",
     },
     {
       question: "¿tienen programas para niños?",
       answer:
-        "¡Sí! Tenemos ministerio infantil durante todas nuestras reuniones, con actividades apropiadas para cada edad.",
+        "¡sí! tenemos ministerio infantil durante todas nuestras reuniones, con actividades apropiadas para cada edad.",
     },
     {
       question: "¿cómo puedo involucrarme en el ministerio?",
       answer:
-        "Hay muchas maneras de servir. Puedes hablar con nuestros líderes después de cualquier reunión o contactarnos directamente.",
+        "hay muchas maneras de servir. puedes hablar con nuestros líderes después de cualquier reunión o contactarnos directamente.",
     },
     {
       question: "¿ofrecen bautismo?",
-      answer: "Sí, ofrecemos bautismo por inmersión. Es una decisión importante que celebramos con toda la comunidad.",
+      answer: "sí, ofrecemos bautismo por inmersión. es una decisión importante que celebramos con toda la comunidad.",
     },
     {
       question: "¿necesito ser miembro para participar?",
       answer:
-        "¡Para nada! Todos son bienvenidos a participar en nuestras actividades y reuniones, sin importar su trasfondo.",
+        "¡para nada! todos son bienvenidos a participar en nuestras actividades y reuniones, sin importar su trasfondo.",
     },
   ]
 
   displayFAQ()
 }
 
-function displayFAQ() {
-  const container = document.getElementById("faqContainer")
-  if (!container) {
-    console.error("No se encontró el contenedor de FAQ")
-    return
+// Funciones de la Galería
+let currentGallerySlide = 0
+
+function initializeGallery() {
+  const galleryItems = document.querySelectorAll(".gallery-item")
+  const indicatorsContainer = document.getElementById("galleryIndicators")
+
+  // Crear indicadores
+  galleryItems.forEach((_, index) => {
+    const indicator = document.createElement("div")
+    indicator.className = `gallery-indicator ${index === 0 ? "active" : ""}`
+    indicator.addEventListener("click", () => goToGallerySlide(index))
+    indicatorsContainer.appendChild(indicator)
+  })
+
+  // Auto-reproducción de la galería
+  setInterval(() => {
+    changeGallerySlide(1)
+  }, 6000)
+}
+
+function changeGallerySlide(direction) {
+  const items = document.querySelectorAll(".gallery-item")
+  const indicators = document.querySelectorAll(".gallery-indicator")
+
+  items[currentGallerySlide].classList.remove("active")
+  indicators[currentGallerySlide].classList.remove("active")
+
+  currentGallerySlide += direction
+
+  if (currentGallerySlide >= items.length) {
+    currentGallerySlide = 0
+  } else if (currentGallerySlide < 0) {
+    currentGallerySlide = items.length - 1
   }
 
+  items[currentGallerySlide].classList.add("active")
+  indicators[currentGallerySlide].classList.add("active")
+}
+
+function goToGallerySlide(index) {
+  const items = document.querySelectorAll(".gallery-item")
+  const indicators = document.querySelectorAll(".gallery-indicator")
+
+  items[currentGallerySlide].classList.remove("active")
+  indicators[currentGallerySlide].classList.remove("active")
+
+  currentGallerySlide = index
+
+  items[currentGallerySlide].classList.add("active")
+  indicators[currentGallerySlide].classList.add("active")
+}
+
+function displayFAQ() {
+  const container = document.getElementById("faqContainer")
   container.innerHTML = ""
 
   faqData.forEach((faq, index) => {
     const faqItem = document.createElement("div")
     faqItem.className = "faq-item"
     faqItem.innerHTML = `
-      <div class="faq-question" onclick="toggleFAQ(${index})">
-        <h4>${faq.question}</h4>
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="faq-answer">
-        <p>${faq.answer}</p>
-      </div>
-    `
+            <div class="faq-question" onclick="toggleFAQ(${index})">
+                <h4>${faq.question}</h4>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <p>${faq.answer}</p>
+            </div>
+        `
     container.appendChild(faqItem)
   })
 }
@@ -683,16 +367,18 @@ function toggleFAQ(index) {
   const currentItem = faqItems[index]
   const isActive = currentItem.classList.contains("active")
 
+  // Cerrar todos los elementos FAQ
   faqItems.forEach((item) => {
     item.classList.remove("active")
     const icon = item.querySelector(".fa-chevron-down")
-    if (icon) icon.style.transform = "rotate(0deg)"
+    icon.style.transform = "rotate(0deg)"
   })
 
+  // Abrir elemento clickeado si no estaba activo
   if (!isActive) {
     currentItem.classList.add("active")
     const icon = currentItem.querySelector(".fa-chevron-down")
-    if (icon) icon.style.transform = "rotate(180deg)"
+    icon.style.transform = "rotate(180deg)"
   }
 }
 
@@ -712,91 +398,45 @@ function searchFAQ() {
   })
 }
 
-// ========== FUNCIONES DE GALERÍA ==========
-let currentGallerySlide = 0
+function submitQuestion(event) {
+  event.preventDefault()
 
-function initializeGallery() {
-  const galleryItems = document.querySelectorAll(".gallery-item")
-  const indicatorsContainer = document.getElementById("galleryIndicators")
-
-  if (!indicatorsContainer) {
-    console.error("No se encontró el contenedor de indicadores de galería")
-    return
+  const questionData = {
+    id: Date.now(),
+    name: document.getElementById("questionName").value,
+    email: document.getElementById("questionEmail").value,
+    question: document.getElementById("questionText").value,
+    date: new Date().toISOString(),
+    status: "pending",
   }
 
-  galleryItems.forEach((_, index) => {
-    const indicator = document.createElement("div")
-    indicator.className = `gallery-indicator ${index === 0 ? "active" : ""}`
-    indicator.addEventListener("click", () => goToGallerySlide(index))
-    indicatorsContainer.appendChild(indicator)
-  })
+  // Guardar en localStorage
+  questions.push(questionData)
+  localStorage.setItem("questions", JSON.stringify(questions))
 
-  setInterval(() => {
-    changeGallerySlide(1)
-  }, 6000)
+  // Si hay URL de Google Sheets, enviar también allí
+  if (GOOGLE_SHEETS_URL) {
+    sendToGoogleSheets("submitQuestion", questionData)
+  }
+
+  showMessage("¡gracias por tu pregunta! te responderemos pronto.", "success")
+  document.getElementById("faqForm").reset()
+
+  updateDashboardStats()
 }
 
-function changeGallerySlide(direction) {
-  const items = document.querySelectorAll(".gallery-item")
-  const indicators = document.querySelectorAll(".gallery-indicator")
-
-  if (items.length === 0) return
-
-  items[currentGallerySlide].classList.remove("active")
-  if (indicators[currentGallerySlide]) {
-    indicators[currentGallerySlide].classList.remove("active")
-  }
-
-  currentGallerySlide += direction
-
-  if (currentGallerySlide >= items.length) {
-    currentGallerySlide = 0
-  } else if (currentGallerySlide < 0) {
-    currentGallerySlide = items.length - 1
-  }
-
-  items[currentGallerySlide].classList.add("active")
-  if (indicators[currentGallerySlide]) {
-    indicators[currentGallerySlide].classList.add("active")
-  }
-}
-
-function goToGallerySlide(index) {
-  const items = document.querySelectorAll(".gallery-item")
-  const indicators = document.querySelectorAll(".gallery-indicator")
-
-  if (items.length === 0) return
-
-  items[currentGallerySlide].classList.remove("active")
-  if (indicators[currentGallerySlide]) {
-    indicators[currentGallerySlide].classList.remove("active")
-  }
-
-  currentGallerySlide = index
-
-  items[currentGallerySlide].classList.add("active")
-  if (indicators[currentGallerySlide]) {
-    indicators[currentGallerySlide].classList.add("active")
-  }
-}
-
-// ========== FUNCIONES DE MODAL ==========
+// Funciones de Modal
 function openModal(modalId) {
-  const modal = document.getElementById(modalId)
-  if (modal) {
-    modal.style.display = "block"
-    document.body.style.overflow = "hidden"
-  }
+  document.getElementById(modalId).style.display = "block"
+  document.body.style.overflow = "hidden"
 }
 
 function closeModal(modalId) {
-  const modal = document.getElementById(modalId)
-  if (modal) {
-    modal.style.display = "none"
-    document.body.style.overflow = "auto"
-  }
+  document.getElementById(modalId).style.display = "none"
+  document.body.style.overflow = "auto"
 }
 
+// Cerrar modal al hacer clic fuera
 window.addEventListener("click", (event) => {
   const modals = document.querySelectorAll(".modal")
   modals.forEach((modal) => {
@@ -807,17 +447,89 @@ window.addEventListener("click", (event) => {
   })
 })
 
-// ========== FUNCIONES DE UTILIDAD ==========
-function showMessage(message, type) {
-  const messageDiv = document.createElement("div")
-  messageDiv.className = `message ${type}`
-  messageDiv.innerHTML = message
+// Funciones de Autenticación
+function handleLogin(event) {
+  event.preventDefault()
 
-  document.body.appendChild(messageDiv)
+  const email = document.getElementById("loginEmail").value
+  const password = document.getElementById("loginPassword").value
 
-  setTimeout(() => {
-    messageDiv.remove()
-  }, 6000)
+  // Simular autenticación
+  const users = JSON.parse(localStorage.getItem("users") || "[]")
+  const user = users.find((u) => u.email === email && u.password === password)
+
+  if (user) {
+    currentUser = user
+    localStorage.setItem("currentUser", JSON.stringify(user))
+    updateUIForLoggedInUser()
+    closeModal("loginModal")
+    showMessage(`¡bienvenido de nuevo, ${user.name}!`, "success")
+  } else {
+    showMessage("email o contraseña inválidos.", "error")
+  }
+}
+
+function handleRegister(event) {
+  event.preventDefault()
+
+  const name = document.getElementById("registerName").value
+  const email = document.getElementById("registerEmail").value
+  const role = document.getElementById("registerRole").value
+  const password = document.getElementById("registerPassword").value
+  const confirmPassword = document.getElementById("confirmPassword").value
+
+  if (password !== confirmPassword) {
+    showMessage("las contraseñas no coinciden.", "error")
+    return
+  }
+
+  if (!validatePassword(password)) {
+    showMessage("la contraseña no cumple con los requisitos.", "error")
+    return
+  }
+
+  // Verificar si el usuario ya existe
+  const users = JSON.parse(localStorage.getItem("users") || "[]")
+  if (users.find((u) => u.email === email)) {
+    showMessage("ya existe un usuario con este email.", "error")
+    return
+  }
+
+  // Crear nuevo usuario
+  const newUser = {
+    id: Date.now(),
+    name: name,
+    email: email,
+    password: password,
+    role: role,
+    joinDate: new Date().toISOString(),
+  }
+
+  users.push(newUser)
+  localStorage.setItem("users", JSON.stringify(users))
+
+  // Si hay URL de Google Sheets, enviar también allí
+  if (GOOGLE_SHEETS_URL) {
+    sendToGoogleSheets("register", newUser)
+  }
+
+  // Auto-login del nuevo usuario
+  currentUser = newUser
+  localStorage.setItem("currentUser", JSON.stringify(newUser))
+
+  updateUIForLoggedInUser()
+  closeModal("registerModal")
+  showMessage(`¡bienvenido a un lugar de él para ti, ${name}!`, "success")
+}
+
+function handleForgotPassword(event) {
+  event.preventDefault()
+
+  const email = document.getElementById("forgotEmail").value
+
+  // Simular envío de email de reset
+  showMessage(`Se ha enviado un enlace de restablecimiento a ${email}`, "success")
+  closeModal("forgotPasswordModal")
 }
 
 function validatePassword(password) {
@@ -827,6 +539,7 @@ function validatePassword(password) {
     number: /\d/.test(password),
   }
 
+  // Actualizar indicadores de UI
   Object.keys(requirements).forEach((req) => {
     const element = document.getElementById(req)
     if (element) {
@@ -835,32 +548,6 @@ function validatePassword(password) {
   })
 
   return Object.values(requirements).every((req) => req)
-}
-
-function updateUIForLoggedInUser() {
-  if (!currentUser) return
-
-  const loginLink = document.getElementById("loginLink")
-  if (loginLink) {
-    loginLink.textContent = currentUser.nombre
-    loginLink.onclick = () => showDashboard()
-  }
-
-  if (currentUser.rol === "pastor" || currentUser.rol === "lider") {
-    const eventActions = document.getElementById("eventActions")
-    if (eventActions) {
-      eventActions.style.display = "block"
-    }
-  }
-
-  updateUpcomingEvents()
-}
-
-function updateFooterYear() {
-  const yearElement = document.getElementById("currentYear")
-  if (yearElement) {
-    yearElement.textContent = new Date().getFullYear()
-  }
 }
 
 // Validación de contraseña en tiempo real
@@ -873,4 +560,358 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 })
 
-console.log("🎉 Script principal cargado completamente")
+function updateUIForLoggedInUser() {
+  if (!currentUser) return
+
+  // Actualizar navegación
+  const loginLink = document.getElementById("loginLink")
+  if (loginLink) {
+    loginLink.textContent = currentUser.name
+    loginLink.onclick = () => showDashboard()
+  }
+
+  // Mostrar características de admin si el usuario es pastor o líder
+  if (currentUser.role === "pastor" || currentUser.role === "lider") {
+    const eventActions = document.getElementById("eventActions")
+    if (eventActions) {
+      eventActions.style.display = "block"
+    }
+  }
+
+  updateUpcomingEvents()
+}
+
+function logout() {
+  currentUser = null
+  localStorage.removeItem("currentUser")
+
+  // Resetear UI
+  const loginLink = document.getElementById("loginLink")
+  if (loginLink) {
+    loginLink.textContent = "ingresar"
+    loginLink.onclick = () => openModal("loginModal")
+  }
+
+  // Ocultar dashboard
+  const dashboard = document.getElementById("dashboard")
+  if (dashboard) {
+    dashboard.style.display = "none"
+  }
+  document.body.style.overflow = "auto"
+
+  // Ocultar acciones de admin
+  const eventActions = document.getElementById("eventActions")
+  if (eventActions) {
+    eventActions.style.display = "none"
+  }
+
+  showMessage("has cerrado sesión.", "success")
+  updateUpcomingEvents()
+}
+
+// Funciones del Dashboard
+function showDashboard() {
+  if (!currentUser) {
+    openModal("loginModal")
+    return
+  }
+
+  document.getElementById("dashboard").style.display = "block"
+  document.body.style.overflow = "hidden"
+
+  document.getElementById("dashboardUserName").textContent = currentUser.name
+  updateDashboardStats()
+}
+
+function updateDashboardStats() {
+  document.getElementById("eventsCount").textContent = events.length
+  document.getElementById("questionsCount").textContent = questions.length
+  document.getElementById("formsCount").textContent = attendeeForms.length
+}
+
+// Funciones de Gestión de Eventos
+function handleEventSubmit(event) {
+  event.preventDefault()
+
+  if (!currentUser || (currentUser.role !== "pastor" && currentUser.role !== "lider")) {
+    showMessage("no tienes permisos para crear eventos.", "error")
+    return
+  }
+
+  const eventData = {
+    id: Date.now().toString(),
+    title: document.getElementById("eventTitle").value,
+    date: document.getElementById("eventDate").value,
+    time: document.getElementById("eventTime").value,
+    location: document.getElementById("eventLocation").value,
+    audience: document.getElementById("eventAudience").value,
+    description: document.getElementById("eventDescription").value,
+    createdBy: currentUser.id,
+    rsvps: [],
+  }
+
+  events.push(eventData)
+  localStorage.setItem("events", JSON.stringify(events))
+
+  // Si hay URL de Google Sheets, enviar también allí
+  if (GOOGLE_SHEETS_URL) {
+    sendToGoogleSheets("createEvent", eventData)
+  }
+
+  updateCalendar()
+  updateUpcomingEvents()
+  closeModal("eventModal")
+  showMessage("¡evento creado exitosamente!", "success")
+
+  document.getElementById("eventForm").reset()
+  updateDashboardStats()
+}
+
+function rsvpEvent(eventId) {
+  if (!currentUser) {
+    openModal("loginModal")
+    return
+  }
+
+  const eventIndex = events.findIndex((e) => e.id === eventId)
+  if (eventIndex === -1) return
+
+  const event = events[eventIndex]
+
+  // Verificar si el usuario ya confirmó asistencia
+  if (event.rsvps.includes(currentUser.id)) {
+    showMessage("ya has confirmado tu asistencia a este evento.", "info")
+    return
+  }
+
+  event.rsvps.push(currentUser.id)
+  localStorage.setItem("events", JSON.stringify(events))
+
+  showMessage("¡asistencia confirmada!", "success")
+}
+
+function editEvent(eventId) {
+  const event = events.find((e) => e.id === eventId)
+  if (!event) return
+
+  document.getElementById("eventTitle").value = event.title
+  document.getElementById("eventDate").value = event.date
+  document.getElementById("eventTime").value = event.time
+  document.getElementById("eventLocation").value = event.location
+  document.getElementById("eventAudience").value = event.audience
+  document.getElementById("eventDescription").value = event.description
+
+  document.getElementById("eventModalTitle").textContent = "editar evento"
+
+  // Cambiar manejador de formulario temporalmente
+  const form = document.getElementById("eventForm")
+  form.onsubmit = (e) => {
+    e.preventDefault()
+    updateEvent(eventId)
+  }
+
+  openModal("eventModal")
+}
+
+function updateEvent(eventId) {
+  const eventIndex = events.findIndex((e) => e.id === eventId)
+  if (eventIndex === -1) return
+
+  events[eventIndex] = {
+    ...events[eventIndex],
+    title: document.getElementById("eventTitle").value,
+    date: document.getElementById("eventDate").value,
+    time: document.getElementById("eventTime").value,
+    location: document.getElementById("eventLocation").value,
+    audience: document.getElementById("eventAudience").value,
+    description: document.getElementById("eventDescription").value,
+  }
+
+  localStorage.setItem("events", JSON.stringify(events))
+
+  updateCalendar()
+  updateUpcomingEvents()
+  closeModal("eventModal")
+  showMessage("¡evento actualizado exitosamente!", "success")
+
+  // Resetear manejador de formulario
+  document.getElementById("eventForm").onsubmit = handleEventSubmit
+  document.getElementById("eventModalTitle").textContent = "crear evento"
+  document.getElementById("eventForm").reset()
+}
+
+function deleteEvent(eventId) {
+  if (!confirm("¿estás seguro de que quieres eliminar este evento?")) return
+
+  const eventIndex = events.findIndex((e) => e.id === eventId)
+  if (eventIndex === -1) return
+
+  events.splice(eventIndex, 1)
+  localStorage.setItem("events", JSON.stringify(events))
+
+  updateCalendar()
+  updateUpcomingEvents()
+  showMessage("¡evento eliminado exitosamente!", "success")
+  updateDashboardStats()
+}
+
+// Formulario de Asistentes
+async function submitAttendeeForm(event) {
+  event.preventDefault()
+
+  const formData = new FormData(event.target)
+  const attendeeData = {
+    id: Date.now(),
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+    congregation: formData.get("congregation"),
+    discipleship: formData.get("discipleship"),
+    baptized: formData.get("baptized"),
+    prayerRequest: formData.get("prayerRequest"),
+    contact: formData.get("contact"),
+    date: new Date().toISOString(),
+  }
+
+  // Guardar en localStorage
+  attendeeForms.push(attendeeData)
+  localStorage.setItem("attendeeForms", JSON.stringify(attendeeForms))
+
+  // Si hay URL de Google Sheets, enviar también allí
+  if (GOOGLE_SHEETS_URL) {
+    try {
+      await sendToGoogleSheets("submitAttendee", attendeeData)
+      showMessage("¡gracias por tu información! nos pondremos en contacto contigo pronto.", "success")
+    } catch (error) {
+      showMessage("información guardada localmente. intentaremos enviarla más tarde.", "info")
+    }
+  } else {
+    showMessage("¡gracias por tu información! nos pondremos en contacto contigo pronto.", "success")
+  }
+
+  event.target.reset()
+  updateDashboardStats()
+}
+
+// Función para enviar datos a Google Sheets
+async function sendToGoogleSheets(action, data) {
+  if (!GOOGLE_SHEETS_URL) return
+
+  try {
+    const response = await fetch(GOOGLE_SHEETS_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: action,
+        data: data,
+      }),
+    })
+
+    const result = await response.json()
+    return result
+  } catch (error) {
+    console.error("Error enviando a Google Sheets:", error)
+    throw error
+  }
+}
+
+// Funciones de Utilidad
+function showMessage(message, type) {
+  const messageDiv = document.createElement("div")
+  messageDiv.className = `message ${type}`
+  messageDiv.innerHTML = message
+
+  document.body.appendChild(messageDiv)
+
+  setTimeout(() => {
+    messageDiv.remove()
+  }, 6000)
+}
+
+function loadSampleData() {
+  // Cargar eventos de muestra si no existen
+  if (!localStorage.getItem("events")) {
+    events = [
+      {
+        id: "1",
+        title: "reunión dominical",
+        date: "2024-01-07",
+        time: "10:00",
+        description: "únete a nosotros para adoración y enseñanza",
+        location: "lugar principal de reunión",
+        audience: "todos",
+        rsvps: [],
+      },
+      {
+        id: "2",
+        title: "estudio bíblico",
+        date: "2024-01-10",
+        time: "19:00",
+        description: "estudio profundo de la palabra de dios",
+        location: "casa de oración",
+        audience: "todos",
+        rsvps: [],
+      },
+      {
+        id: "3",
+        title: "reunión de jóvenes",
+        date: "2024-01-12",
+        time: "18:00",
+        description: "tiempo especial para los jóvenes",
+        location: "centro juvenil",
+        audience: "jóvenes",
+        rsvps: [],
+      },
+    ]
+    localStorage.setItem("events", JSON.stringify(events))
+  } else {
+    events = JSON.parse(localStorage.getItem("events"))
+  }
+
+  // Cargar usuarios de muestra si no existen
+  if (!localStorage.getItem("users")) {
+    const sampleUsers = [
+      {
+        id: 1,
+        name: "glenis",
+        email: "glenis@unlugardeelparati.com",
+        password: "Pastor2020!",
+        role: "pastor",
+        joinDate: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        name: "wilmar",
+        email: "wilmar@unlugardeelparati.com",
+        password: "Pastor2020!",
+        role: "pastor",
+        joinDate: new Date().toISOString(),
+      },
+    ]
+    localStorage.setItem("users", JSON.stringify(sampleUsers))
+  }
+}
+
+function loadStoredData() {
+  // Cargar preguntas guardadas
+  const storedQuestions = localStorage.getItem("questions")
+  if (storedQuestions) {
+    questions = JSON.parse(storedQuestions)
+  }
+
+  // Cargar formularios de asistentes guardados
+  const storedForms = localStorage.getItem("attendeeForms")
+  if (storedForms) {
+    attendeeForms = JSON.parse(storedForms)
+  }
+}
+
+function updateFooterYear() {
+  document.getElementById("currentYear").textContent = new Date().getFullYear()
+}
+
+// Inicializar todo cuando la página se carga
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("¡sitio web de un lugar de él para ti cargado exitosamente!")
+})
