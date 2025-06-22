@@ -1106,21 +1106,16 @@ textarea {
   margin-bottom: 50px;
 }
 
-.footer-logo {
+.logo-container {
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
+  justify-content: center;
 }
 
-.footer-logo .church-name {
-  color: var(--white);
-}
-
-.footer-tagline {
-  color: var(--primary-orange);
-  font-weight: 500;
-  text-transform: lowercase;
+.logo-symbol2 {
+  width: auto;
+  height: auto;
 }
 
 .footer-section h4 {
