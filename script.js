@@ -727,7 +727,7 @@ async function logout() {
 }
 
 // Funciones del Dashboard
-function showDashboard() {
+async function showDashboard() {
     if (!currentUser) {
         openModal("loginModal");
         return;
@@ -737,7 +737,7 @@ function showDashboard() {
     document.body.style.overflow = "hidden";
 
     document.getElementById("dashboardUserName").textContent = currentUser.name;
-    updateDashboardStats();
+    await loadAdminData();
 }
 
 function updateDashboardStats() {
@@ -995,14 +995,21 @@ async function deleteEvent(id) {
 // 1) Asocia clicks
 document.querySelectorAll(".admin-card").forEach((card) => {
     card.addEventListener("click", () => {
+        // 1) refrescar contadores
+        loadAdminData();
+        +(
+            // 0) Asegurar que el contenedor de detalles está visible
+            (+document
+                .getElementById("adminDetails")
+                .classList.remove("hidden"))
+        );
+        // 2) ocultar y mostrar paneles como ya tienes
         const sec = card.dataset.section;
-        // ocultar todos
         document
             .querySelectorAll(".details-panel")
             .forEach((d) => d.classList.add("hidden"));
-        // mostrar sólo el seleccionado
         document.getElementById(sec).classList.remove("hidden");
-        // cargar datos según el panel
+        // 3) cargar registros…
         if (sec === "eventsDetails") loadEventsList();
         if (sec === "questionsDetails") loadQuestionsList();
         if (sec === "formsDetails") loadFormsList();
@@ -1089,3 +1096,10 @@ async function loadFormsList() {
         container.appendChild(card);
     });
 }
+
+document.getElementById("backToDashboard").addEventListener("click", () => {
+    // Oculta TODO el bloque de detalles
+    document.getElementById("adminDetails").classList.add("hidden");
+    // (Opcional) refresca los contadores cuando regresas
+    loadAdminData();
+});
