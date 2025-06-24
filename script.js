@@ -32,7 +32,6 @@ async function loadUserProfile(userId) {
         name: perfil.nombre,
         role: perfil.rol,
     };
-    console.log("ROL DEL USUARIO:", currentUser.role); // <-- mira qué imprime
     updateUIForLoggedInUser();
 }
 
@@ -56,6 +55,26 @@ supabase.auth.onAuthStateChange((event, session) => {
         updateUIForLoggedOutUser();
     }
 });
+
+(async () => {
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
+    if (error || !user) {
+        return;
+    }
+
+    // Ya hay sesión activa → cargar perfil y eventos
+    await loadUserProfile(user.id); // esto ya actualiza currentUser
+    await loadStoredData(); // esto ya llena el calendario y tarjetas
+
+    // Si el usuario es admin, mostrar directamente el dashboard
+    if (currentUser.role === "administrador") {
+        showDashboard(); // oculta calendario, muestra panel de control
+    }
+})();
+
 // Meses en español
 const monthNames = [
     "enero",
