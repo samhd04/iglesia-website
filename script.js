@@ -749,19 +749,19 @@ function updateDashboardStats() {
 async function loadAdminData() {
     // Eventos
     let { count: cntEv } = await supabase
-        .from("events")
+        .from("eventos")
         .select("*", { count: "exact" });
     document.getElementById("eventsCount").textContent = cntEv;
 
     // Preguntas
     let { count: cntQ } = await supabase
-        .from("questions")
+        .from("preguntas")
         .select("*", { count: "exact" });
     document.getElementById("questionsCount").textContent = cntQ;
 
     // Formularios
     let { count: cntF } = await supabase
-        .from("forms")
+        .from("asistentes")
         .select("*", { count: "exact" });
     document.getElementById("formsCount").textContent = cntF;
 }
@@ -1010,11 +1010,16 @@ document.querySelectorAll(".admin-card").forEach((card) => {
 });
 
 async function loadEventsList() {
-    const { data: evs } = await supabase
-        .from("events")
-        .select("id,title,date,location")
+    const { data: evs, error } = await supabase
+        .from("eventos")
+        .select("id, title, date, time, location")
         .order("date", { ascending: false })
         .limit(10);
+
+    if (error) {
+        console.error("Error cargando eventos:", error);
+        return;
+    }
     const container = document.getElementById("eventsCards");
     container.innerHTML = "";
     evs.forEach((ev) => {
@@ -1022,7 +1027,7 @@ async function loadEventsList() {
         card.className = "card-panel hoverable record-card";
         card.innerHTML = `
       <h6>${ev.title}</h6>
-      <p><strong>Fecha:</strong> ${ev.date}</p>
+      <p><strong>Fecha:</strong> ${ev.date} <strong>Hora:</strong> ${ev.time}</p>
       <p><strong>Lugar:</strong> ${ev.location}</p>
     `;
         container.appendChild(card);
@@ -1030,39 +1035,56 @@ async function loadEventsList() {
 }
 
 async function loadQuestionsList() {
-    const { data: qs } = await supabase
-        .from("questions")
-        .select("id,event_id,content,created_at")
-        .order("created_at", { ascending: false })
+    const { data: qs, error } = await supabase
+        .from("preguntas")
+        .select("id, name, email, question, date, status")
+        .order("date", { ascending: false })
         .limit(10);
+
+    if (error) {
+        console.error("Error cargando preguntas:", error);
+        return;
+    }
     const container = document.getElementById("questionsCards");
     container.innerHTML = "";
     qs.forEach((q) => {
         const card = document.createElement("div");
         card.className = "card-panel hoverable record-card";
         card.innerHTML = `
-      <p><strong>Evento #${q.event_id}</strong></p>
-      <p>${q.content}</p>
-      <p class="small"><em>${new Date(q.created_at).toLocaleString()}</em></p>
+      <p><strong>${q.name}</strong> &lt;${q.email}&gt;</p>
+      <p>${q.question}</p>
+      <p class="small">
+        ${new Date(q.date).toLocaleString()} — <em>${q.status}</em>
+      </p>
     `;
         container.appendChild(card);
     });
 }
 
 async function loadFormsList() {
-    const { data: fs } = await supabase
-        .from("forms")
-        .select("id,name,email,submitted_at")
-        .order("submitted_at", { ascending: false })
+    const { data: fs, error } = await supabase
+        .from("asistentes")
+        .select(
+            "id, fullname, email, congregation, discipleship, baptized, prayerrequest, contact, date"
+        )
+        .order("date", { ascending: false })
         .limit(10);
+
+    if (error) {
+        console.error("Error cargando asistentes:", error);
+        return;
+    }
     const container = document.getElementById("formsCards");
     container.innerHTML = "";
     fs.forEach((f) => {
         const card = document.createElement("div");
         card.className = "card-panel hoverable record-card";
         card.innerHTML = `
-      <p><strong>${f.name}</strong> &lt;${f.email}&gt;</p>
-      <p class="small"><em>${new Date(f.submitted_at).toLocaleString()}</em></p>
+      <p><strong>${f.fullname}</strong> &lt;${f.email}&gt;</p>
+      <p>Congregación: ${f.congregation}</p>
+      <p>Bautizado: ${f.baptized} — Discipulado: ${f.discipleship}</p>
+      <p>Solicitud: ${f.prayerrequest || "–"}</p>
+      <p class="small">${new Date(f.date).toLocaleString()}</p>
     `;
         container.appendChild(card);
     });
