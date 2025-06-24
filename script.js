@@ -13,16 +13,48 @@ const supabase = window.supabase.createClient(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YnJ5cXdvZml0ZWZueHB6b2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Mjg5MTIsImV4cCI6MjA2NjMwNDkxMn0.-pytVRaCeMHV3ktvHJfhqxNjRIYZSh4h8sfigZhhmpk"
 );
 
+// 1) Función para traer el perfil (nombre + rol) y actualizar la UI
+async function loadUserProfile(userId) {
+    const { data: perfil, error } = await supabase
+        .from("usuarios")
+        .select("nombre, rol")
+        .eq("id", userId)
+        .single();
+
+    if (error) {
+        console.error("Error cargando perfil:", error);
+        return;
+    }
+
+    // Graba en currentUser y muestra controles de admin
+    currentUser = {
+        id: userId,
+        name: perfil.nombre,
+        role: perfil.rol,
+    };
+    updateUIForLoggedInUser();
+}
+
+// 2) (Ya la tienes) Función que carga tus eventos
+async function loadStoredData() {
+    const { data: dbEvents, error: errEv } = await supabase
+        .from("eventos")
+        .select("*");
+    if (!errEv) events = dbEvents;
+    updateCalendar();
+    updateUpcomingEvents();
+}
+
+// 3) Ahora tu listener de Auth puede invocar ambas sin error:
 supabase.auth.onAuthStateChange((event, session) => {
     if (session) {
         loadUserProfile(session.user.id);
         loadStoredData();
     } else {
-        currentUser = null; // Solo reinicias el usuario
-        // no haces nada más: la página carga "en modo invitado"
+        currentUser = null;
+        updateUIForLoggedOutUser();
     }
 });
-
 // Meses en español
 const monthNames = [
     "enero",
@@ -521,6 +553,9 @@ async function handleLogin(event) {
 
     currentUser = { id: data.user.id, name: perfil.nombre, role: perfil.rol };
     updateUIForLoggedInUser();
+    await loadStoredData();
+    updateCalendar();
+    updateUpcomingEvents();
     closeModal("loginModal");
     showMessage(`¡Bienvenido de nuevo, ${perfil.nombre}!`, "success");
 }
@@ -813,18 +848,6 @@ async function loadSampleData() {
     // 4) Finalmente refresca el calendario y la lista de próximos eventos
     updateCalendar();
     updateUpcomingEvents();
-}
-
-async function loadStoredData() {
-    // 3. Traer eventos de la tabla "eventos"
-    const { data: dbEvents, error: errEv } = await supabase
-        .from("eventos")
-        .select("*");
-    if (!errEv) events = dbEvents; // <-- aquí
-    updateCalendar();
-    updateUpcomingEvents();
-
-    // (si tienes preguntas/asistentes, repite .from("preguntas") y .from("asistentes"))
 }
 
 function updateFooterYear() {
