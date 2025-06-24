@@ -429,34 +429,43 @@ function searchFAQ() {
     });
 }
 
-function submitQuestion(event) {
+// Envía la pregunta a la tabla 'preguntas' de Supabase
+async function submitQuestion(event) {
     event.preventDefault();
 
+    // 1️⃣ Prepara el objeto con los datos de la pregunta
     const questionData = {
-        id: Date.now(),
-        name: document.getElementById("questionName").value,
-        email: document.getElementById("questionEmail").value,
-        question: document.getElementById("questionText").value,
+        id: Date.now().toString(),
+        name: document.getElementById("questionName").value.trim(),
+        email: document.getElementById("questionEmail").value.trim(),
+        question: document.getElementById("questionText").value.trim(),
         date: new Date().toISOString(),
         status: "pending",
     };
 
-    // Guardar en localStorage
-    questions.push(questionData);
-    localStorage.setItem("questions", JSON.stringify(questions));
+    // 2️⃣ Inserta en Supabase
+    const { data, error } = await supabase
+        .from("preguntas")
+        .insert([questionData]);
 
-    // Si hay URL de Google Sheets, enviar también allí
-    if (GOOGLE_SHEETS_URL) {
-        sendToGoogleSheets("submitQuestion", questionData);
+    if (error) {
+        // Muestra error si algo falla
+        return showMessage(
+            `Error al enviar pregunta: ${error.message}`,
+            "error"
+        );
     }
 
+    // 3️⃣ Actualiza tu array local y la UI
+    questions.unshift(questionData);
+    updateDashboardStats();
+
+    // 4️⃣ Notifica al usuario y limpia el formulario
     showMessage(
-        "¡gracias por tu pregunta! te responderemos pronto.",
+        "¡Gracias por tu pregunta! Te responderemos pronto.",
         "success"
     );
     document.getElementById("faqForm").reset();
-
-    updateDashboardStats();
 }
 
 // Funciones de Modal
@@ -753,74 +762,48 @@ function deleteEvent(eventId) {
     updateDashboardStats();
 }
 
-// Formulario de Asistentes
+// Formulario de Asistentes via Supabase
 async function submitAttendeeForm(event) {
     event.preventDefault();
 
-    const formData = new FormData(event.target);
+    // Recoger todos los campos del formulario
+    const form = event.target;
+    const entries = Object.fromEntries(new FormData(form).entries());
     const attendeeData = {
-        id: Date.now(),
-        fullName: formData.get("fullName"),
-        email: formData.get("email"),
-        congregation: formData.get("congregation"),
-        discipleship: formData.get("discipleship"),
-        baptized: formData.get("baptized"),
-        prayerRequest: formData.get("prayerRequest"),
-        contact: formData.get("contact"),
+        id: Date.now().toString(),
+        fullName: entries.fullName.trim(),
+        email: entries.email.trim(),
+        congregation: entries.congregation,
+        discipleship: entries.discipleship,
+        baptized: entries.baptized,
+        prayerRequest: entries.prayerRequest.trim(),
+        contact: entries.contact,
         date: new Date().toISOString(),
     };
 
-    // Guardar en localStorage
-    attendeeForms.push(attendeeData);
-    localStorage.setItem("attendeeForms", JSON.stringify(attendeeForms));
+    // Insertar en la tabla 'asistentes' de Supabase
+    const { data, error } = await supabase
+        .from("asistentes")
+        .insert([attendeeData]);
 
-    // Si hay URL de Google Sheets, enviar también allí
-    if (GOOGLE_SHEETS_URL) {
-        try {
-            await sendToGoogleSheets("submitAttendee", attendeeData);
-            showMessage(
-                "¡gracias por tu información! nos pondremos en contacto contigo pronto.",
-                "success"
-            );
-        } catch (error) {
-            showMessage(
-                "información guardada localmente. intentaremos enviarla más tarde.",
-                "info"
-            );
-        }
-    } else {
-        showMessage(
-            "¡gracias por tu información! nos pondremos en contacto contigo pronto.",
-            "success"
+    if (error) {
+        // 3️⃣ Manejo de error
+        return showMessage(
+            `Error al guardar tu información: ${error.message}`,
+            "error"
         );
     }
 
-    event.target.reset();
+    // Actualizar estado local y UI
+    attendeeForms.unshift(attendeeData);
     updateDashboardStats();
-}
 
-// Función para enviar datos a Google Sheets
-async function sendToGoogleSheets(action, data) {
-    if (!GOOGLE_SHEETS_URL) return;
-
-    try {
-        const response = await fetch(GOOGLE_SHEETS_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                action: action,
-                data: data,
-            }),
-        });
-
-        const result = await response.json();
-        return result;
-    } catch (error) {
-        console.error("Error enviando a Google Sheets:", error);
-        throw error;
-    }
+    // Informar al usuario y limpiar el formulario
+    showMessage(
+        "¡Gracias por tu información! Nos pondremos en contacto pronto.",
+        "success"
+    );
+    form.reset();
 }
 
 // Funciones de Utilidad
