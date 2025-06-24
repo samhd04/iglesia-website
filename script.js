@@ -1009,19 +1009,23 @@ document.querySelectorAll(".admin-card").forEach((card) => {
     });
 });
 
-// 2) Funciones para poblar cada lista
 async function loadEventsList() {
     const { data: evs } = await supabase
         .from("events")
         .select("id,title,date,location")
         .order("date", { ascending: false })
         .limit(10);
-    const ul = document.getElementById("listEvents");
-    ul.innerHTML = "";
+    const container = document.getElementById("eventsCards");
+    container.innerHTML = "";
     evs.forEach((ev) => {
-        const li = document.createElement("li");
-        li.textContent = `${ev.title} — ${ev.date} — ${ev.location}`;
-        ul.appendChild(li);
+        const card = document.createElement("div");
+        card.className = "card-panel hoverable record-card";
+        card.innerHTML = `
+      <h6>${ev.title}</h6>
+      <p><strong>Fecha:</strong> ${ev.date}</p>
+      <p><strong>Lugar:</strong> ${ev.location}</p>
+    `;
+        container.appendChild(card);
     });
 }
 
@@ -1031,14 +1035,17 @@ async function loadQuestionsList() {
         .select("id,event_id,content,created_at")
         .order("created_at", { ascending: false })
         .limit(10);
-    const ul = document.getElementById("listQuestions");
-    ul.innerHTML = "";
+    const container = document.getElementById("questionsCards");
+    container.innerHTML = "";
     qs.forEach((q) => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>Ev#${q.event_id}</strong>: ${
-            q.content
-        } <em>(${new Date(q.created_at).toLocaleString()})</em>`;
-        ul.appendChild(li);
+        const card = document.createElement("div");
+        card.className = "card-panel hoverable record-card";
+        card.innerHTML = `
+      <p><strong>Evento #${q.event_id}</strong></p>
+      <p>${q.content}</p>
+      <p class="small"><em>${new Date(q.created_at).toLocaleString()}</em></p>
+    `;
+        container.appendChild(card);
     });
 }
 
@@ -1048,13 +1055,15 @@ async function loadFormsList() {
         .select("id,name,email,submitted_at")
         .order("submitted_at", { ascending: false })
         .limit(10);
-    const ul = document.getElementById("listForms");
-    ul.innerHTML = "";
+    const container = document.getElementById("formsCards");
+    container.innerHTML = "";
     fs.forEach((f) => {
-        const li = document.createElement("li");
-        li.innerHTML = `${f.name} — ${f.email} <em>(${new Date(
-            f.submitted_at
-        ).toLocaleString()})</em>`;
-        ul.appendChild(li);
+        const card = document.createElement("div");
+        card.className = "card-panel hoverable record-card";
+        card.innerHTML = `
+      <p><strong>${f.name}</strong> &lt;${f.email}&gt;</p>
+      <p class="small"><em>${new Date(f.submitted_at).toLocaleString()}</em></p>
+    `;
+        container.appendChild(card);
     });
 }

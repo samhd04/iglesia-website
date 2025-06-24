@@ -1818,3 +1818,26 @@ a:focus {
 .admin-card {
     cursor: pointer;
 }
+
+/* grid de tarjetas */
+.record-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* ajuste de cada tarjeta */
+.record-card h6 {
+    margin-top: 0;
+    font-weight: 600;
+}
+
+.record-card p {
+    margin: 0.3rem 0;
+}
+
+.record-card .small {
+    font-size: 0.85rem;
+    color: #666;
+}
