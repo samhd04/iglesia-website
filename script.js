@@ -507,10 +507,10 @@ async function handleLogin(event) {
 }
 
 async function handleRegister(event) {
-    console.log("handleRegister called");
     event.preventDefault();
     const name = document.getElementById("registerName").value;
-    const email = document.getElementById("registerEmail").value;
+    const _email = document.getElementById("registerEmail").value;
+    const _rol = document.getElementById("registerRole").value;
     const password = document.getElementById("registerPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
 
@@ -518,7 +518,7 @@ async function handleRegister(event) {
         return showMessage("Las contraseñas no coinciden.", "error");
     }
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ _email, password });
     if (error) return showMessage(error.message, "error");
 
     // Insertar perfil con rol 'usuario' por defecto
@@ -526,7 +526,8 @@ async function handleRegister(event) {
         {
             id: data.user.id,
             nombre: name,
-            rol: "usuario",
+            email: _email,
+            rol: _rol,
         },
     ]);
 
