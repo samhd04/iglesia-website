@@ -291,12 +291,14 @@ function changeMonth(direction) {
 function showDayEvents(year, month, day) {
     console.log("⟳ showDayEvents", year, month, day);
 
+    // 1) Filtrar eventos del día
     const selectedDate = new Date(year, month, day);
     const key = selectedDate.toDateString();
     const dayEvents = events.filter(
         (ev) => new Date(ev.date).toDateString() === key
     );
 
+    // 2) Abrir el modal de lista
     openModal("eventsModal");
     document.getElementById(
         "eventsModalTitle"
@@ -304,33 +306,13 @@ function showDayEvents(year, month, day) {
     const listEl = document.getElementById("eventsList");
     listEl.innerHTML = "";
 
+    // 3) Si NO hay eventos, solo mostramos el mensaje
     if (dayEvents.length === 0) {
-        if (currentUser?.role === "administrador") {
-            if (confirm("No hay eventos este día. ¿Deseas crear uno?")) {
-                document.getElementById("eventDate").value = selectedDate
-                    .toISOString()
-                    .split("T")[0];
-                closeModal("eventsModal");
-                openModal("eventModal");
-            } else {
-                closeModal("eventsModal");
-            }
-        } else {
-            // invitado y usuario normal
-            listEl.innerHTML = `
-        <p>No hay eventos programados para este día.</p>
-        ${
-            !currentUser
-                ? `<button class="btn btn-primary" onclick="openModal('loginModal')">
-                 ingresar para confirmar
-               </button>`
-                : ``
-        }
-      `;
-        }
+        listEl.innerHTML = "<p>No hay eventos programados para este día.</p>";
         return;
     }
 
+    // 4) Si hay eventos, los pintamos con sus botones
     dayEvents.forEach((ev) => {
         const item = document.createElement("div");
         item.className = "event-item";
@@ -346,14 +328,17 @@ function showDayEvents(year, month, day) {
         actions.className = "event-actions";
 
         if (!currentUser) {
-            // invitado
+            // Invitado: cierra este modal y abre el login
             actions.innerHTML = `
-        <button class="btn btn-primary" onclick="openModal('loginModal')">
+        <button
+          class="btn btn-primary"
+          onclick="closeModal('eventsModal'); openModal('loginModal')"
+        >
           ingresar para confirmar
         </button>
       `;
         } else if (currentUser.role === "administrador") {
-            // admin
+            // Admin: editar / eliminar
             actions.innerHTML = `
         <button class="btn btn-secondary" onclick="editEvent('${ev.id}')">
           ✏️ Editar
@@ -363,7 +348,7 @@ function showDayEvents(year, month, day) {
         </button>
       `;
         } else {
-            // usuario normal
+            // Usuario normal: RSVP
             actions.innerHTML = `
         <button class="btn btn-primary" onclick="rsvpEvent('${ev.id}')">
           ✅ Confirmar asistencia

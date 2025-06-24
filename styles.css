@@ -1665,7 +1665,40 @@ a:focus {
     background: #c54a2c;
 }
 
-/* Botones genéricos */
+/* Botón de peligro (eliminar) */
+.btn-danger {
+    background-color: #c0392b;
+    color: #fff;
+}
+.btn-danger:hover {
+    background-color: #a93226;
+}
+
+/* 2) Tarjetas de próximos eventos */
+.upcoming-item {
+    background: var(--light-gray);
+    border-left: 4px solid var(--primary-orange);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(44, 44, 73, 0.1);
+}
+.upcoming-item h4 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+.upcoming-item p {
+    margin: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+.upcoming-item button {
+    margin-top: 12px;
+}
+
 .btn {
     font-family: inherit;
     font-size: 1rem;
@@ -1678,8 +1711,6 @@ a:focus {
     align-items: center;
     gap: 0.4em;
 }
-
-/* Botón primario (confirmar) */
 .btn-primary {
     background-color: #e65b2a;
     color: #fff;
@@ -1687,8 +1718,6 @@ a:focus {
 .btn-primary:hover {
     background-color: #d04f23;
 }
-
-/* Botón secundario (editar) */
 .btn-secondary {
     background-color: #fff;
     color: #e65b2a;
@@ -1698,8 +1727,6 @@ a:focus {
     background-color: #e65b2a;
     color: #fff;
 }
-
-/* Botón de peligro (eliminar) */
 .btn-danger {
     background-color: #c0392b;
     color: #fff;
@@ -1708,13 +1735,39 @@ a:focus {
     background-color: #a93226;
 }
 
-/* --- Modal de eventos --- */
+/* ——— Tarjetas de próximos eventos ——— */
+.upcoming-item {
+    background: var(--light-gray);
+    border-left: 4px solid var(--primary-orange);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(44, 44, 73, 0.1);
+}
+.upcoming-item h4 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: var(--text-dark);
+}
+.upcoming-item p {
+    margin: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+/* ——— Modal de eventos ——— */
+#eventsModal {
+    z-index: 1000;
+}
+#loginModal {
+    z-index: 1100;
+}
 #eventsModal .modal-content {
     max-width: 450px;
     padding: 1.5rem;
 }
-
-/* Cada evento dentro del modal */
 #eventsList .event-item {
     background: #fff;
     border: 1px solid #e65b2a;
@@ -1722,46 +1775,13 @@ a:focus {
     padding: 1rem;
     margin-bottom: 1rem;
 }
-
-/* Título y texto dentro de cada evento */
 #eventsList .event-item h4 {
     margin: 0 0 0.5rem;
     font-size: 1.1rem;
 }
-
-/* Contenedor de botones dentro de cada evento */
 #eventsList .event-item .event-actions {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
     margin-top: 0.75rem;
-}
-
-#upcomingEvents .upcoming-item {
-    background: #fff; /* fondo blanco */
-    border: 1px solid #e65b2a; /* borde naranja */
-    border-radius: 8px; /* esquinas redondeadas */
-    padding: 1rem; /* espacio interior */
-    margin-bottom: 1rem; /* separación entre ítems */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-#upcomingEvents .upcoming-item h4 {
-    margin: 0 0 0.5rem;
-    font-size: 1.2rem;
-    color: #272343;
-}
-
-#upcomingEvents .upcoming-item p {
-    margin: 0.3rem 0;
-    font-size: 0.95rem;
-    color: #444;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-#upcomingEvents .upcoming-item button {
-    margin-top: 1rem;
-    align-self: start;
 }
