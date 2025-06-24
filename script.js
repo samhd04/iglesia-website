@@ -993,10 +993,6 @@ async function loadSampleData() {
         .from("eventos")
         .select("*");
 
-    // 2) Debug: asegúrate de ver qué devuelve la consulta
-    console.log("Supabase → eventos:", dbEvents);
-    console.log("Supabase → error:", error);
-
     // 3) Si hay error, vacía el array; si no, úsalo
     if (error) {
         console.error("Error cargando eventos:", error);
