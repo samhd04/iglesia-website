@@ -61,17 +61,18 @@ supabase.auth.onAuthStateChange((event, session) => {
         data: { user },
         error,
     } = await supabase.auth.getUser();
-    if (error || !user) {
-        return;
-    }
+    if (error || !user) return;
 
-    // Ya hay sesión activa → cargar perfil y eventos
-    await loadUserProfile(user.id); // esto ya actualiza currentUser
-    await loadStoredData(); // esto ya llena el calendario y tarjetas
+    // recupera perfil + carga calendario
+    await loadUserProfile(user.id);
+    await loadStoredData();
 
-    // Si el usuario es admin, mostrar directamente el dashboard
-    if (currentUser.role === "administrador") {
-        showDashboard(); // oculta calendario, muestra panel de control
+    // si era admin **y** estaba en modo_panel, abre dashboard
+    if (
+        currentUser.role === "administrador" &&
+        localStorage.getItem("modo_panel") === "activo"
+    ) {
+        showDashboard();
     }
 })();
 
@@ -751,7 +752,14 @@ async function showDashboard() {
     document.body.style.overflow = "hidden";
 
     document.getElementById("dashboardUserName").textContent = currentUser.name;
+
+    // Refresca los contadores desde la BD
     await loadAdminData();
+
+    +(
+        // ← Guarda en localStorage que el admin está en el panel
+        (+localStorage.setItem("modo_panel", "activo"))
+    );
 }
 
 function updateDashboardStats() {
