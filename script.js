@@ -768,61 +768,81 @@ function updateDashboardStats() {
 // Funciones de Gestión de Eventos
 async function handleEventSubmit(e) {
     e.preventDefault();
-    const form = e.target;
-    const editingId = form.dataset.editing; // <-- si existe, estamos editando
 
-    // 1) Lee los valores del formulario
+    const form = e.target;
+    const editingId = form.dataset.editing; // si existe, es modo edición
+
+    // 1) Lee los campos del formulario
     const title = form.eventTitle.value.trim();
     const date = form.eventDate.value; // yyyy-mm-dd
-    const time = form.eventTime.value; // hh:mm
+    const time = form.eventTime.value; // HH:MM
     const location = form.eventLocation.value.trim();
     const audience = form.eventAudience.value;
     const description = form.eventDescription.value.trim();
 
-    // Prepárate el objeto common
+    // Prepara el objeto común
     const eventData = { title, date, time, location, audience, description };
 
     if (editingId) {
-        // —————— ACTUALIZACIÓN ——————
+        // —————— EDITAR EVENTO ——————
         const { error } = await supabase
             .from("eventos")
             .update(eventData)
             .eq("id", editingId);
 
         if (error) {
-            return showMessage(`Error: ${error.message}`, "error");
+            return showMessage(
+                `Error al actualizar: ${error.message}`,
+                "error"
+            );
         }
 
-        // Refresca tu array local
+        // Actualiza el array local
         events = events.map((ev) =>
             ev.id === editingId ? { ...ev, ...eventData } : ev
         );
+
         delete form.dataset.editing;
         showMessage("Evento actualizado", "success");
     } else {
-        // —————— CREACIÓN ——————
-        // 2) Genera un ID único (puedes cambiar la estrategia si prefieres UUID)
+        // —————— CREAR NUEVO EVENTO ——————
+
+        // 2) Genera un ID único
         const newId = Date.now().toString();
 
-        // 3) Construye el objeto que vas a insertar
+        // 3) Recupera la sesión para obtener el user.id
+        const {
+            data: { session },
+            error: sessError,
+        } = await supabase.auth.getSession();
+
+        if (sessError || !session) {
+            return showMessage(
+                "Debes iniciar sesión para crear eventos",
+                "error"
+            );
+        }
+
+        // 4) Construye el nuevo evento
         const newEvent = {
             id: newId,
             ...eventData,
-            createdBy: currentUser.id,
+            createdBy: session.user.id,
         };
 
+        // 5) Inserta en Supabase
         const { error } = await supabase.from("eventos").insert([newEvent]);
 
         if (error) {
-            return showMessage(`Error: ${error.message}`, "error");
+            return showMessage(`Error al crear: ${error.message}`, "error");
         }
 
-        // Agrégalo al principio de tu array local
+        // Añade al array local
         events.unshift(newEvent);
         showMessage("Evento creado", "success");
     }
 
-    // 4) Refresca toda la UI
+    // 6) Refresca la UI
     updateCalendar();
     updateUpcomingEvents();
     updateDashboardStats();
