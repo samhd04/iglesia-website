@@ -738,10 +738,46 @@ function updateUIForLoggedInUser() {
     updateUpcomingEvents();
 }
 
+function updateUIForLoggedOutUser() {
+    // 1) Oculta panel de control (dashboard)
+    const dash = document.getElementById("dashboard");
+    if (dash) dash.style.display = "none";
+
+    // 2) Restaura scroll y oculta el modal si quedó abierto
+    document.body.style.overflow = "auto";
+    closeModal("eventModal");
+    closeModal("loginModal");
+
+    // 3) Oculta “Crear Evento”
+    const evActions = document.getElementById("eventActions");
+    if (evActions) evActions.style.display = "none";
+
+    // 4) Ajusta nav para mostrar “Ingresar” en lugar de usuario/admin
+    const loginLink = document.getElementById("loginLink");
+    if (loginLink) {
+        loginLink.textContent = "Ingresar";
+        loginLink.onclick = () => openModal("loginModal");
+    }
+
+    // 5) Pinta de nuevo el calendario y próximos eventos
+    updateCalendar();
+    updateUpcomingEvents();
+}
+
 async function logout() {
-    await supabase.auth.signOut();
+    // 1) Llamada a Supabase
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        return showMessage(`Error cerrando sesión: ${error.message}`, "error");
+    }
+
+    // 2) Limpia estado
     currentUser = null;
+
+    // 3) Restablece UI pública
     updateUIForLoggedOutUser();
+
+    // 4) Mensaje al usuario
     showMessage("Has cerrado sesión.", "success");
 }
 
@@ -870,25 +906,26 @@ async function handleEventSubmit(e) {
     showMessage("¡asistencia confirmada!", "success");
 } */
 
-function editEvent(eventId) {
-    const event = events.find((e) => e.id === eventId);
-    if (!event) return;
+function editEvent(id) {
+    // 2.a) Solo admin
+    if (!currentUser || currentUser.role !== "administrador") {
+        return showMessage("No tienes permisos para editar", "error");
+    }
 
-    document.getElementById("eventTitle").value = event.title;
-    document.getElementById("eventDate").value = event.date;
-    document.getElementById("eventTime").value = event.time;
-    document.getElementById("eventLocation").value = event.location;
-    document.getElementById("eventAudience").value = event.audience;
-    document.getElementById("eventDescription").value = event.description;
+    // 2.b) Busca el evento y carga el form
+    const ev = events.find((e) => e.id === id);
+    if (!ev) return showMessage("Evento no encontrado", "error");
 
-    document.getElementById("eventModalTitle").textContent = "editar evento";
-
-    // Cambiar manejador de formulario temporalmente
     const form = document.getElementById("eventForm");
-    form.onsubmit = (e) => {
-        e.preventDefault();
-        updateEvent(eventId);
-    };
+    form.eventTitle.value = ev.title;
+    form.eventDate.value = ev.date;
+    form.eventTime.value = ev.time;
+    form.eventLocation.value = ev.location;
+    form.eventAudience.value = ev.audience;
+    form.eventDescription.value = ev.description;
+
+    // Marca modo edición
+    form.dataset.editing = id;
 
     openModal("eventModal");
 }
@@ -994,10 +1031,22 @@ function editEvent(id) {
 }
 
 async function deleteEvent(id) {
-    // <-- aquí
-    if (!confirm("¿Eliminar este evento?")) return;
+    // 3.a) Solo admin
+    if (!currentUser || currentUser.role !== "administrador") {
+        return showMessage("No tienes permisos para eliminar", "error");
+    }
+
+    // 3.b) Confirmación
+    if (!confirm("¿Seguro que quieres eliminar este evento?")) return;
+
+    // 3.c) Llamada a Supabase
     const { error } = await supabase.from("eventos").delete().eq("id", id);
-    if (error) return showMessage(`Error: ${error.message}`, "error");
+
+    if (error) {
+        return showMessage(`Error al eliminar: ${error.message}`, "error");
+    }
+
+    // 3.d) Actualiza tu array y refresca UI
     events = events.filter((e) => e.id !== id);
     updateCalendar();
     updateUpcomingEvents();
