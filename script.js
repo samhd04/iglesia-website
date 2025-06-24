@@ -756,10 +756,7 @@ async function showDashboard() {
     // Refresca los contadores desde la BD
     await loadAdminData();
 
-    +(
-        // ← Guarda en localStorage que el admin está en el panel
-        (+localStorage.setItem("modo_panel", "activo"))
-    );
+    localStorage.setItem("modo_panel", "activo");
 }
 
 function updateDashboardStats() {
@@ -1017,14 +1014,9 @@ async function deleteEvent(id) {
 // 1) Asocia clicks
 document.querySelectorAll(".admin-card").forEach((card) => {
     card.addEventListener("click", () => {
-        // 1) refrescar contadores
         loadAdminData();
-        +(
-            // 0) Asegurar que el contenedor de detalles está visible
-            (+document
-                .getElementById("adminDetails")
-                .classList.remove("hidden"))
-        );
+        // muestra el contenedor padre
+        document.getElementById("adminDetails").classList.remove("hidden");
         // 2) ocultar y mostrar paneles como ya tienes
         const sec = card.dataset.section;
         document
@@ -1120,6 +1112,7 @@ async function loadFormsList() {
 }
 
 document.getElementById("backToDashboard").addEventListener("click", () => {
+    localStorage.removeItem("modo_panel");
     // 1) Oculta el bloque de detalles
     document.getElementById("adminDetails").classList.add("hidden");
 
