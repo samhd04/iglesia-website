@@ -290,39 +290,62 @@ function changeMonth(direction) {
 function showDayEvents(year, month, day) {
     console.log("⟳ showDayEvents", year, month, day);
 
-    const date = new Date(year, month, day);
-    const key = date.toDateString();
+    // 1) Fecha seleccionada y filtrado de eventos
+    const selectedDate = new Date(year, month, day);
+    const key = selectedDate.toDateString();
     const dayEvents = events.filter(
         (ev) => new Date(ev.date).toDateString() === key
     );
 
+    // 2) Abrir modal y preparar encabezado y lista
     openModal("eventsModal");
     document.getElementById(
         "eventsModalTitle"
-    ).textContent = `Eventos para ${date.toLocaleDateString("es-ES")}`;
+    ).textContent = `Eventos para ${selectedDate.toLocaleDateString("es-ES")}`;
     const listEl = document.getElementById("eventsList");
     listEl.innerHTML = "";
 
+    // 3) Si no hay eventos, mostrar mensaje o permitir creación al admin
     if (dayEvents.length === 0) {
-        listEl.innerHTML = "<p>No hay eventos programados.</p>";
+        if (currentUser?.role === "administrador") {
+            if (confirm("No hay eventos este día. ¿Deseas crear uno?")) {
+                document.getElementById("eventDate").value = selectedDate
+                    .toISOString()
+                    .split("T")[0];
+                closeModal("eventsModal");
+                openModal("eventModal");
+            } else {
+                closeModal("eventsModal");
+            }
+        } else {
+            listEl.innerHTML =
+                "<p>No hay eventos programados para este día.</p>";
+        }
         return;
     }
 
+    // 4) Si hay eventos, pintarlos con sus acciones
     dayEvents.forEach((ev) => {
         const item = document.createElement("div");
         item.className = "event-item";
         item.innerHTML = `
       <h4>${ev.title}</h4>
       <p><i class="fas fa-clock"></i> ${ev.time}</p>
-      <p><i class="fas fa-map-marker-alt"></i> ${ev.location}</p>
+      <p><i class="fas fa-map-marker-alt"></i> ${ev.location || ""}</p>
       <p><i class="fas fa-users"></i> ${ev.audience}</p>
-      <p>${ev.description}</p>
+      <p>${ev.description || ""}</p>
       <div class="event-actions">
         ${
             currentUser?.role === "administrador"
-                ? `<button onclick="editEvent('${ev.id}')">✏️ Editar</button>
-               <button onclick="deleteEvent('${ev.id}')">🗑 Eliminar</button>`
-                : `<button onclick="rsvpEvent('${ev.id}')">✅ Confirmar asistencia</button>`
+                ? `<button class="btn btn-secondary" onclick="editEvent('${ev.id}')">
+                 ✏️ Editar
+               </button>
+               <button class="btn btn-danger" onclick="deleteEvent('${ev.id}')">
+                 🗑 Eliminar
+               </button>`
+                : `<button class="btn btn-primary" onclick="rsvpEvent('${ev.id}')">
+                 ✅ Confirmar asistencia
+               </button>`
         }
       </div>
     `;
