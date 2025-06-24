@@ -161,7 +161,7 @@ function initializeCalendar() {
     updateUpcomingEvents();
 }
 
-function updateCalendar() {
+/* function updateCalendar() {
     document.getElementById(
         "currentMonth"
     ).textContent = `${monthNames[currentMonth]} ${currentYear}`;
@@ -214,6 +214,92 @@ function updateCalendar() {
         dayElement.addEventListener("click", () => {
             showDayEvents(currentYear, currentMonth, day);
         });
+
+        calendar.appendChild(dayElement);
+    }
+} */
+
+function openNewEventModal(date) {
+    const form = document.getElementById("eventForm");
+    form.reset();
+    delete form.dataset.editing;
+    document.getElementById("eventDate").value = date;
+    openModal("eventModal");
+}
+
+function updateCalendar() {
+    // 1) Título del mes
+    document.getElementById(
+        "currentMonth"
+    ).textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    // 2) Encabezados de días
+    dayHeaders.forEach((day) => {
+        const header = document.createElement("div");
+        header.className = "calendar-day-header";
+        header.textContent = day;
+        calendar.appendChild(header);
+    });
+
+    // 3) Celdas vacías antes del día 1
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "calendar-day other-month";
+        calendar.appendChild(empty);
+    }
+
+    // 4) Celdas de cada día del mes
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const today = new Date();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement("div");
+        dayElement.className = "calendar-day";
+        dayElement.textContent = day;
+
+        const currentDate = new Date(currentYear, currentMonth, day);
+
+        // 4.a) Marca “hoy”
+        if (currentDate.toDateString() === today.toDateString()) {
+            dayElement.classList.add("today");
+        }
+
+        // 4.b) Marca si ya hay un evento
+        const hasEvent = events.some(
+            (e) =>
+                new Date(e.date).toDateString() === currentDate.toDateString()
+        );
+        if (hasEvent) {
+            dayElement.classList.add("has-event");
+        }
+
+        // 4.c) Click para ver eventos de ese día
+        dayElement.addEventListener("click", () => {
+            showDayEvents(currentYear, currentMonth, day);
+        });
+
+        // 4.d) — NUEVO — Si eres admin, añade “+” para crear
+        if (currentUser?.role === "administrador") {
+            // evita duplicados
+            if (!dayElement.querySelector(".btn-add-cell")) {
+                const addBtn = document.createElement("span");
+                addBtn.textContent = "+";
+                addBtn.className = "btn-add-cell";
+                // guardamos la fecha en formato ISO para el modal
+                addBtn.dataset.date = currentDate.toISOString().split("T")[0];
+                addBtn.addEventListener("click", (e) => {
+                    e.stopPropagation(); // no dispare el showDayEvents
+                    openNewEventModal(addBtn.dataset.date); // abre el modal con fecha
+                });
+                // ponemos la celda relative para posicionar bien el "+"
+                dayElement.style.position = "relative";
+                dayElement.appendChild(addBtn);
+            }
+        }
 
         calendar.appendChild(dayElement);
     }

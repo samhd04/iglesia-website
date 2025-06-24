@@ -1185,6 +1185,21 @@ textarea {
     font-size: 0.95rem;
 }
 
+.btn-add-cell {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #e65b2a;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+}
+
 /* Modals */
 .modal {
     display: none;
