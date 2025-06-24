@@ -221,17 +221,14 @@ function showDayEvents(year, month, day) {
                 <p><i class="fas fa-users"></i> ${event.audience}</p>
                 <p>${event.description}</p>
                 ${
-                    !currentUser
-+          // 1) Si no está logueado
-+          ? '<button class="btn btn-primary" onclick="openModal(\'loginModal\')">ingresar para confirmar</button>'
-+
-+          // 2) Si está logueado y es admin
-+          : currentUser.role === "administrador"
-+            ? `<button class="btn btn-secondary" onclick="editEvent('${event.id}')">✏️ editar</button>
-+               <button class="btn btn-danger"    onclick="deleteEvent('${event.id}')">🗑 eliminar</button>`
-+
-+            // 3) Si es usuario normal
-+            : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">✅ confirmar asistencia</button>`
+                    currentUser &&
+                    (currentUser.role === "pastor" ||
+                        currentUser.role === "lider")
+                        ? `<div class="event-actions">
+                        <button class="btn btn-secondary" onclick="editEvent('${event.id}')">editar</button>
+                        <button class="btn btn-secondary" onclick="deleteEvent('${event.id}')">eliminar</button>
+                    </div>`
+                        : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">confirmar asistencia</button>`
                 }
             </div>`
             )
@@ -694,6 +691,52 @@ async function handleEventSubmit(e) {
     form.reset();
 }
 
+/* function rsvpEvent(eventId) {
+    if (!currentUser) {
+        openModal("loginModal");
+        return;
+    }
+
+    const eventIndex = events.findIndex((e) => e.id === eventId);
+    if (eventIndex === -1) return;
+
+    const event = events[eventIndex];
+
+    // Verificar si el usuario ya confirmó asistencia
+    if (event.rsvps.includes(currentUser.id)) {
+        showMessage("ya has confirmado tu asistencia a este evento.", "info");
+        return;
+    }
+
+    event.rsvps.push(currentUser.id);
+    localStorage.setItem("events", JSON.stringify(events));
+
+    showMessage("¡asistencia confirmada!", "success");
+} */
+
+function editEvent(eventId) {
+    const event = events.find((e) => e.id === eventId);
+    if (!event) return;
+
+    document.getElementById("eventTitle").value = event.title;
+    document.getElementById("eventDate").value = event.date;
+    document.getElementById("eventTime").value = event.time;
+    document.getElementById("eventLocation").value = event.location;
+    document.getElementById("eventAudience").value = event.audience;
+    document.getElementById("eventDescription").value = event.description;
+
+    document.getElementById("eventModalTitle").textContent = "editar evento";
+
+    // Cambiar manejador de formulario temporalmente
+    const form = document.getElementById("eventForm");
+    form.onsubmit = (e) => {
+        e.preventDefault();
+        updateEvent(eventId);
+    };
+
+    openModal("eventModal");
+}
+
 // Formulario de Asistentes via Supabase
 async function submitAttendeeForm(event) {
     event.preventDefault();
@@ -749,6 +792,29 @@ function showMessage(message, type) {
     setTimeout(() => {
         messageDiv.remove();
     }, 6000);
+}
+
+async function loadSampleData() {
+    // 1) Trae los eventos de Supabase
+    const { data: dbEvents, error } = await supabase
+        .from("eventos")
+        .select("*");
+
+    // 2) Debug: asegúrate de ver qué devuelve la consulta
+    console.log("Supabase → eventos:", dbEvents);
+    console.log("Supabase → error:", error);
+
+    // 3) Si hay error, vacía el array; si no, úsalo
+    if (error) {
+        console.error("Error cargando eventos:", error);
+        events = [];
+    } else {
+        events = dbEvents;
+    }
+
+    // 4) Finalmente refresca el calendario y la lista de próximos eventos
+    updateCalendar();
+    updateUpcomingEvents();
 }
 
 async function loadStoredData() {
