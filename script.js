@@ -1,5 +1,4 @@
 // Variables Globales
-let currentUser = null;
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let events = [];
@@ -12,6 +11,19 @@ const supabase = window.supabase.createClient(
     "https://lubryqwofitefnxpzoiu.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YnJ5cXdvZml0ZWZueHB6b2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Mjg5MTIsImV4cCI6MjA2NjMwNDkxMn0.-pytVRaCeMHV3ktvHJfhqxNjRIYZSh4h8sfigZhhmpk"
 );
+
+let currentUser = null;
+
+// 1. Cuando cambie la sesión de Auth, cargo perfil y datos
+supabase.auth.onAuthStateChange((event, session) => {
+    if (session) {
+        loadUserProfile(session.user.id); // <-- aquí
+        loadStoredData(); // <-- aquí
+    } else {
+        // opcional: redirigir al login si no hay sesión
+        window.location = "/login.html";
+    }
+});
 
 // Meses en español
 const monthNames = [
@@ -209,14 +221,17 @@ function showDayEvents(year, month, day) {
                 <p><i class="fas fa-users"></i> ${event.audience}</p>
                 <p>${event.description}</p>
                 ${
-                    currentUser &&
-                    (currentUser.role === "pastor" ||
-                        currentUser.role === "lider")
-                        ? `<div class="event-actions">
-                        <button class="btn btn-secondary" onclick="editEvent('${event.id}')">editar</button>
-                        <button class="btn btn-secondary" onclick="deleteEvent('${event.id}')">eliminar</button>
-                    </div>`
-                        : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">confirmar asistencia</button>`
+                    !currentUser
++          // 1) Si no está logueado
++          ? '<button class="btn btn-primary" onclick="openModal(\'loginModal\')">ingresar para confirmar</button>'
++
++          // 2) Si está logueado y es admin
++          : currentUser.role === "administrador"
++            ? `<button class="btn btn-secondary" onclick="editEvent('${event.id}')">✏️ editar</button>
++               <button class="btn btn-danger"    onclick="deleteEvent('${event.id}')">🗑 eliminar</button>`
++
++            // 3) Si es usuario normal
++            : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">✅ confirmar asistencia</button>`
                 }
             </div>`
             )
@@ -634,132 +649,49 @@ function updateDashboardStats() {
 }
 
 // Funciones de Gestión de Eventos
-function handleEventSubmit(event) {
-    event.preventDefault();
+async function handleEventSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const editingId = form.dataset.editing; // <-- aquí
 
-    if (
-        !currentUser ||
-        (currentUser.role !== "pastor" && currentUser.role !== "lider")
-    ) {
-        showMessage("no tienes permisos para crear eventos.", "error");
-        return;
-    }
-
+    // Re-lee los campos como ya lo haces...
     const eventData = {
-        id: Date.now().toString(),
-        title: document.getElementById("eventTitle").value,
-        date: document.getElementById("eventDate").value,
-        time: document.getElementById("eventTime").value,
-        location: document.getElementById("eventLocation").value,
-        audience: document.getElementById("eventAudience").value,
-        description: document.getElementById("eventDescription").value,
-        createdBy: currentUser.id,
-        rsvps: [],
+        /* título, fecha, hora, location… */
     };
 
-    events.push(eventData);
-    localStorage.setItem("events", JSON.stringify(events));
-
-    // Si hay URL de Google Sheets, enviar también allí
-    if (GOOGLE_SHEETS_URL) {
-        sendToGoogleSheets("createEvent", eventData);
+    if (editingId) {
+        // 4.a) Si es edición
+        const { error } = await supabase
+            .from("eventos")
+            .update(eventData)
+            .eq("id", editingId);
+        if (error) return showMessage(`Error: ${error.message}`, "error");
+        // actualizo tu array local
+        events = events.map((ev) =>
+            ev.id === editingId ? { ...ev, ...eventData } : ev
+        );
+        delete form.dataset.editing;
+        showMessage("Evento actualizado", "success");
+    } else {
+        // 4.b) Si es nuevo
+        const { error } = await supabase
+            .from("eventos")
+            .insert([{ ...eventData, createdBy: currentUser.id }]);
+        if (error) return showMessage(`Error: ${error.message}`, "error");
+        // lo agrego al array local
+        events.unshift({
+            id: eventData.id,
+            ...eventData,
+            createdBy: currentUser.id,
+        });
+        showMessage("Evento creado", "success");
     }
 
     updateCalendar();
     updateUpcomingEvents();
-    closeModal("eventModal");
-    showMessage("¡evento creado exitosamente!", "success");
-
-    document.getElementById("eventForm").reset();
     updateDashboardStats();
-}
-
-function rsvpEvent(eventId) {
-    if (!currentUser) {
-        openModal("loginModal");
-        return;
-    }
-
-    const eventIndex = events.findIndex((e) => e.id === eventId);
-    if (eventIndex === -1) return;
-
-    const event = events[eventIndex];
-
-    // Verificar si el usuario ya confirmó asistencia
-    if (event.rsvps.includes(currentUser.id)) {
-        showMessage("ya has confirmado tu asistencia a este evento.", "info");
-        return;
-    }
-
-    event.rsvps.push(currentUser.id);
-    localStorage.setItem("events", JSON.stringify(events));
-
-    showMessage("¡asistencia confirmada!", "success");
-}
-
-function editEvent(eventId) {
-    const event = events.find((e) => e.id === eventId);
-    if (!event) return;
-
-    document.getElementById("eventTitle").value = event.title;
-    document.getElementById("eventDate").value = event.date;
-    document.getElementById("eventTime").value = event.time;
-    document.getElementById("eventLocation").value = event.location;
-    document.getElementById("eventAudience").value = event.audience;
-    document.getElementById("eventDescription").value = event.description;
-
-    document.getElementById("eventModalTitle").textContent = "editar evento";
-
-    // Cambiar manejador de formulario temporalmente
-    const form = document.getElementById("eventForm");
-    form.onsubmit = (e) => {
-        e.preventDefault();
-        updateEvent(eventId);
-    };
-
-    openModal("eventModal");
-}
-
-function updateEvent(eventId) {
-    const eventIndex = events.findIndex((e) => e.id === eventId);
-    if (eventIndex === -1) return;
-
-    events[eventIndex] = {
-        ...events[eventIndex],
-        title: document.getElementById("eventTitle").value,
-        date: document.getElementById("eventDate").value,
-        time: document.getElementById("eventTime").value,
-        location: document.getElementById("eventLocation").value,
-        audience: document.getElementById("eventAudience").value,
-        description: document.getElementById("eventDescription").value,
-    };
-
-    localStorage.setItem("events", JSON.stringify(events));
-
-    updateCalendar();
-    updateUpcomingEvents();
     closeModal("eventModal");
-    showMessage("¡evento actualizado exitosamente!", "success");
-
-    // Resetear manejador de formulario
-    document.getElementById("eventForm").onsubmit = handleEventSubmit;
-    document.getElementById("eventModalTitle").textContent = "crear evento";
-    document.getElementById("eventForm").reset();
-}
-
-function deleteEvent(eventId) {
-    if (!confirm("¿estás seguro de que quieres eliminar este evento?")) return;
-
-    const eventIndex = events.findIndex((e) => e.id === eventId);
-    if (eventIndex === -1) return;
-
-    events.splice(eventIndex, 1);
-    localStorage.setItem("events", JSON.stringify(events));
-
-    updateCalendar();
-    updateUpcomingEvents();
-    showMessage("¡evento eliminado exitosamente!", "success");
-    updateDashboardStats();
+    form.reset();
 }
 
 // Formulario de Asistentes via Supabase
@@ -819,82 +751,16 @@ function showMessage(message, type) {
     }, 6000);
 }
 
-function loadSampleData() {
-    // Cargar eventos de muestra si no existen
-    if (!localStorage.getItem("events")) {
-        events = [
-            {
-                id: "1",
-                title: "reunión dominical",
-                date: "2024-01-07",
-                time: "10:00",
-                description: "únete a nosotros para adoración y enseñanza",
-                location: "lugar principal de reunión",
-                audience: "todos",
-                rsvps: [],
-            },
-            {
-                id: "2",
-                title: "estudio bíblico",
-                date: "2024-01-10",
-                time: "19:00",
-                description: "estudio profundo de la palabra de dios",
-                location: "casa de oración",
-                audience: "todos",
-                rsvps: [],
-            },
-            {
-                id: "3",
-                title: "reunión de jóvenes",
-                date: "2024-01-12",
-                time: "18:00",
-                description: "tiempo especial para los jóvenes",
-                location: "centro juvenil",
-                audience: "jóvenes",
-                rsvps: [],
-            },
-        ];
-        localStorage.setItem("events", JSON.stringify(events));
-    } else {
-        events = JSON.parse(localStorage.getItem("events"));
-    }
+async function loadStoredData() {
+    // 3. Traer eventos de la tabla "eventos"
+    const { data: dbEvents, error: errEv } = await supabase
+        .from("eventos")
+        .select("*");
+    if (!errEv) events = dbEvents; // <-- aquí
+    updateCalendar();
+    updateUpcomingEvents();
 
-    // Cargar usuarios de muestra si no existen
-    if (!localStorage.getItem("users")) {
-        const sampleUsers = [
-            {
-                id: 1,
-                name: "glenis",
-                email: "glenis@unlugardeelparati.com",
-                password: "Pastor2020!",
-                role: "pastor",
-                joinDate: new Date().toISOString(),
-            },
-            {
-                id: 2,
-                name: "wilmar",
-                email: "wilmar@unlugardeelparati.com",
-                password: "Pastor2020!",
-                role: "pastor",
-                joinDate: new Date().toISOString(),
-            },
-        ];
-        localStorage.setItem("users", JSON.stringify(sampleUsers));
-    }
-}
-
-function loadStoredData() {
-    // Cargar preguntas guardadas
-    const storedQuestions = localStorage.getItem("questions");
-    if (storedQuestions) {
-        questions = JSON.parse(storedQuestions);
-    }
-
-    // Cargar formularios de asistentes guardados
-    const storedForms = localStorage.getItem("attendeeForms");
-    if (storedForms) {
-        attendeeForms = JSON.parse(storedForms);
-    }
+    // (si tienes preguntas/asistentes, repite .from("preguntas") y .from("asistentes"))
 }
 
 function updateFooterYear() {
@@ -906,3 +772,25 @@ function updateFooterYear() {
 document.addEventListener("DOMContentLoaded", () => {
     console.log("¡sitio web de un lugar de él para ti cargado exitosamente!");
 });
+
+function editEvent(id) {
+    // <-- aquí
+    const ev = events.find((e) => e.id === id);
+    document.getElementById("eventTitle").value = ev.title;
+    document.getElementById("eventDate").value = ev.date;
+    /* …los demás campos… */
+    document.getElementById("eventForm").dataset.editing = id;
+    openModal("eventModal");
+}
+
+async function deleteEvent(id) {
+    // <-- aquí
+    if (!confirm("¿Eliminar este evento?")) return;
+    const { error } = await supabase.from("eventos").delete().eq("id", id);
+    if (error) return showMessage(`Error: ${error.message}`, "error");
+    events = events.filter((e) => e.id !== id);
+    updateCalendar();
+    updateUpcomingEvents();
+    updateDashboardStats();
+    showMessage("Evento eliminado", "success");
+}
