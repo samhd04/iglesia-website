@@ -776,7 +776,7 @@ async function submitAttendeeForm(event) {
         congregation: entries.congregation,
         discipleship: entries.discipleship,
         baptized: entries.baptized,
-        prayerRequest: entries.prayerRequest.trim(),
+        prayerrequest: entries.prayerrequest.trim(),
         contact: entries.contact,
         date: new Date().toISOString(),
     };
