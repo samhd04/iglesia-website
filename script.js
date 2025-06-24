@@ -306,12 +306,6 @@ function showDayEvents(year, month, day) {
     const listEl = document.getElementById("eventsList");
     listEl.innerHTML = "";
 
-    // 3) Si NO hay eventos, solo mostramos el mensaje
-    if (dayEvents.length === 0) {
-        listEl.innerHTML = "<p>No hay eventos programados para este día.</p>";
-        return;
-    }
-
     // 4) Si hay eventos, los pintamos con sus botones
     dayEvents.forEach((ev) => {
         const item = document.createElement("div");
