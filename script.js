@@ -32,6 +32,7 @@ async function loadUserProfile(userId) {
         name: perfil.nombre,
         role: perfil.rol,
     };
+    console.log("ROL DEL USUARIO:", currentUser.role); // <-- mira qué imprime
     updateUIForLoggedInUser();
 }
 
