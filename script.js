@@ -1,4 +1,5 @@
 // Variables Globales
+let currentUser = null;
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let events = [];
@@ -12,16 +13,13 @@ const supabase = window.supabase.createClient(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YnJ5cXdvZml0ZWZueHB6b2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Mjg5MTIsImV4cCI6MjA2NjMwNDkxMn0.-pytVRaCeMHV3ktvHJfhqxNjRIYZSh4h8sfigZhhmpk"
 );
 
-let currentUser = null;
-
-// 1. Cuando cambie la sesión de Auth, cargo perfil y datos
 supabase.auth.onAuthStateChange((event, session) => {
     if (session) {
-        loadUserProfile(session.user.id); // <-- aquí
-        loadStoredData(); // <-- aquí
+        loadUserProfile(session.user.id);
+        loadStoredData();
     } else {
-        // opcional: redirigir al login si no hay sesión
-        window.location = "/login.html";
+        currentUser = null; // Solo reinicias el usuario
+        // no haces nada más: la página carga "en modo invitado"
     }
 });
 
