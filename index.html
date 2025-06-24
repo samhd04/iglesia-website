@@ -735,18 +735,41 @@
             </div>
             <div class="dashboard-content">
                 <div class="dashboard-stats">
-                    <div class="stat-card">
+                    <div
+                        class="stat-card admin-card"
+                        data-section="eventsDetails"
+                    >
                         <h3>eventos creados</h3>
                         <span id="eventsCount">0</span>
                     </div>
-                    <div class="stat-card">
+                    <div
+                        class="stat-card admin-card"
+                        data-section="questionsDetails"
+                    >
                         <h3>preguntas recibidas</h3>
                         <span id="questionsCount">0</span>
                     </div>
-                    <div class="stat-card">
+                    <div
+                        class="stat-card admin-card"
+                        data-section="formsDetails"
+                    >
                         <h3>formularios enviados</h3>
                         <span id="formsCount">0</span>
                     </div>
+                </div>
+            </div>
+            <div id="adminDetails">
+                <div id="eventsDetails" class="details-panel hidden">
+                    <h5>Últimos eventos creados</h5>
+                    <ul id="listEvents"></ul>
+                </div>
+                <div id="questionsDetails" class="details-panel hidden">
+                    <h5>Últimas preguntas recibidas</h5>
+                    <ul id="listQuestions"></ul>
+                </div>
+                <div id="formsDetails" class="details-panel hidden">
+                    <h5>Últimos formularios enviados</h5>
+                    <ul id="listForms"></ul>
                 </div>
             </div>
         </div>

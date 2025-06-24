@@ -1785,3 +1785,36 @@ a:focus {
     justify-content: flex-end;
     margin-top: 0.75rem;
 }
+
+/* ocultar/mostrar paneles */
+.hidden {
+    display: none;
+}
+
+/* estilo general de cada detalle */
+.details-panel {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+.details-panel h5 {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+.details-panel ul {
+    list-style: none;
+    padding: 0;
+}
+.details-panel li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+/* cursor pointer para las cards */
+.admin-card {
+    cursor: pointer;
+}

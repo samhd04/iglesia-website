@@ -746,6 +746,26 @@ function updateDashboardStats() {
     document.getElementById("formsCount").textContent = attendeeForms.length;
 }
 
+async function loadAdminData() {
+    // Eventos
+    let { count: cntEv } = await supabase
+        .from("events")
+        .select("*", { count: "exact" });
+    document.getElementById("eventsCount").textContent = cntEv;
+
+    // Preguntas
+    let { count: cntQ } = await supabase
+        .from("questions")
+        .select("*", { count: "exact" });
+    document.getElementById("questionsCount").textContent = cntQ;
+
+    // Formularios
+    let { count: cntF } = await supabase
+        .from("forms")
+        .select("*", { count: "exact" });
+    document.getElementById("formsCount").textContent = cntF;
+}
+
 // Funciones de Gestión de Eventos
 async function handleEventSubmit(e) {
     e.preventDefault();
@@ -970,4 +990,71 @@ async function deleteEvent(id) {
     updateUpcomingEvents();
     updateDashboardStats();
     showMessage("Evento eliminado", "success");
+}
+
+// 1) Asocia clicks
+document.querySelectorAll(".admin-card").forEach((card) => {
+    card.addEventListener("click", () => {
+        const sec = card.dataset.section;
+        // ocultar todos
+        document
+            .querySelectorAll(".details-panel")
+            .forEach((d) => d.classList.add("hidden"));
+        // mostrar sólo el seleccionado
+        document.getElementById(sec).classList.remove("hidden");
+        // cargar datos según el panel
+        if (sec === "eventsDetails") loadEventsList();
+        if (sec === "questionsDetails") loadQuestionsList();
+        if (sec === "formsDetails") loadFormsList();
+    });
+});
+
+// 2) Funciones para poblar cada lista
+async function loadEventsList() {
+    const { data: evs } = await supabase
+        .from("events")
+        .select("id,title,date,location")
+        .order("date", { ascending: false })
+        .limit(10);
+    const ul = document.getElementById("listEvents");
+    ul.innerHTML = "";
+    evs.forEach((ev) => {
+        const li = document.createElement("li");
+        li.textContent = `${ev.title} — ${ev.date} — ${ev.location}`;
+        ul.appendChild(li);
+    });
+}
+
+async function loadQuestionsList() {
+    const { data: qs } = await supabase
+        .from("questions")
+        .select("id,event_id,content,created_at")
+        .order("created_at", { ascending: false })
+        .limit(10);
+    const ul = document.getElementById("listQuestions");
+    ul.innerHTML = "";
+    qs.forEach((q) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>Ev#${q.event_id}</strong>: ${
+            q.content
+        } <em>(${new Date(q.created_at).toLocaleString()})</em>`;
+        ul.appendChild(li);
+    });
+}
+
+async function loadFormsList() {
+    const { data: fs } = await supabase
+        .from("forms")
+        .select("id,name,email,submitted_at")
+        .order("submitted_at", { ascending: false })
+        .limit(10);
+    const ul = document.getElementById("listForms");
+    ul.innerHTML = "";
+    fs.forEach((f) => {
+        const li = document.createElement("li");
+        li.innerHTML = `${f.name} — ${f.email} <em>(${new Date(
+            f.submitted_at
+        ).toLocaleString()})</em>`;
+        ul.appendChild(li);
+    });
 }
