@@ -161,64 +161,6 @@ function initializeCalendar() {
     updateUpcomingEvents();
 }
 
-/* function updateCalendar() {
-    document.getElementById(
-        "currentMonth"
-    ).textContent = `${monthNames[currentMonth]} ${currentYear}`;
-
-    const calendar = document.getElementById("calendar");
-    calendar.innerHTML = "";
-
-    // Agregar encabezados de días
-    dayHeaders.forEach((day) => {
-        const dayHeader = document.createElement("div");
-        dayHeader.className = "calendar-day-header";
-        dayHeader.textContent = day;
-        calendar.appendChild(dayHeader);
-    });
-
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const today = new Date();
-
-    // Agregar celdas vacías para días antes del primer día del mes
-    for (let i = 0; i < firstDay; i++) {
-        const emptyDay = document.createElement("div");
-        emptyDay.className = "calendar-day other-month";
-        calendar.appendChild(emptyDay);
-    }
-
-    // Agregar días del mes
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayElement = document.createElement("div");
-        dayElement.className = "calendar-day";
-        dayElement.textContent = day;
-
-        const currentDate = new Date(currentYear, currentMonth, day);
-
-        // Verificar si es hoy
-        if (currentDate.toDateString() === today.toDateString()) {
-            dayElement.classList.add("today");
-        }
-
-        // Verificar si hay eventos en este día
-        const hasEvent = events.some((event) => {
-            const eventDate = new Date(event.date);
-            return eventDate.toDateString() === currentDate.toDateString();
-        });
-
-        if (hasEvent) {
-            dayElement.classList.add("has-event");
-        }
-
-        dayElement.addEventListener("click", () => {
-            showDayEvents(currentYear, currentMonth, day);
-        });
-
-        calendar.appendChild(dayElement);
-    }
-} */
-
 function openNewEventModal(date) {
     const form = document.getElementById("eventForm");
     form.reset();
@@ -727,12 +669,11 @@ function updateUIForLoggedInUser() {
         loginLink.onclick = () => showDashboard();
     }
 
-    // Mostrar características de admin si el usuario es pastor o líder
-    if (currentUser.role === "pastor" || currentUser.role === "lider") {
-        const eventActions = document.getElementById("eventActions");
-        if (eventActions) {
-            eventActions.style.display = "block";
-        }
+    // Mostrar botón “Crear evento” solo para administradores
+    const eventActions = document.getElementById("eventActions");
+    if (eventActions) {
+        eventActions.style.display =
+            currentUser.role === "administrador" ? "block" : "none";
     }
 
     updateUpcomingEvents();
@@ -883,29 +824,6 @@ async function handleEventSubmit(e) {
     form.reset();
 }
 
-/* function rsvpEvent(eventId) {
-    if (!currentUser) {
-        openModal("loginModal");
-        return;
-    }
-
-    const eventIndex = events.findIndex((e) => e.id === eventId);
-    if (eventIndex === -1) return;
-
-    const event = events[eventIndex];
-
-    // Verificar si el usuario ya confirmó asistencia
-    if (event.rsvps.includes(currentUser.id)) {
-        showMessage("ya has confirmado tu asistencia a este evento.", "info");
-        return;
-    }
-
-    event.rsvps.push(currentUser.id);
-    localStorage.setItem("events", JSON.stringify(events));
-
-    showMessage("¡asistencia confirmada!", "success");
-} */
-
 function editEvent(id) {
     // 2.a) Solo admin
     if (!currentUser || currentUser.role !== "administrador") {
@@ -1017,32 +935,32 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function editEvent(id) {
-    // <-- aquí
     const ev = events.find((e) => e.id === id);
-    document.getElementById("eventTitle").value = ev.title;
-    document.getElementById("eventDate").value = ev.date;
-    /* …los demás campos… */
-    document.getElementById("eventForm").dataset.editing = id;
+    if (!ev) return showMessage("Evento no encontrado", "error");
+    if (currentUser.role !== "administrador")
+        return showMessage("Sin permisos", "error");
+
+    const form = document.getElementById("eventForm");
+    form.eventTitle.value = ev.title;
+    form.eventDate.value = ev.date;
+    form.eventTime.value = ev.time;
+    form.eventLocation.value = ev.location;
+    form.eventAudience.value = ev.audience;
+    form.eventDescription.value = ev.description;
+
+    form.dataset.editing = id;
+    closeModal("eventsModal");
     openModal("eventModal");
 }
 
 async function deleteEvent(id) {
-    // 3.a) Solo admin
-    if (!currentUser || currentUser.role !== "administrador") {
-        return showMessage("No tienes permisos para eliminar", "error");
-    }
+    if (currentUser.role !== "administrador")
+        return showMessage("Sin permisos", "error");
 
-    // 3.b) Confirmación
-    if (!confirm("¿Seguro que quieres eliminar este evento?")) return;
-
-    // 3.c) Llamada a Supabase
+    if (!confirm("¿Eliminar este evento?")) return;
     const { error } = await supabase.from("eventos").delete().eq("id", id);
+    if (error) return showMessage(`Error: ${error.message}`, "error");
 
-    if (error) {
-        return showMessage(`Error al eliminar: ${error.message}`, "error");
-    }
-
-    // 3.d) Actualiza tu array y refresca UI
     events = events.filter((e) => e.id !== id);
     updateCalendar();
     updateUpcomingEvents();
