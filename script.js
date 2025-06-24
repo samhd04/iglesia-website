@@ -168,7 +168,6 @@ function openNewEventModal(date) {
     document.getElementById("eventDate").value = date;
     openModal("eventModal");
 }
-
 function updateUpcomingEvents() {
     const container = document.getElementById("upcomingEvents");
     container.innerHTML = "";
@@ -199,16 +198,18 @@ function updateUpcomingEvents() {
     `;
 
         const btn = document.createElement("button");
+        btn.className = "btn btn-primary";
+
         if (!currentUser) {
+            // invitado
             btn.textContent = "ingresar para confirmar";
-            btn.className = "btn btn-primary";
             btn.onclick = () => openModal("loginModal");
         } else if (currentUser.role !== "administrador") {
+            // usuario normal
             btn.textContent = "confirmar asistencia";
-            btn.className = "btn btn-primary";
             btn.onclick = () => rsvpEvent(ev.id);
         } else {
-            // admin no necesita botón aquí
+            // admin no ve botón
             btn.style.display = "none";
         }
 
@@ -290,14 +291,12 @@ function changeMonth(direction) {
 function showDayEvents(year, month, day) {
     console.log("⟳ showDayEvents", year, month, day);
 
-    // 1) Fecha seleccionada y filtrado de eventos
     const selectedDate = new Date(year, month, day);
     const key = selectedDate.toDateString();
     const dayEvents = events.filter(
         (ev) => new Date(ev.date).toDateString() === key
     );
 
-    // 2) Abrir modal y preparar encabezado y lista
     openModal("eventsModal");
     document.getElementById(
         "eventsModalTitle"
@@ -305,7 +304,6 @@ function showDayEvents(year, month, day) {
     const listEl = document.getElementById("eventsList");
     listEl.innerHTML = "";
 
-    // 3) Si no hay eventos, mostrar mensaje o permitir creación al admin
     if (dayEvents.length === 0) {
         if (currentUser?.role === "administrador") {
             if (confirm("No hay eventos este día. ¿Deseas crear uno?")) {
@@ -318,13 +316,21 @@ function showDayEvents(year, month, day) {
                 closeModal("eventsModal");
             }
         } else {
-            listEl.innerHTML =
-                "<p>No hay eventos programados para este día.</p>";
+            // invitado y usuario normal
+            listEl.innerHTML = `
+        <p>No hay eventos programados para este día.</p>
+        ${
+            !currentUser
+                ? `<button class="btn btn-primary" onclick="openModal('loginModal')">
+                 ingresar para confirmar
+               </button>`
+                : ``
+        }
+      `;
         }
         return;
     }
 
-    // 4) Si hay eventos, pintarlos con sus acciones
     dayEvents.forEach((ev) => {
         const item = document.createElement("div");
         item.className = "event-item";
@@ -334,21 +340,38 @@ function showDayEvents(year, month, day) {
       <p><i class="fas fa-map-marker-alt"></i> ${ev.location || ""}</p>
       <p><i class="fas fa-users"></i> ${ev.audience}</p>
       <p>${ev.description || ""}</p>
-      <div class="event-actions">
-        ${
-            currentUser?.role === "administrador"
-                ? `<button class="btn btn-secondary" onclick="editEvent('${ev.id}')">
-                 ✏️ Editar
-               </button>
-               <button class="btn btn-danger" onclick="deleteEvent('${ev.id}')">
-                 🗑 Eliminar
-               </button>`
-                : `<button class="btn btn-primary" onclick="rsvpEvent('${ev.id}')">
-                 ✅ Confirmar asistencia
-               </button>`
-        }
-      </div>
     `;
+
+        const actions = document.createElement("div");
+        actions.className = "event-actions";
+
+        if (!currentUser) {
+            // invitado
+            actions.innerHTML = `
+        <button class="btn btn-primary" onclick="openModal('loginModal')">
+          ingresar para confirmar
+        </button>
+      `;
+        } else if (currentUser.role === "administrador") {
+            // admin
+            actions.innerHTML = `
+        <button class="btn btn-secondary" onclick="editEvent('${ev.id}')">
+          ✏️ Editar
+        </button>
+        <button class="btn btn-danger" onclick="deleteEvent('${ev.id}')">
+          🗑 Eliminar
+        </button>
+      `;
+        } else {
+            // usuario normal
+            actions.innerHTML = `
+        <button class="btn btn-primary" onclick="rsvpEvent('${ev.id}')">
+          ✅ Confirmar asistencia
+        </button>
+      `;
+        }
+
+        item.appendChild(actions);
         listEl.appendChild(item);
     });
 }
