@@ -733,6 +733,7 @@ async function showDashboard() {
         return;
     }
 
+    document.getElementById("calendarView").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
     document.body.style.overflow = "hidden";
 
@@ -1098,8 +1099,17 @@ async function loadFormsList() {
 }
 
 document.getElementById("backToDashboard").addEventListener("click", () => {
-    // Oculta TODO el bloque de detalles
+    // 1) Oculta el bloque de detalles
     document.getElementById("adminDetails").classList.add("hidden");
-    // (Opcional) refresca los contadores cuando regresas
-    loadAdminData();
+
+    // 2) Oculta TODO el dashboard
+    document.getElementById("dashboard").style.display = "none";
+
+    // 3) (Re)Muestra tu calendario
+    //    Asegúrate de que el contenedor de tu calendario tenga un id,
+    //    por ejemplo <div id="calendarView" class="calendar-container">…
+    document.getElementById("calendarView").style.display = "block";
+
+    // 4) Restaura scroll del body
+    document.body.style.overflow = "auto";
 });
