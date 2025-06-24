@@ -170,7 +170,6 @@ function openNewEventModal(date) {
 }
 
 function updateCalendar() {
-    // 1) Título del mes
     document.getElementById(
         "currentMonth"
     ).textContent = `${monthNames[currentMonth]} ${currentYear}`;
@@ -178,7 +177,7 @@ function updateCalendar() {
     const calendar = document.getElementById("calendar");
     calendar.innerHTML = "";
 
-    // 2) Encabezados de días
+    // Encabezados
     dayHeaders.forEach((day) => {
         const header = document.createElement("div");
         header.className = "calendar-day-header";
@@ -186,7 +185,7 @@ function updateCalendar() {
         calendar.appendChild(header);
     });
 
-    // 3) Celdas vacías antes del día 1
+    // Celdas vacías
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     for (let i = 0; i < firstDay; i++) {
         const empty = document.createElement("div");
@@ -194,54 +193,32 @@ function updateCalendar() {
         calendar.appendChild(empty);
     }
 
-    // 4) Celdas de cada día del mes
+    // Días con evento o no
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date();
-
     for (let day = 1; day <= daysInMonth; day++) {
         const dayElement = document.createElement("div");
         dayElement.className = "calendar-day";
         dayElement.textContent = day;
 
         const currentDate = new Date(currentYear, currentMonth, day);
-
-        // 4.a) Marca “hoy”
         if (currentDate.toDateString() === today.toDateString()) {
             dayElement.classList.add("today");
         }
-
-        // 4.b) Marca si ya hay un evento
-        const hasEvent = events.some(
-            (e) =>
-                new Date(e.date).toDateString() === currentDate.toDateString()
-        );
-        if (hasEvent) {
+        if (
+            events.some(
+                (e) =>
+                    new Date(e.date).toDateString() ===
+                    currentDate.toDateString()
+            )
+        ) {
             dayElement.classList.add("has-event");
         }
 
-        // 4.c) Click para ver eventos de ese día
+        // **muestra el modal de ese día al hacer click**
         dayElement.addEventListener("click", () => {
             showDayEvents(currentYear, currentMonth, day);
         });
-
-        // 4.d) — NUEVO — Si eres admin, añade “+” para crear
-        if (currentUser?.role === "administrador") {
-            // evita duplicados
-            if (!dayElement.querySelector(".btn-add-cell")) {
-                const addBtn = document.createElement("span");
-                addBtn.textContent = "+";
-                addBtn.className = "btn-add-cell";
-                // guardamos la fecha en formato ISO para el modal
-                addBtn.dataset.date = currentDate.toISOString().split("T")[0];
-                addBtn.addEventListener("click", (e) => {
-                    e.stopPropagation(); // no dispare el showDayEvents
-                    openNewEventModal(addBtn.dataset.date); // abre el modal con fecha
-                });
-                // ponemos la celda relative para posicionar bien el "+"
-                dayElement.style.position = "relative";
-                dayElement.appendChild(addBtn);
-            }
-        }
 
         calendar.appendChild(dayElement);
     }
@@ -263,14 +240,13 @@ function changeMonth(direction) {
 }
 
 function showDayEvents(year, month, day) {
-    // Fecha y filtrado
     const selectedDate = new Date(year, month, day);
     const dayStr = selectedDate.toDateString();
     const dayEvents = events.filter(
         (ev) => new Date(ev.date).toDateString() === dayStr
     );
 
-    // Abre modal
+    // abre el modal
     openModal("eventsModal");
     const titleEl = document.getElementById("eventsModalTitle");
     const listEl = document.getElementById("eventsList");
@@ -279,11 +255,9 @@ function showDayEvents(year, month, day) {
     )}`;
     listEl.innerHTML = "";
 
-    // Si no hay eventos
     if (dayEvents.length === 0) {
-        // Solo administrador puede crear desde aquí
         if (currentUser?.role === "administrador") {
-            if (confirm("No hay eventos este día. ¿Crear uno?")) {
+            if (confirm("No hay eventos. ¿Deseas crear uno?")) {
                 document.getElementById("eventDate").value = selectedDate
                     .toISOString()
                     .split("T")[0];
@@ -293,14 +267,11 @@ function showDayEvents(year, month, day) {
                 closeModal("eventsModal");
             }
         } else {
-            // Invitados / usuarios normales
-            listEl.innerHTML =
-                "<p>No hay eventos programados para este día.</p>";
+            listEl.innerHTML = "<p>No hay eventos programados.</p>";
         }
         return;
     }
 
-    // Si hay eventos, listarlos
     dayEvents.forEach((ev) => {
         const item = document.createElement("div");
         item.className = "event-item";
@@ -312,29 +283,20 @@ function showDayEvents(year, month, day) {
       <p>${ev.description || ""}</p>
     `;
 
-        // Zona de botones
         const actions = document.createElement("div");
         actions.className = "event-actions";
 
         if (currentUser?.role === "administrador") {
-            // Solo admin ve estos dos
             actions.innerHTML = `
         <button class="btn btn-secondary"
                 onclick="editEvent('${ev.id}')">✏️ Editar</button>
         <button class="btn btn-secondary"
                 onclick="deleteEvent('${ev.id}')">🗑 Eliminar</button>
       `;
-        } else if (currentUser) {
-            // Usuario logueado normal
+        } else {
             actions.innerHTML = `
         <button class="btn btn-primary"
                 onclick="rsvpEvent('${ev.id}')">✅ Confirmar asistencia</button>
-      `;
-        } else {
-            // Invitado
-            actions.innerHTML = `
-        <button class="btn btn-primary"
-                onclick="openModal('loginModal')">🔒 Ingresar</button>
       `;
         }
 
