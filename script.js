@@ -169,6 +169,48 @@ function openNewEventModal(date) {
     openModal("eventModal");
 }
 
+function updateUpcomingEvents() {
+    const container = document.getElementById("upcomingEvents");
+    container.innerHTML = "";
+
+    // Tomamos los 3 primeros eventos futuros
+    const items = events
+        .filter((ev) => new Date(ev.date) >= new Date())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 3);
+
+    items.forEach((ev) => {
+        const div = document.createElement("div");
+        div.className = "upcoming-item";
+        div.innerHTML = `
+      <h4>${ev.title}</h4>
+      <p><i class="fas fa-calendar-alt"></i> ${new Date(
+          ev.date
+      ).toLocaleDateString("es-ES")}</p>
+      <p><i class="fas fa-clock"></i> ${ev.time}</p>
+      <p><i class="fas fa-map-marker-alt"></i> ${ev.location || ""}</p>
+      <p><i class="fas fa-users"></i> ${ev.audience}</p>
+    `;
+
+        const btn = document.createElement("button");
+        if (!currentUser) {
+            btn.textContent = "ingresar para confirmar";
+            btn.className = "btn btn-primary";
+            btn.onclick = () => openModal("loginModal");
+        } else if (currentUser.role === "administrador") {
+            // admin no necesita confirmar asistencia
+            btn.style.display = "none";
+        } else {
+            btn.textContent = "confirmar asistencia";
+            btn.className = "btn btn-primary";
+            btn.onclick = () => rsvpEvent(ev.id);
+        }
+
+        div.appendChild(btn);
+        container.appendChild(div);
+    });
+}
+
 function updateCalendar() {
     document.getElementById(
         "currentMonth"
