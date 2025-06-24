@@ -179,6 +179,12 @@ function updateUpcomingEvents() {
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(0, 3);
 
+    if (items.length === 0) {
+        container.innerHTML =
+            '<p class="text-center">No hay eventos próximos programados.</p>';
+        return;
+    }
+
     items.forEach((ev) => {
         const div = document.createElement("div");
         div.className = "upcoming-item";
@@ -197,13 +203,13 @@ function updateUpcomingEvents() {
             btn.textContent = "ingresar para confirmar";
             btn.className = "btn btn-primary";
             btn.onclick = () => openModal("loginModal");
-        } else if (currentUser.role === "administrador") {
-            // admin no necesita confirmar asistencia
-            btn.style.display = "none";
-        } else {
+        } else if (currentUser.role !== "administrador") {
             btn.textContent = "confirmar asistencia";
             btn.className = "btn btn-primary";
             btn.onclick = () => rsvpEvent(ev.id);
+        } else {
+            // admin no necesita botón aquí
+            btn.style.display = "none";
         }
 
         div.appendChild(btn);
@@ -282,35 +288,23 @@ function changeMonth(direction) {
 }
 
 function showDayEvents(year, month, day) {
-    const selectedDate = new Date(year, month, day);
-    const dayStr = selectedDate.toDateString();
+    console.log("⟳ showDayEvents", year, month, day);
+
+    const date = new Date(year, month, day);
+    const key = date.toDateString();
     const dayEvents = events.filter(
-        (ev) => new Date(ev.date).toDateString() === dayStr
+        (ev) => new Date(ev.date).toDateString() === key
     );
 
-    // abre el modal
     openModal("eventsModal");
-    const titleEl = document.getElementById("eventsModalTitle");
+    document.getElementById(
+        "eventsModalTitle"
+    ).textContent = `Eventos para ${date.toLocaleDateString("es-ES")}`;
     const listEl = document.getElementById("eventsList");
-    titleEl.textContent = `Eventos para ${selectedDate.toLocaleDateString(
-        "es-ES"
-    )}`;
     listEl.innerHTML = "";
 
     if (dayEvents.length === 0) {
-        if (currentUser?.role === "administrador") {
-            if (confirm("No hay eventos. ¿Deseas crear uno?")) {
-                document.getElementById("eventDate").value = selectedDate
-                    .toISOString()
-                    .split("T")[0];
-                closeModal("eventsModal");
-                openModal("eventModal");
-            } else {
-                closeModal("eventsModal");
-            }
-        } else {
-            listEl.innerHTML = "<p>No hay eventos programados.</p>";
-        }
+        listEl.innerHTML = "<p>No hay eventos programados.</p>";
         return;
     }
 
@@ -320,70 +314,20 @@ function showDayEvents(year, month, day) {
         item.innerHTML = `
       <h4>${ev.title}</h4>
       <p><i class="fas fa-clock"></i> ${ev.time}</p>
-      <p><i class="fas fa-map-marker-alt"></i> ${ev.location || ""}</p>
+      <p><i class="fas fa-map-marker-alt"></i> ${ev.location}</p>
       <p><i class="fas fa-users"></i> ${ev.audience}</p>
-      <p>${ev.description || ""}</p>
-    `;
-
-        const actions = document.createElement("div");
-        actions.className = "event-actions";
-
-        if (currentUser?.role === "administrador") {
-            actions.innerHTML = `
-        <button class="btn btn-secondary"
-                onclick="editEvent('${ev.id}')">✏️ Editar</button>
-        <button class="btn btn-secondary"
-                onclick="deleteEvent('${ev.id}')">🗑 Eliminar</button>
-      `;
-        } else {
-            actions.innerHTML = `
-        <button class="btn btn-primary"
-                onclick="rsvpEvent('${ev.id}')">✅ Confirmar asistencia</button>
-      `;
-        }
-
-        item.appendChild(actions);
-        listEl.appendChild(item);
-    });
-}
-
-function updateUpcomingEvents() {
-    const eventsList = document.getElementById("eventsList");
-    const today = new Date();
-
-    // Filtrar eventos futuros
-    const upcomingEvents = events
-        .filter((event) => new Date(event.date) >= today)
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .slice(0, 3); // Mostrar solo los próximos 3 eventos
-
-    if (upcomingEvents.length === 0) {
-        eventsList.innerHTML =
-            '<p class="text-center">no hay eventos próximos programados.</p>';
-        return;
-    }
-
-    eventsList.innerHTML = upcomingEvents
-        .map(
-            (event) => `
-      <div class="event-item">
-        <h4>${event.title}</h4>
-        <p><i class="fas fa-calendar"></i> ${new Date(
-            event.date
-        ).toLocaleDateString("es-ES")}</p>
-        <p><i class="fas fa-clock"></i> ${event.time}</p>
-        <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
-        <p><i class="fas fa-users"></i> ${event.audience}</p>
-        <p>${event.description}</p>
+      <p>${ev.description}</p>
+      <div class="event-actions">
         ${
-            !currentUser
-                ? '<button class="btn btn-primary" onclick="openModal(\'loginModal\')">ingresar para confirmar</button>'
-                : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">confirmar asistencia</button>`
+            currentUser?.role === "administrador"
+                ? `<button onclick="editEvent('${ev.id}')">✏️ Editar</button>
+               <button onclick="deleteEvent('${ev.id}')">🗑 Eliminar</button>`
+                : `<button onclick="rsvpEvent('${ev.id}')">✅ Confirmar asistencia</button>`
         }
       </div>
-    `
-        )
-        .join("");
+    `;
+        listEl.appendChild(item);
+    });
 }
 
 // Funciones de FAQ
