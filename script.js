@@ -263,59 +263,84 @@ function changeMonth(direction) {
 }
 
 function showDayEvents(year, month, day) {
+    // Fecha y filtrado
     const selectedDate = new Date(year, month, day);
-    const dayEvents = events.filter((event) => {
-        const eventDate = new Date(event.date);
-        return eventDate.toDateString() === selectedDate.toDateString();
-    });
+    const dayStr = selectedDate.toDateString();
+    const dayEvents = events.filter(
+        (ev) => new Date(ev.date).toDateString() === dayStr
+    );
 
-    if (dayEvents.length > 0) {
-        const eventsList = dayEvents
-            .map(
-                (event) =>
-                    `<div class="event-item">
-                <h4>${event.title}</h4>
-                <p><i class="fas fa-clock"></i> ${event.time}</p>
-                <p><i class="fas fa-map-marker-alt"></i> ${event.location}</p>
-                <p><i class="fas fa-users"></i> ${event.audience}</p>
-                <p>${event.description}</p>
-                ${
-                    currentUser &&
-                    (currentUser.role === "pastor" ||
-                        currentUser.role === "lider")
-                        ? `<div class="event-actions">
-                        <button class="btn btn-secondary" onclick="editEvent('${event.id}')">editar</button>
-                        <button class="btn btn-secondary" onclick="deleteEvent('${event.id}')">eliminar</button>
-                    </div>`
-                        : `<button class="btn btn-primary" onclick="rsvpEvent('${event.id}')">confirmar asistencia</button>`
-                }
-            </div>`
-            )
-            .join("");
+    // Abre modal
+    openModal("eventsModal");
+    const titleEl = document.getElementById("eventsModalTitle");
+    const listEl = document.getElementById("eventsList");
+    titleEl.textContent = `Eventos para ${selectedDate.toLocaleDateString(
+        "es-ES"
+    )}`;
+    listEl.innerHTML = "";
 
-        showMessage(
-            `eventos para ${selectedDate.toLocaleDateString(
-                "es-ES"
-            )}:<br>${eventsList}`,
-            "info"
-        );
-    } else {
-        if (
-            currentUser &&
-            (currentUser.role === "pastor" || currentUser.role === "lider")
-        ) {
-            if (
-                confirm("no hay eventos en este día. ¿te gustaría agregar uno?")
-            ) {
+    // Si no hay eventos
+    if (dayEvents.length === 0) {
+        // Solo administrador puede crear desde aquí
+        if (currentUser?.role === "administrador") {
+            if (confirm("No hay eventos este día. ¿Crear uno?")) {
                 document.getElementById("eventDate").value = selectedDate
                     .toISOString()
                     .split("T")[0];
+                closeModal("eventsModal");
                 openModal("eventModal");
+            } else {
+                closeModal("eventsModal");
             }
         } else {
-            showMessage("no hay eventos programados para este día.", "info");
+            // Invitados / usuarios normales
+            listEl.innerHTML =
+                "<p>No hay eventos programados para este día.</p>";
         }
+        return;
     }
+
+    // Si hay eventos, listarlos
+    dayEvents.forEach((ev) => {
+        const item = document.createElement("div");
+        item.className = "event-item";
+        item.innerHTML = `
+      <h4>${ev.title}</h4>
+      <p><i class="fas fa-clock"></i> ${ev.time}</p>
+      <p><i class="fas fa-map-marker-alt"></i> ${ev.location || ""}</p>
+      <p><i class="fas fa-users"></i> ${ev.audience}</p>
+      <p>${ev.description || ""}</p>
+    `;
+
+        // Zona de botones
+        const actions = document.createElement("div");
+        actions.className = "event-actions";
+
+        if (currentUser?.role === "administrador") {
+            // Solo admin ve estos dos
+            actions.innerHTML = `
+        <button class="btn btn-secondary"
+                onclick="editEvent('${ev.id}')">✏️ Editar</button>
+        <button class="btn btn-secondary"
+                onclick="deleteEvent('${ev.id}')">🗑 Eliminar</button>
+      `;
+        } else if (currentUser) {
+            // Usuario logueado normal
+            actions.innerHTML = `
+        <button class="btn btn-primary"
+                onclick="rsvpEvent('${ev.id}')">✅ Confirmar asistencia</button>
+      `;
+        } else {
+            // Invitado
+            actions.innerHTML = `
+        <button class="btn btn-primary"
+                onclick="openModal('loginModal')">🔒 Ingresar</button>
+      `;
+        }
+
+        item.appendChild(actions);
+        listEl.appendChild(item);
+    });
 }
 
 function updateUpcomingEvents() {
