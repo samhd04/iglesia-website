@@ -771,7 +771,7 @@ async function submitAttendeeForm(event) {
     const entries = Object.fromEntries(new FormData(form).entries());
     const attendeeData = {
         id: Date.now().toString(),
-        fullName: entries.fullName.trim(),
+        full_name: entries.full_name.trim(),
         email: entries.email.trim(),
         congregation: entries.congregation,
         discipleship: entries.discipleship,
