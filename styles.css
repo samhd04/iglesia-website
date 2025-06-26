@@ -169,8 +169,8 @@ body {
     text-align: center;
     color: var(--white);
     position: relative;
-    padding-top: 150px;
-    min-height: 1000px;  /* o más si lo necesitas */
+    padding-top: 300px;
+    min-height: 1200px;  /* o más si lo necesitas */
     flex-direction: column;
 }
 

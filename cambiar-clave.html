@@ -17,7 +17,11 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    const supabase = createClient("https://TUSUPABASE.supabase.co", "TU_PUBLIC_KEY");
+    const supabase = createClient(
+  "https://lubryqwofitefnxpzoiu.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // tu anon key real
+);
+
 
     async function cambiarPassword() {
       const newPassword = document.getElementById("newPassword").value;

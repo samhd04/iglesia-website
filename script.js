@@ -1382,14 +1382,13 @@ function mostrarFormularioRecuperacion() {
 
 async function enviarCorreoRecuperacion() {
   const email = document.getElementById("recuperarEmail").value;
-
   if (!email) {
     alert("Por favor ingresa un correo.");
     return;
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "https://iglesia-un-lugar.vercel.app/cambiar-clave.html"
+    redirectTo: "http://127.0.0.1:5500/cambiar-clave.html"
   });
 
   if (error) {
@@ -1397,6 +1396,6 @@ async function enviarCorreoRecuperacion() {
     return;
   }
 
-  alert("Se ha enviado un correo para restablecer tu contraseña.");
+  alert("Se ha enviado un correo de recuperación. Revisa tu bandeja de entrada.");
   closeModal("recuperarModal");
 }
