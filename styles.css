@@ -1128,6 +1128,7 @@ textarea {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 .logo-symbol2 {
@@ -1141,12 +1142,20 @@ textarea {
     margin-bottom: 25px;
     color: var(--primary-orange);
     text-transform: lowercase;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+
 }
 
 .footer-section p {
     line-height: 1.7;
     opacity: 0.9;
     margin-bottom: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .footer-section a {
@@ -1154,11 +1163,17 @@ textarea {
     text-decoration: none;
     transition: color 0.3s ease;
     opacity: 0.9;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .footer-section a:hover {
     color: var(--primary-orange);
     opacity: 1;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 .social-icons {
@@ -2099,3 +2114,11 @@ a:focus {
     margin-top: 10px;
     min-height: 80px;
 }
+
+.logo-symbol2 {
+  width: 140px;   /* Aumenta este valor para agrandar */
+  height: auto;   /* Mantiene la proporción correcta */
+  display: block;
+  margin: 0 auto; /* Centra horizontalmente dentro del contenedor */
+}
+
