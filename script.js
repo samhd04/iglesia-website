@@ -1374,3 +1374,29 @@ async function responderPregunta(id) {
 
   alert("Respuesta guardada correctamente.");
 }
+
+function mostrarFormularioRecuperacion() {
+  closeModal('loginModal');
+  openModal('recuperarModal');
+}
+
+async function enviarCorreoRecuperacion() {
+  const email = document.getElementById("recuperarEmail").value;
+
+  if (!email) {
+    alert("Por favor ingresa un correo.");
+    return;
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://iglesia-un-lugar.vercel.app/cambiar-clave.html"
+  });
+
+  if (error) {
+    alert("Error al enviar el correo: " + error.message);
+    return;
+  }
+
+  alert("Se ha enviado un correo para restablecer tu contraseña.");
+  closeModal("recuperarModal");
+}

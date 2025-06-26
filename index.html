@@ -347,9 +347,6 @@
         <section id="eventos" class="events">
             <div class="container">
                 <h2 class="section-title">eventos</h2>
-                <div id="notificationToggleContainer" style="text-align: right; margin-bottom: 10px; display: none;">
-                    <button id="notificationToggleBtn" class="btn btn-secondary" onclick="toggleNotifications()">Cargando...</button>
-                </div>
                 <div id="calendarView" class="calendar-container">
                     <div class="calendar-header">
                         <button class="calendar-nav" onclick="changeMonth(-1)">
@@ -687,6 +684,10 @@
                         ingresar
                     </button>
                     <div class="form-links">
+    <a href="#" onclick="mostrarFormularioRecuperacion()">¿olvidaste tu contraseña?</a>
+</div>
+
+                    <div class="form-links">
                         <a
                             href="#"
                             onclick="openModal('registerModal'); closeModal('loginModal')"
@@ -856,6 +857,13 @@
                     <div id="formsCards" class="record-cards"></div>
                 </div>
             </div>
+
+            <section id="panelPreguntas" class="admin-section">
+            <h3>Preguntas recibidas</h3>
+            <div id="listaPreguntas"></div>
+            </section>
+
+            
         </div>
         <!-- Modal de notificaciones -->
         <div class="modal" id="notificationModal">
@@ -990,6 +998,22 @@
   }
 </script>
 
+<!-- Modal para recuperar contraseña -->
+<div id="recuperarModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('recuperarModal')">&times;</span>
+    <h2>Recuperar contraseña</h2>
+    <p>Ingresa tu correo y te enviaremos un enlace para restablecerla.</p>
+    <input
+      type="email"
+      id="recuperarEmail"
+      placeholder="Correo electrónico"
+      required
+    />
+    <button onclick="enviarCorreoRecuperacion()" class="btn btn-primary">Enviar</button>
+    <button onclick="closeModal('recuperarModal')" class="btn btn-secondary">Cancelar</button>
+  </div>
+</div>
 
 
     </body>
