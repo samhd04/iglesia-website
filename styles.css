@@ -1163,7 +1163,10 @@ textarea {
 
 .social-icons {
     display: flex;
-    gap: 18px;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 10px;
 }
 
 .social-icons a {
