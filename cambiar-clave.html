@@ -11,7 +11,9 @@
       <h2>Restablecer contraseña</h2>
       <p>Escribe tu nueva contraseña:</p>
       <input type="password" id="newPassword" placeholder="Nueva contraseña" />
-      <button onclick="cambiarPassword()">Cambiar contraseña</button>
+      <button id="btnCambiar" onclick="cambiarPassword()" disabled>
+        Cambiar contraseña
+      </button>
     </div>
 
     <!-- Cargar Supabase desde CDN -->
@@ -24,6 +26,7 @@
 
       let sesionEstablecida = false;
 
+      // Establecer sesión desde los tokens del hash
       (async () => {
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
         const access_token = hashParams.get("access_token");
@@ -34,8 +37,10 @@
             access_token,
             refresh_token
           });
+
           if (!error) {
             sesionEstablecida = true;
+            document.getElementById("btnCambiar").disabled = false;
             console.log("✅ Sesión de recuperación establecida");
           } else {
             alert("Error al establecer sesión: " + error.message);
@@ -45,6 +50,7 @@
         }
       })();
 
+      // Función para cambiar contraseña
       async function cambiarPassword() {
         const newPassword = document.getElementById("newPassword").value;
 
@@ -54,17 +60,18 @@
         }
 
         if (!sesionEstablecida) {
-          alert("Sesión no activa. Asegúrate de acceder desde el enlace del correo.");
+          alert("La sesión no está activa. Asegúrate de usar el enlace del correo.");
           return;
         }
 
         const { error } = await supabase.auth.updateUser({ password: newPassword });
 
         if (error) {
-          alert("Error al cambiar la contraseña: " + error.message);
+          alert("❌ Error al cambiar la contraseña.");
+          console.error(error);
         } else {
-          alert("Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
-          window.location.href = "/";
+          alert("✅ Contraseña cambiada correctamente. Ya puedes iniciar sesión.");
+          window.location.href = "index.html";
         }
       }
     </script>
