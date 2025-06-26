@@ -1328,7 +1328,7 @@ async function guardarInformacionMiembro(e) {
         id_usuario: data.user.id,
         nombre_completo: form.nombre_completo.value,
         documento: form.documento.value,
-        edad: parseInt(form.edad.value),
+        edad: form.edad.value,
         genero: form.genero.value,
         telefono: form.telefono.value,
         correo: form.correo.value,
@@ -1343,6 +1343,8 @@ async function guardarInformacionMiembro(e) {
         area_interes: form.area_interes.value,
         rol: "miembro",
     };
+
+    console.log(data2);
 
     const { error2 } = await supabase.from("miembros").insert([data2]);
     if (error2) {
