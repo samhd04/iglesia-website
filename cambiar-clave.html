@@ -14,34 +14,62 @@
     <button onclick="cambiarPassword()">Cambiar contraseña</button>
   </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+<!-- ✅ Supabase desde CDN estándar -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+  const supabase = supabase.createClient(
+    "https://lubryqwofitefnxpzoiu.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YnJ5cXdvZml0ZWZueHB6b2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Mjg5MTIsImV4cCI6MjA2NjMwNDkxMn0.-pytVRaCeMHV3ktvHJfhqxNjRIYZSh4h8sfigZhhmpk"
+  );
 
-    const supabase = createClient(
-  "https://lubryqwofitefnxpzoiu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // tu anon key real
-);
 
+  const hashParams = new URLSearchParams(window.location.hash.slice(1));
+const access_token = hashParams.get("access_token");
+const refresh_token = hashParams.get("refresh_token");
 
-    async function cambiarPassword() {
-      const newPassword = document.getElementById("newPassword").value;
-
-      if (!newPassword) {
-        alert("Por favor escribe una nueva contraseña.");
-        return;
-      }
-
-      const { data, error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) {
-        alert("Error al cambiar la contraseña: " + error.message);
-      } else {
-        alert("Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
-        window.location.href = "/"; // redirige al inicio
-      }
+if (access_token && refresh_token) {
+  supabase.auth.setSession({
+    access_token,
+    refresh_token,
+  }).then(({ error }) => {
+    if (error) {
+      alert("Error al establecer sesión: " + error.message);
+    } else {
+      console.log("Sesión de recuperación establecida.");
     }
-  </script>
+  });
+}
+
+
+
+  // Verifica la sesión actual (para recuperación)
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      alert("Debes abrir esta página desde el enlace del correo.");
+    }
+  });
+
+  async function cambiarPassword() {
+    const newPassword = document.getElementById("newPassword").value;
+
+    if (!newPassword) {
+      alert("Por favor escribe una nueva contraseña.");
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (error) {
+      alert("Error al cambiar la contraseña: " + error.message);
+    } else {
+      alert("Contraseña actualizada correctamente.");
+      window.location.href = "/";
+    }
+  }
+</script>
+
+
+
+    
 </body>
 </html>
