@@ -97,7 +97,7 @@ body {
     font-weight: 700;
     color: var(--primary-dark);
     line-height: 1.1;
-    text-transform: lowercase; /* As specified in PDF for "minúsculas" approach */
+    text-transform: none; /* As specified in PDF for "minúsculas" approach */
     letter-spacing: -0.5px;
 }
 
@@ -1852,4 +1852,29 @@ a:focus {
 /* sigue ocultando con hidden */
 .hidden {
     display: none;
+}
+
+.church-name {
+    display: inline-block;
+    line-height: 1.2;
+    font-family: var(--font-heading);
+}
+
+.dark-text {
+    color: var(--primary-dark);
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+}
+
+.orange-text {
+    color: var(--primary-orange);
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: var(--font-heading);
+}
+
+.nav-logo::after,
+.church-name::after {
+    content: none !important;
 }
