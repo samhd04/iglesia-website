@@ -1325,19 +1325,19 @@ async function guardarInformacionMiembro(e) {
     const form = e.target;
     const data2 = {
         id: data.user.id,
-        id_usuario: data.user.id,
+        user_id: data.user.id,
         nombre_completo: form.nombre_completo.value,
-        documento: form.documento.value,
-        edad: form.edad.value,
+        documento_identidad: form.documento.value,
+        edad: parseInt(form.edad.value),
         genero: form.genero.value,
         telefono: form.telefono.value,
         correo: form.correo.value,
         direccion: form.direccion.value,
         estado_civil: form.estado_civil.value,
-        familia_en_iglesia: form.familia_en_iglesia.value,
-        tiene_hijos: form.tiene_hijos.value,
-        historial_otras_iglesias: form.historial_otras_iglesias.value,
-        bautismo: form.bautismo.value,
+        familiares_en_iglesia: form.familia_en_iglesia.value,
+        tiene_hijos: form.tiene_hijos.checked,
+        asistencia_otra_iglesia: form.historial_otras_iglesias.value,
+        bautismo: form.bautismo.checked,
         motivo_visita: form.motivo_visita.value,
         necesidades_especificas: form.necesidades_especificas.value,
         area_interes: form.area_interes.value,
@@ -1368,18 +1368,45 @@ async function cerrarSesion() {
 
 async function responderPregunta(id) {
     const respuesta = document.getElementById(`respuesta-${id}`).value;
-
-    const { error } = await supabase
+    
+    // 1. Actualiza la pregunta en Supabase
+    const { data: pregunta, error: updateError } = await supabase
         .from("preguntas")
-        .update({ respuesta: respuesta, status: "respondida" })
-        .eq("id", id);
+        .update({ 
+            respuesta: respuesta, 
+            status: "respondida",
+            fecha_respuesta: new Date().toISOString()
+        })
+        .eq("id", id)
+        .select()
+        .single();
 
-    if (error) {
+    if (updateError) {
         alert("Error al guardar la respuesta.");
         return;
     }
 
-    alert("Respuesta guardada correctamente.");
+    // 2. Envía el correo al usuario
+    try {
+        const emailParams = {
+            to_email: pregunta.email,
+            to_name: pregunta.name,
+            question: pregunta.question,
+            answer: respuesta,
+            response_date: new Date().toLocaleDateString('es-ES')
+        };
+
+        await emailjs.send(
+            'TU_SERVICE_ID_DE_EMAILJS', 
+            'TU_TEMPLATE_ID_DE_EMAILJS', 
+            emailParams
+        );
+        
+        alert("Respuesta guardada y correo enviado correctamente.");
+    } catch (emailError) {
+        console.error("Error enviando el correo:", emailError);
+        alert("Respuesta guardada, pero hubo un problema enviando el correo.");
+    }
 }
 
 function mostrarFormularioRecuperacion() {
@@ -1395,7 +1422,7 @@ async function enviarCorreoRecuperacion() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "http://127.0.0.1:5500/cambiar-clave.html",
+        redirectTo: "https://iglesia-website.vercel.app/cambiar-clave.html",
     });
 
     if (error) {
