@@ -1707,8 +1707,9 @@ a:focus {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    display: inline-flex;
-    align-items: center;
+    width: fit-content;
+    margin: 0 auto;
+    display: block;
     gap: 0.4em;
 }
 .btn-primary {

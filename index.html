@@ -617,6 +617,22 @@
             </div>
         </div>
 
+        <!-- Log Out Modal -->
+        <div id="logOutModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('logOutModal')"
+                    >&times;</span
+                >
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    onclick="logout(); closeModal('logOutModal')"
+                >
+                    cerrar sesión
+                </button>
+            </div>
+        </div>
+
         <!-- Register Modal -->
         <div id="registerModal" class="modal">
             <div class="modal-content">
@@ -637,13 +653,6 @@
                         placeholder="correo electrónico"
                         required
                     />
-                    <select id="registerRole" required>
-                        <option value="">selecciona tu rol</option>
-                        <option value="miembro">miembro</option>
-                        <option value="servidor">servidor</option>
-                        <option value="lider">líder</option>
-                        <option value="pastor">pastor</option>
-                    </select>
                     <input
                         type="password"
                         id="registerPassword"

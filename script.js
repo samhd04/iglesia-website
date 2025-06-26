@@ -69,7 +69,7 @@ supabase.auth.onAuthStateChange((event, session) => {
 
     // si era admin **y** estaba en modo_panel, abre dashboard
     if (
-        currentUser.role === "administrador" &&
+        currentUser.role === "pastor" &&
         localStorage.getItem("modo_panel") === "activo"
     ) {
         showDashboard();
@@ -224,7 +224,7 @@ function updateUpcomingEvents() {
             // invitado
             btn.textContent = "ingresar para confirmar";
             btn.onclick = () => openModal("loginModal");
-        } else if (currentUser.role !== "administrador") {
+        } else if (currentUser.role !== "pastor") {
             // usuario normal
             btn.textContent = "confirmar asistencia";
             btn.onclick = () => rsvpEvent(ev.id);
@@ -351,7 +351,7 @@ function showDayEvents(year, month, day) {
           ingresar para confirmar
         </button>
       `;
-        } else if (currentUser.role === "administrador") {
+        } else if (currentUser.role === "pastor") {
             // Admin: editar / eliminar
             actions.innerHTML = `
         <button class="btn btn-secondary" onclick="editEvent('${ev.id}')">
@@ -611,7 +611,7 @@ async function handleRegister(event) {
     event.preventDefault();
     const name = document.getElementById("registerName").value;
     const email = document.getElementById("registerEmail").value;
-    const role = document.getElementById("registerRole").value;
+    const role = "miembro";
     const password = document.getElementById("registerPassword").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
 
@@ -684,14 +684,18 @@ function updateUIForLoggedInUser() {
     const loginLink = document.getElementById("loginLink");
     if (loginLink) {
         loginLink.textContent = currentUser.name;
-        loginLink.onclick = () => showDashboard();
+        if (currentUser.role === "pastor") {
+            loginLink.onclick = showDashboard;
+        } else {
+            loginLink.onclick = showLogOut;
+        }
     }
 
-    // Mostrar botón “Crear evento” solo para administradores
+    // Mostrar botón “Crear evento” solo para pastores
     const eventActions = document.getElementById("eventActions");
     if (eventActions) {
         eventActions.style.display =
-            currentUser.role === "administrador" ? "block" : "none";
+            currentUser.role === "pastor" ? "block" : "none";
     }
 
     updateUpcomingEvents();
@@ -757,6 +761,11 @@ async function showDashboard() {
     await loadAdminData();
 
     localStorage.setItem("modo_panel", "activo");
+}
+
+function showLogOut() {
+    openModal("logOutModal");
+    return;
 }
 
 function updateDashboardStats() {
@@ -869,7 +878,7 @@ async function handleEventSubmit(e) {
 
 function editEvent(id) {
     // 2.a) Solo admin
-    if (!currentUser || currentUser.role !== "administrador") {
+    if (!currentUser || currentUser.role !== "pastor") {
         return showMessage("No tienes permisos para editar", "error");
     }
 
@@ -980,7 +989,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function editEvent(id) {
     const ev = events.find((e) => e.id === id);
     if (!ev) return showMessage("Evento no encontrado", "error");
-    if (currentUser.role !== "administrador")
+    if (currentUser.role !== "pastor")
         return showMessage("Sin permisos", "error");
 
     const form = document.getElementById("eventForm");
@@ -997,7 +1006,7 @@ function editEvent(id) {
 }
 
 async function deleteEvent(id) {
-    if (currentUser.role !== "administrador")
+    if (currentUser.role !== "pastor")
         return showMessage("Sin permisos", "error");
 
     if (!confirm("¿Eliminar este evento?")) return;
