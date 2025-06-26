@@ -49,6 +49,14 @@
                             >Ingresar</a
                         >
                     </li>
+                    <!-- Visible solo cuando el usuario está logueado -->
+<li class="nav-user-dropdown" id="userDropdownContainer" style="display: none; position: relative;">
+  <a href="#" class="nav-link" id="userDropdownToggle"></a>
+  <div id="userDropdownMenu" class="dropdown-menu" style="display: none;">
+    <!-- Los botones se agregan dinámicamente con JS -->
+  </div>
+</li>
+
                 </ul>
                 <div class="hamburger" id="hamburger">
                     <span class="bar"></span>
@@ -230,7 +238,16 @@
 
                 </div>
             </div>
+
+
+<div id="botonMiembroContainer" style="text-align: center; margin-top: 30px;">
+  <!-- Aquí se insertará el botón si el usuario tiene el rol 'miembro' -->
+</div>
+
+
         </section>
+
+
 
         <!-- Gallery Section -->
         <section id="galeria" class="gallery">
@@ -728,11 +745,12 @@
                         registrarse
                     </button>
                     <div class="form-links">
-                        <a
-                            href="#"
-                            onclick="openModal('loginModal'); closeModal('registerModal')"
-                            >¿ya tienes cuenta?</a
-                        >
+                        <li class="nav-user-dropdown" id="userDropdownContainer" style="position: relative; display: none;">
+  <a href="#" class="nav-link" id="userDropdownToggle"></a>
+  <div id="userDropdownMenu" class="dropdown-menu" style="display: none;">
+    <a href="#" onclick="cerrarSesion()">Cerrar sesión</a>
+  </div>
+</li>
                     </div>
                 </form>
             </div>
@@ -895,6 +913,80 @@
 
     </div>
 </div>
+
+
+<!-- Modal para formulario de miembros -->
+<div id="miembroModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('miembroModal')">&times;</span>
+    <h3>Completa tu información personal</h3>
+    <form id="miembroForm" onsubmit="guardarInformacionMiembro(event)">
+      <input type="text" name="nombre_completo" placeholder="Nombre completo" required>
+      <input type="text" name="documento" placeholder="Documento de identidad" required>
+      <input type="number" name="edad" placeholder="Edad" required>
+      <select name="genero" required>
+        <option value="">Género</option>
+        <option value="masculino">Masculino</option>
+        <option value="femenino">Femenino</option>
+        <option value="otro">Otro</option>
+      </select>
+      <input type="tel" name="telefono" placeholder="Número telefónico" required>
+      <input type="email" name="correo" placeholder="Correo electrónico" required>
+      <input type="text" name="direccion" placeholder="Dirección" required>
+      <select name="estado_civil" required>
+        <option value="">Estado civil</option>
+        <option value="soltero">Soltero</option>
+        <option value="casado">Casado</option>
+        <option value="viudo">Viudo</option>
+        <option value="divorciado">Divorciado</option>
+      </select>
+      <select name="familia_en_iglesia" required>
+        <option value="">¿Tiene familiares en la iglesia?</option>
+        <option value="sí">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <select name="tiene_hijos" required>
+        <option value="">¿Tiene hijos?</option>
+        <option value="sí">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <textarea name="historial_otras_iglesias" placeholder="Historial de asistencia a otras iglesias" required></textarea>
+      <select name="bautismo" required>
+        <option value="">¿Está bautizado?</option>
+        <option value="sí">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <textarea name="motivo_visita" placeholder="Motivo de su visita" required></textarea>
+      <textarea name="necesidades_especificas" placeholder="Necesidades específicas"></textarea>
+      <textarea name="area_interes" placeholder="Área de interés en el servicio" required></textarea>
+      <button class="btn btn-primary" type="submit">Guardar</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  async function guardarInformacionMiembro(event) {
+    event.preventDefault();
+    const form = document.getElementById("miembroForm");
+    const data = Object.fromEntries(new FormData(form));
+
+    if (!currentUser || !currentUser.id) {
+      return showMessage("Debes estar logueado para guardar tu información.", "error");
+    }
+
+    const { error } = await supabase
+      .from("miembros")
+      .upsert([{ ...data, id_usuario: currentUser.id }], { onConflict: ["id_usuario"] });
+
+    if (error) {
+      showMessage("Error al guardar: " + error.message, "error");
+    } else {
+      showMessage("Información guardada exitosamente.", "success");
+      closeModal("miembroModal");
+    }
+  }
+</script>
+
 
 
     </body>

@@ -702,26 +702,82 @@ document.addEventListener("DOMContentLoaded", () => {
 function updateUIForLoggedInUser() {
     if (!currentUser) return;
 
-    // Actualizar navegación
     const loginLink = document.getElementById("loginLink");
-    if (loginLink) {
-        loginLink.textContent = currentUser.name;
+    const userDropdownToggle = document.getElementById("userDropdownToggle");
+    const userDropdownContainer = document.getElementById("userDropdownContainer");
+    const userDropdownMenu = document.getElementById("userDropdownMenu");
+
+    // Oculta botón "Ingresar"
+    if (loginLink) loginLink.style.display = "none";
+
+    // Muestra nombre del usuario
+    if (userDropdownToggle && userDropdownContainer && userDropdownMenu) {
+        userDropdownToggle.textContent = currentUser.name;
+        userDropdownContainer.style.display = "block";
+
+        // Genera contenido dinámicamente
+        let menuHTML = "";
+
         if (currentUser.role === "pastor") {
-            loginLink.onclick = showDashboard;
-        } else {
-            loginLink.onclick = showLogOut;
+            menuHTML += `<a href="#" onclick="showDashboard()">Panel de control</a>`;
+        }
+
+        menuHTML += `<a href="#" onclick="cerrarSesion()">Cerrar sesión</a>`;
+        userDropdownMenu.innerHTML = menuHTML;
+
+        userDropdownToggle.onclick = function (e) {
+            e.preventDefault();
+            userDropdownMenu.style.display =
+                userDropdownMenu.style.display === "block" ? "none" : "block";
+        };
+
+        // Oculta el menú si haces clic fuera
+        document.addEventListener("click", function (e) {
+            if (!userDropdownContainer.contains(e.target)) {
+                userDropdownMenu.style.display = "none";
+            }
+        });
+    }
+
+    // Botón solo miembros
+    if (currentUser.role === "miembro") {
+        const contenedor = document.getElementById("botonMiembroContainer");
+        if (contenedor) {
+            contenedor.innerHTML = `
+                <button class="btn btn-primary" onclick="openModal('miembroModal')">
+                    completar información personal
+                </button>
+            `;
         }
     }
 
-    // Mostrar botón “Crear evento” solo para pastores
+    // Mostrar botón crear evento solo para pastores
     const eventActions = document.getElementById("eventActions");
     if (eventActions) {
-        eventActions.style.display =
-            currentUser.role === "pastor" ? "block" : "none";
+        eventActions.style.display = currentUser.role === "pastor" ? "block" : "none";
     }
 
     updateUpcomingEvents();
 }
+
+
+
+// 👇 Esto garantiza que se reintente mostrar el botón si aún no aparece
+setTimeout(() => {
+  if (
+    currentUser &&
+    currentUser.role === "miembro" &&
+    document.getElementById("botonMiembroContainer")
+  ) {
+    const contenedor = document.getElementById("botonMiembroContainer");
+    contenedor.innerHTML = `
+      <button class="btn btn-primary" onclick="openModal('miembroModal')">
+        completar información personal
+      </button>
+    `;
+  }
+}, 1000);
+
 
 function updateUIForLoggedOutUser() {
     // 1) Oculta panel de control (dashboard)
@@ -763,7 +819,7 @@ async function logout() {
     updateUIForLoggedOutUser();
 
     // 4) Mensaje al usuario
-    showMessage("Has cerrado sesión.", "success");
+    showMessage("Has cerrado sesión correctamente.", "success");
 }
 
 // Funciones del Dashboard
@@ -814,6 +870,33 @@ async function loadAdminData() {
         .from("asistentes")
         .select("*", { count: "exact" });
     document.getElementById("formsCount").textContent = cntF;
+
+    // Preguntas
+  const { data: preguntas, error } = await supabase
+    .from("preguntas")
+    .select("*")
+    .order("date", { ascending: false });
+
+  const contenedor = document.getElementById("listaPreguntas");
+  contenedor.innerHTML = "";
+
+  if (error || !preguntas || preguntas.length === 0) {
+    contenedor.innerHTML = "<p>No hay preguntas registradas.</p>";
+    return;
+  }
+
+  preguntas.forEach((p) => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "pregunta-card";
+    tarjeta.innerHTML = `
+      <p><strong>${p.name}</strong> — ${p.email}</p>
+      <p><em>${new Date(p.date).toLocaleString()}</em></p>
+      <p>${p.question}</p>
+      <textarea id="respuesta-${p.id}" placeholder="Escribe una respuesta...">${p.respuesta || ""}</textarea>
+      <button class="btn btn-primary" onclick="responderPregunta('${p.id}')">Guardar respuesta</button>
+    `;
+    contenedor.appendChild(tarjeta);
+  });
 }
 
 // Funciones de Gestión de Eventos
@@ -1158,3 +1241,72 @@ document.getElementById("backToDashboard").addEventListener("click", () => {
     // 4) Restaura scroll del body
     document.body.style.overflow = "auto";
 });
+
+document.getElementById("formMiembro").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+  if (!user) return alert("Debes iniciar sesión.");
+
+  const form = e.target;
+  const data = {
+    user_id: user.id,
+    nombre_completo: form.nombre_completo.value,
+    documento_identidad: form.documento_identidad.value,
+    edad: parseInt(form.edad.value),
+    genero: form.genero.value,
+    telefono: form.telefono.value,
+    correo: form.correo.value,
+    direccion: form.direccion.value,
+    estado_civil: form.estado_civil.value,
+    familiares_en_iglesia: form.familiares_en_iglesia.checked,
+    tiene_hijos: form.tiene_hijos.checked,
+    asistencia_otra_iglesia: form.asistencia_otra_iglesia.value,
+    bautismo: form.bautismo.checked,
+    motivo_visita: form.motivo_visita.value,
+    necesidades_especificas: form.necesidades_especificas.value,
+    area_interes: form.area_interes.value,
+    rol: "miembro"
+  };
+
+  const { error } = await supabase.from("miembros").insert([data]);
+  if (error) {
+    alert("Error al guardar: " + error.message);
+  } else {
+    alert("Información guardada correctamente.");
+    closeModal("miembroModal");
+    form.reset();
+  }
+});
+
+
+async function cerrarSesion() {
+    await supabase.auth.signOut();
+    currentUser = null;
+    localStorage.removeItem("modo_panel");
+
+    showMessage("Has cerrado sesión correctamente.", "success");
+
+    setTimeout(() => {
+        location.reload();
+    }, 1000); // Espera 1 segundo para que el usuario vea el mensaje
+}
+
+async function responderPregunta(id) {
+  const respuesta = document.getElementById(`respuesta-${id}`).value;
+
+  const { error } = await supabase
+    .from("preguntas")
+    .update({ respuesta: respuesta, status: "respondida" })
+    .eq("id", id);
+
+  if (error) {
+    alert("Error al guardar la respuesta.");
+    return;
+  }
+
+  alert("Respuesta guardada correctamente.");
+}
