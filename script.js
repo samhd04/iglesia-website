@@ -1344,8 +1344,6 @@ async function guardarInformacionMiembro(e) {
         rol: "miembro",
     };
 
-    console.log(data2);
-
     const { error2 } = await supabase.from("miembros").insert([data2]);
     if (error2) {
         alert("Error al guardar: " + error.message);
