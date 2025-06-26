@@ -599,6 +599,7 @@ async function handleLogin(event) {
         .single();
 
     currentUser = { id: data.user.id, name: perfil.nombre, role: perfil.rol };
+    mostrarBotonNotificacionesSiUsuarioActivo();
     updateUIForLoggedInUser();
     await loadStoredData();
     updateCalendar();
@@ -631,12 +632,75 @@ async function handleRegister(event) {
             rol: role,
         },
     ]);
-
+    currentUser = { id: data.user.id, name: name, role: role };
+    mostrarBotonNotificacionesSiUsuarioActivo();
     showMessage(`¡Registro exitoso, ${name}!`, "success");
     closeModal("registerModal");
     openModal("notificationModal");
 
 }
+async function toggleNotifications() {
+    if (!currentUser || !currentUser.id) return;
+
+    // Consultar el estado actual desde Supabase
+    const { data, error } = await supabase
+        .from("usuarios")
+        .select("recibir_notificaciones")
+        .eq("id", currentUser.id)
+        .single();
+
+    if (error || !data) {
+        alert("No se pudo obtener tu estado de notificaciones.");
+        return;
+    }
+
+    const nuevoEstado = !data.recibir_notificaciones;
+
+    // Actualizar el nuevo estado
+    const { error: updateError } = await supabase
+        .from("usuarios")
+        .update({ recibir_notificaciones: nuevoEstado })
+        .eq("id", currentUser.id);
+
+    if (updateError) {
+        alert("No se pudo actualizar tu preferencia.");
+    } else {
+        updateNotificationToggleButton(nuevoEstado);
+        alert(nuevoEstado ? "Activaste las notificaciones." : "Desactivaste las notificaciones.");
+    }
+}
+function updateNotificationToggleButton(estado) {
+    const btn = document.getElementById("notificationToggleBtn");
+    if (btn) {
+        btn.textContent = estado
+            ? "Dejar de recibir notificaciones"
+            : "Recibir notificaciones";
+    }
+}
+async function mostrarBotonNotificacionesSiUsuarioActivo() {
+    if (!currentUser || !currentUser.id) return;
+
+    const contenedor = document.getElementById("notificationToggleContainer");
+    const btn = document.getElementById("notificationToggleBtn");
+
+    // Muestra el contenedor del botón
+    contenedor.style.display = "block";
+
+    // Consulta el estado actual del usuario
+    const { data, error } = await supabase
+        .from("usuarios")
+        .select("recibir_notificaciones")
+        .eq("id", currentUser.id)
+        .single();
+
+    if (!error && data) {
+        updateNotificationToggleButton(data.recibir_notificaciones);
+    } else {
+        btn.textContent = "No disponible";
+        btn.disabled = true;
+    }
+}
+
 async function handleNotificationChoice(choice) {
     closeModal("notificationModal");
 
