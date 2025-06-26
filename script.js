@@ -1316,29 +1316,27 @@ document.getElementById("backToDashboard").addEventListener("click", () => {
     document.body.style.overflow = "auto";
 });
 
-document.getElementById("formMiembro").addEventListener("submit", async (e) => {
+async function guardarInformacionMiembro(e) {
     e.preventDefault();
+    const { data, error } = await supabase.auth.getUser();
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return alert("Debes iniciar sesión.");
+    if (error) return showMessage(error.message, "error.");
 
     const form = e.target;
-    const data = {
-        user_id: user.id,
+    const data2 = {
+        id: data.user.id,
+        user_id: data.user.id,
         nombre_completo: form.nombre_completo.value,
-        documento_identidad: form.documento_identidad.value,
+        documento_identidad: form.documento.value,
         edad: parseInt(form.edad.value),
         genero: form.genero.value,
         telefono: form.telefono.value,
         correo: form.correo.value,
         direccion: form.direccion.value,
         estado_civil: form.estado_civil.value,
-        familiares_en_iglesia: form.familiares_en_iglesia.checked,
+        familiares_en_iglesia: form.familia_en_iglesia.value,
         tiene_hijos: form.tiene_hijos.checked,
-        asistencia_otra_iglesia: form.asistencia_otra_iglesia.value,
+        asistencia_otra_iglesia: form.historial_otras_iglesias.value,
         bautismo: form.bautismo.checked,
         motivo_visita: form.motivo_visita.value,
         necesidades_especificas: form.necesidades_especificas.value,
@@ -1346,15 +1344,15 @@ document.getElementById("formMiembro").addEventListener("submit", async (e) => {
         rol: "miembro",
     };
 
-    const { error } = await supabase.from("miembros").insert([data]);
-    if (error) {
+    const { error2 } = await supabase.from("miembros").insert([data2]);
+    if (error2) {
         alert("Error al guardar: " + error.message);
     } else {
-        alert("Información guardada correctamente.");
+        showMessage("Información guardada correctamente.", "success");
         closeModal("miembroModal");
         form.reset();
     }
-});
+}
 
 async function cerrarSesion() {
     await supabase.auth.signOut();

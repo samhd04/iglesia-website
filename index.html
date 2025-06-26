@@ -1097,37 +1097,6 @@
             </div>
         </div>
 
-        <script>
-            async function guardarInformacionMiembro(event) {
-                event.preventDefault();
-                const form = document.getElementById("miembroForm");
-                const data = Object.fromEntries(new FormData(form));
-
-                if (!currentUser || !currentUser.id) {
-                    return showMessage(
-                        "Debes estar logueado para guardar tu información.",
-                        "error"
-                    );
-                }
-
-                const { error } = await supabase
-                    .from("miembros")
-                    .upsert([{ ...data, id_usuario: currentUser.id }], {
-                        onConflict: ["id_usuario"],
-                    });
-
-                if (error) {
-                    showMessage("Error al guardar: " + error.message, "error");
-                } else {
-                    showMessage(
-                        "Información guardada exitosamente.",
-                        "success"
-                    );
-                    closeModal("miembroModal");
-                }
-            }
-        </script>
-
         <!-- Modal para recuperar contraseña -->
         <div id="recuperarModal" class="modal" style="display: none">
             <div class="modal-content">
