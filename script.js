@@ -634,7 +634,29 @@ async function handleRegister(event) {
 
     showMessage(`¡Registro exitoso, ${name}!`, "success");
     closeModal("registerModal");
+    openModal("notificationModal");
+
 }
+async function handleNotificationChoice(choice) {
+    closeModal("notificationModal");
+
+    if (!currentUser || !currentUser.id) return;
+
+    const { error } = await supabase
+        .from("usuarios")
+        .update({ recibir_notificaciones: choice })
+        .eq("id", currentUser.id);
+
+    if (error) {
+        alert("Hubo un problema al guardar tu preferencia.");
+        console.error("Error al guardar notificación:", error);
+    } else if (choice) {
+        alert("¡Te avisaremos de los próximos eventos!");
+    } else {
+        console.log("El usuario prefirió no recibir notificaciones.");
+    }
+}
+
 
 function handleForgotPassword(event) {
     event.preventDefault();

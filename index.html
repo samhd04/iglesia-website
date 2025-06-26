@@ -787,6 +787,16 @@
                 </div>
             </div>
         </div>
+        <!-- Modal de notificaciones -->
+        <div class="modal" id="notificationModal">
+            <div class="modal-content">
+                <h3>¿Deseas recibir notificaciones sobre eventos?</h3>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="handleNotificationChoice(true)">Sí, quiero</button>
+                    <button class="btn btn-secondary" onclick="handleNotificationChoice(false)">No, gracias</button>
+                </div>
+            </div>
+        </div>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
         <script src="script.js"></script>
     </body>
