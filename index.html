@@ -95,19 +95,26 @@
                 </div>
 
                 <div class="hero-actions">
-                    <button
-                        class="cta-button primary"
-                        onclick="scrollToSection('nosotros')"
-                    >
-                        conoce más
-                    </button>
-                    <button
-                        class="cta-button secondary"
-                        onclick="scrollToSection('contacto')"
-                    >
-                        visítanos
-                    </button>
-                </div>
+    <button
+        class="cta-button primary"
+        onclick="scrollToSection('nosotros')"
+    >
+        conoce más
+    </button>
+    <button
+        class="cta-button secondary"
+        onclick="scrollToSection('contacto')"
+    >
+        visítanos
+    </button>
+    <button
+        class="cta-button accent"
+        onclick="openModal('jesusModal')"
+    >
+        ¿quieres conocer a jesús?
+    </button>
+</div>
+
 
                 <!-- Versículo -->
                 <div class="hero-verse">
@@ -129,34 +136,61 @@
 
                 <div class="founders-section">
                     <h3 class="founders-title">nuestros pastores</h3>
-                    <div class="founders-info">
-                        <div class="founder-card">
-                            <div class="founder-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <h4>glenis</h4>
-                            <p>cofundadora</p>
-                        </div>
-                        <div class="founder-card">
-                            <div class="founder-avatar">
-                                <i class="fas fa-user-circle"></i>
-                            </div>
-                            <h4>wilmar</h4>
-                            <p>cofundador</p>
-                        </div>
-                    </div>
-                    <p class="founding-year">sirviendo desde 2020</p>
+<div class="unified-button-wrapper">
+  <div class="unified-button" onclick="openModal('pastoresModal')">
+    <div class="founders-info">
+        <div class="founder-card">
+            <div class="founder-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h4>Wilmar Vásquez</h4>
+            <p>pastor</p>
+        </div>
+        <div class="founder-card">
+            <div class="founder-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h4>Glenis Forero</h4>
+            <p>pastora</p>
+        </div>
+    </div>
+    <p class="founding-year">sirviendo desde 2020</p>
+  </div>
+</div>
+
+
+
+                <div class="mission-card">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
                 </div>
+                <h3>¿Quiénes Somos?</h3>
+                <p>
+                    <strong>Un Lugar de Él Para Ti</strong> es una iglesia cristiana funcional, saludable e intergeneracional,
+                    fundada con el propósito de ser un espacio donde convergen el propósito eterno de Dios y las
+                    necesidades reales del ser humano. Nos caracterizamos por promover una vida espiritual activa,
+                    fundamentada en la Palabra de Dios, la oración, la adoración y la comunión.
+                </p>
+                <p>
+                    Creemos en el poder transformador del evangelio, y por eso trabajamos intencionalmente en el discipulado,
+                    la enseñanza bíblica, la manifestación del Espíritu Santo y el fortalecimiento de relaciones sanas y significativas
+                    dentro de la comunidad.
+                </p>
+            </div>
 
                 <div class="mission-vision">
+                    
                     <div class="mission-card">
+
+                        
                         <div class="card-icon">
                             <i class="fas fa-heart"></i>
                         </div>
                         <h3>nuestra misión</h3>
                         <p>
-                            Guiar a las personas a una relación auténtica con
-                            Dios a través del discipulado y el servicio.
+                            Nuestra misión es ser una iglesia funcional, saludable e intergeneracional,
+                            que viva en comunión, adoración y enseñanza conforme a la Palabra de Dios,
+                            impactando vidas a través del evangelismo, la generosidad y los relaciones interpersonales.
                         </p>
                     </div>
                     <div class="vision-card">
@@ -165,10 +199,35 @@
                         </div>
                         <h3>nuestra visión</h3>
                         <p>
-                            Formar una comunidad unida, apasionada por Dios, que
-                            impacte su entorno.
+                            Ser una iglesia funcional (Útil), saludable, intergeneracional. Que anhela la presencia de
+                            Dios, la manifestación sobrenatural del espíritu santo y el vivir bajo el gobierno de la palabra
+                            de Dios.
                         </p>
                     </div>
+                    <div class="mission-card">
+                    <div class="card-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3>nuestros pilares</h3>
+                    <p>
+                        Idoneidad en la Palabra, oración y adoración, evangelismo, vida en comunidad,
+                        generosidad y milagros.
+                    </p>
+                </div>
+                <div class="mission-card">
+                <div class="card-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <h3>principios complementarios</h3>
+                <p>
+                    Espiritualidad contagiosa, ministerio según los dones, liderazgo capacitador, servicio inspirador,
+                    estructuras funcionales, relaciones afectivas, células integrales y evangelismo según las necesidades.
+                </p>
+            </div>
+
+
+                </div>
+
                 </div>
             </div>
         </section>
@@ -180,7 +239,7 @@
                 <div class="gallery-container">
                     <div class="gallery-item active">
                         <img
-                            src="/images/familia.jpg"
+                            src="/images/dominical.png"
                             alt="Reunión dominical"
                             loading="lazy"
                         />
@@ -191,7 +250,7 @@
                     </div>
                     <div class="gallery-item">
                         <img
-                            src="/placeholder.svg?height=400&width=600"
+                            src="/images/estudio.jpg"
                             alt="Estudio bíblico"
                             loading="lazy"
                         />
@@ -202,7 +261,7 @@
                     </div>
                     <div class="gallery-item">
                         <img
-                            src="/placeholder.svg?height=400&width=600"
+                            src="./images/jovenes.jpg"
                             alt="Ministerio juvenil"
                             loading="lazy"
                         />
@@ -213,7 +272,7 @@
                     </div>
                     <div class="gallery-item">
                         <img
-                            src="/placeholder.svg?height=400&width=600"
+                            src="/images/familia.jpg"
                             alt="Actividades familiares"
                             loading="lazy"
                         />
@@ -224,18 +283,18 @@
                     </div>
                     <div class="gallery-item">
                         <img
-                            src="/placeholder.svg?height=400&width=600"
+                            src="images/ninos.png"
                             alt="Servicio comunitario"
                             loading="lazy"
                         />
                         <div class="gallery-caption">
-                            <h4>servicio comunitario</h4>
-                            <p>sirviendo a nuestra comunidad</p>
+                            <h4>Red de niños</h4>
+                            <p>sembrando fe y propósito en los más pequeños</p>
                         </div>
                     </div>
                     <div class="gallery-item">
                         <img
-                            src="/placeholder.svg?height=400&width=600"
+                            src="/images/especiales.png"
                             alt="Celebraciones especiales"
                             loading="lazy"
                         />
@@ -381,8 +440,7 @@
                             <div>
                                 <h4>ubicación</h4>
                                 <p>
-                                    nos reunimos en diferentes lugares<br />contáctanos
-                                    para más información
+                                    Cra. 52 #52-17, Perez, Bello, Medellín, Antioquia
                                 </p>
                             </div>
                         </div>
@@ -563,13 +621,13 @@
                     <div class="footer-section">
                         <h4>síguenos</h4>
                         <div class="social-icons">
-                            <a href="#" aria-label="Facebook"
+                            <a href="https://www.facebook.com/UNLUGARDEELPARATI?locale=es_LA" aria-label="Facebook"
                                 ><i class="fab fa-facebook"></i
                             ></a>
-                            <a href="#" aria-label="Instagram"
+                            <a href="https://www.instagram.com/unlugardeelparati" aria-label="Instagram"
                                 ><i class="fab fa-instagram"></i
                             ></a>
-                            <a href="#" aria-label="YouTube"
+                            <a href="https://www.youtube.com/channel/UCjUm-1D-GbJZU6683mIsc5g" aria-label="YouTube"
                                 ><i class="fab fa-youtube"></i
                             ></a>
                         </div>
@@ -619,22 +677,6 @@
             </div>
         </div>
 
-        <!-- Log Out Modal -->
-        <div id="logOutModal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('logOutModal')"
-                    >&times;</span
-                >
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                    onclick="logout(); closeModal('logOutModal')"
-                >
-                    cerrar sesión
-                </button>
-            </div>
-        </div>
-
         <!-- Register Modal -->
         <div id="registerModal" class="modal">
             <div class="modal-content">
@@ -655,6 +697,13 @@
                         placeholder="correo electrónico"
                         required
                     />
+                    <select id="registerRole" required>
+                        <option value="">selecciona tu rol</option>
+                        <option value="miembro">miembro</option>
+                        <option value="servidor">servidor</option>
+                        <option value="lider">líder</option>
+                        <option value="pastor">pastor</option>
+                    </select>
                     <input
                         type="password"
                         id="registerPassword"
@@ -799,5 +848,54 @@
         </div>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
         <script src="script.js"></script>
+    
+        <div id="pastoresModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('pastoresModal')">&times;</span>
+        <h2>Nuestros Pastores</h2>
+        <p><strong>Glenis y Wilmar</strong> son líderes cristianos, apasionados por Dios. Con un corazón dispuesto a servir, acompañan a otros en su intimidad con Dios y en el discipulado, mostrando a Cristo a través de sus vidas. Son fundadores de la iglesia Un Lugar De Él Para Ti, donde Dios les mostró la visión y misión de esta obra.
+        <strong>Wilmar</strong>, entregado a Dios a tiempo completo desde los 18 años, ha servido como misionero y pastor. <strong>Glenis</strong> conoce a Dios desde hace 26 años, cuando inició su llamado como misionera en Colombia y como líder en diferentes áreas dentro de la iglesia. Juntos comenzaron a pastorear y fundaron <strong>Un Lugar De Él Para Ti en el año 2020.</strong>
+        Casados desde el año 2006, han formado una familia junto a sus dos hijas, <strong>Isabella y Camila.</strong></p>
+    </div>
+</div>
+
+<div id="jesusModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('jesusModal')">&times;</span>
+
+    <h2>Jesús te ama</h2>
+
+    <p>
+      Jesús es el Hijo de Dios, enviado para darte vida, esperanza y un nuevo comienzo.
+    </p>
+
+    <p>
+      Él te ama tal como eres y quiere caminar contigo cada día. No estás solo: Jesús está esperándote.
+    </p>
+
+    <br /><br />
+
+    <blockquote>
+      <em>
+        "Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él
+        no se pierda, sino que tenga vida eterna."
+      </em><br />
+      <strong>Juan 3:16</strong>
+    </blockquote>
+
+    <br /><br />
+
+    <a
+      href="#contacto"
+      class="btn btn-primary"
+      onclick="closeModal('jesusModal')"
+    >
+      quiero conocer más de cristo
+    </a>
+
+    </div>
+</div>
+
+
     </body>
 </html>

@@ -169,6 +169,7 @@ body {
     text-align: center;
     color: var(--white);
     position: relative;
+    padding-top: 200px;
 }
 
 .hero-content {
@@ -412,7 +413,7 @@ body {
     font-size: 1.5rem;
     color: var(--primary-dark);
     margin-bottom: 5px;
-    text-transform: lowercase;
+    text-transform: none;
 }
 
 .founder-card p {
@@ -1877,4 +1878,148 @@ a:focus {
 .nav-logo::after,
 .church-name::after {
     content: none !important;
+}
+
+.unified-button {
+    cursor: pointer;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.unified-button:hover {
+    transform: scale(1.02);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 44, 73, 0.85);
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    background-color: var(--white);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    color: var(--text-dark);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.modal-content h2 {
+    font-family: var(--font-heading);
+    color: var(--primary-dark);
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: lowercase;
+}
+
+.modal-content p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.close {
+    color: var(--primary-orange);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.unified-button {
+    cursor: pointer;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: 2px solid var(--primary-orange);
+    border-radius: 15px;
+    padding: 25px;
+    background: var(--white);
+    box-shadow: 0 4px 15px rgba(221, 93, 53, 0.15);
+    
+    /* 🛠️ nuevo: centrado y ancho controlado */
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+
+.unified-button:hover {
+    box-shadow: 0 8px 25px rgba(221, 93, 53, 0.3);
+    transform: translateY(-3px);
+}
+
+.unified-button .founding-year {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary-orange);
+    font-family: var(--font-heading);
+    text-transform: lowercase;
+}
+
+.unified-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto 30px;
+}
+
+.unified-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid var(--primary-orange);
+    border-radius: 15px;
+    padding: 30px;
+    background: var(--white);
+    box-shadow: 0 4px 15px rgba(221, 93, 53, 0.15);
+    max-width: 800px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.unified-button:hover {
+    transform: scale(1.02);
+}
+
+.founders-info {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.founding-year {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary-orange);
+    font-family: var(--font-heading);
+    text-transform: lowercase;
+}
+
+.cta-button.accent {
+    background-color: var(--primary-orange);
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.cta-button.accent:hover {
+    background-color: #dd5d35;
 }
