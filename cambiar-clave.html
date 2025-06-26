@@ -1,47 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cambiar contraseña</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <div class="modal-content">
-    <h2>Restablecer contraseña</h2>
-    <p>Escribe tu nueva contraseña:</p>
-    <input type="password" id="newPassword" placeholder="Nueva contraseña" />
-    <button onclick="cambiarPassword()">Cambiar contraseña</button>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cambiar contraseña</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="modal-content">
+      <h2>Restablecer contraseña</h2>
+      <p>Escribe tu nueva contraseña:</p>
+      <input type="password" id="newPassword" placeholder="Nueva contraseña" />
+      <button onclick="cambiarPassword()">Cambiar contraseña</button>
+    </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    <!-- Cargar Supabase desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+      const supabase = supabase.createClient(
+        "https://lubryqwofitefnxpzoiu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YnJ5cXdvZml0ZWZueHB6b2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Mjg5MTIsImV4cCI6MjA2NjMwNDkxMn0.-pytVRaCeMHV3ktvHJfhqxNjRIYZSh4h8sfigZhhmpk"
+      );
 
-    const supabase = createClient(
-  "https://lubryqwofitefnxpzoiu.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." // tu anon key real
-);
+      let sesionEstablecida = false;
 
+      (async () => {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const access_token = hashParams.get("access_token");
+        const refresh_token = hashParams.get("refresh_token");
 
-    async function cambiarPassword() {
-      const newPassword = document.getElementById("newPassword").value;
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({
+            access_token,
+            refresh_token
+          });
+          if (!error) {
+            sesionEstablecida = true;
+            console.log("✅ Sesión de recuperación establecida");
+          } else {
+            alert("Error al establecer sesión: " + error.message);
+          }
+        } else {
+          alert("Este enlace no contiene los tokens necesarios. Usa el enlace que te llegó al correo.");
+        }
+      })();
 
-      if (!newPassword) {
-        alert("Por favor escribe una nueva contraseña.");
-        return;
+      async function cambiarPassword() {
+        const newPassword = document.getElementById("newPassword").value;
+
+        if (!newPassword) {
+          alert("Por favor escribe una nueva contraseña.");
+          return;
+        }
+
+        if (!sesionEstablecida) {
+          alert("Sesión no activa. Asegúrate de acceder desde el enlace del correo.");
+          return;
+        }
+
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+        if (error) {
+          alert("Error al cambiar la contraseña: " + error.message);
+        } else {
+          alert("Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
+          window.location.href = "/";
+        }
       }
-
-      const { data, error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) {
-        alert("Error al cambiar la contraseña: " + error.message);
-      } else {
-        alert("Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
-        window.location.href = "/"; // redirige al inicio
-      }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>
