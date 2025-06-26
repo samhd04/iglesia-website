@@ -11,9 +11,7 @@
       <h2>Restablecer contraseña</h2>
       <p>Escribe tu nueva contraseña:</p>
       <input type="password" id="newPassword" placeholder="Nueva contraseña" />
-      <button id="btnCambiar" onclick="cambiarPassword()" disabled>
-        Cambiar contraseña
-      </button>
+      <button id="btnCambiar" onclick="cambiarPassword()" disabled>Cambiar contraseña</button>
     </div>
 
     <!-- Cargar Supabase desde CDN -->
@@ -26,8 +24,7 @@
 
       let sesionEstablecida = false;
 
-      // Establecer sesión desde los tokens del hash
-      (async () => {
+      document.addEventListener("DOMContentLoaded", async () => {
         const hashParams = new URLSearchParams(window.location.hash.slice(1));
         const access_token = hashParams.get("access_token");
         const refresh_token = hashParams.get("refresh_token");
@@ -43,14 +40,13 @@
             document.getElementById("btnCambiar").disabled = false;
             console.log("✅ Sesión de recuperación establecida");
           } else {
-            alert("Error al establecer sesión: " + error.message);
+            alert("❌ Error al establecer la sesión: " + error.message);
           }
         } else {
           alert("Este enlace no contiene los tokens necesarios. Usa el enlace que te llegó al correo.");
         }
-      })();
+      });
 
-      // Función para cambiar contraseña
       async function cambiarPassword() {
         const newPassword = document.getElementById("newPassword").value;
 
@@ -60,15 +56,14 @@
         }
 
         if (!sesionEstablecida) {
-          alert("La sesión no está activa. Asegúrate de usar el enlace del correo.");
+          alert("Sesión no activa. Asegúrate de acceder desde el enlace del correo.");
           return;
         }
 
         const { error } = await supabase.auth.updateUser({ password: newPassword });
 
         if (error) {
-          alert("❌ Error al cambiar la contraseña.");
-          console.error(error);
+          alert("❌ Error al cambiar la contraseña: " + error.message);
         } else {
           alert("✅ Contraseña cambiada correctamente. Ya puedes iniciar sesión.");
           window.location.href = "index.html";
