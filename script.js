@@ -380,11 +380,11 @@ function initializeFAQ() {
     faqData = [
         {
             question: "¿cuáles son los horarios de reunión?",
-            answer: "nos reunimos los domingos a las 10:00 AM y los miércoles a las 7:00 PM. también tenemos grupos pequeños durante la semana.",
+            answer: "nos reunimos los domingos a las 9:30 AM. también tenemos reuniones grupales durante la semana.",
         },
         {
             question: "¿tienen programas para niños?",
-            answer: "¡sí! tenemos ministerio infantil durante todas nuestras reuniones, con actividades apropiadas para cada edad.",
+            answer: "¡sí! tenemos ministerio infantil durante nuestras reuniones dominicales, con actividades apropiadas para cada edad.",
         },
         {
             question: "¿cómo puedo involucrarme en el ministerio?",
@@ -392,11 +392,11 @@ function initializeFAQ() {
         },
         {
             question: "¿ofrecen bautismo?",
-            answer: "sí, ofrecemos bautismo por inmersión. es una decisión importante que celebramos con toda la comunidad.",
+            answer: "sí, Acompañamos a los interesados en un proceso de conocer más sobre este importante paso en la vida de un cristiano",
         },
         {
             question: "¿necesito ser miembro para participar?",
-            answer: "¡para nada! todos son bienvenidos a participar en nuestras actividades y reuniones, sin importar su trasfondo.",
+            answer: "¡para nada! todos son bienvenidos a participar en nuestras actividades y reuniones, sin importar si están explorando la fe.",
         },
     ];
 
