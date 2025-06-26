@@ -637,7 +637,6 @@ async function handleRegister(event) {
     showMessage(`¡Registro exitoso, ${name}!`, "success");
     closeModal("registerModal");
     openModal("notificationModal");
-
 }
 async function toggleNotifications() {
     if (!currentUser || !currentUser.id) return;
@@ -666,7 +665,11 @@ async function toggleNotifications() {
         alert("No se pudo actualizar tu preferencia.");
     } else {
         updateNotificationToggleButton(nuevoEstado);
-        alert(nuevoEstado ? "Activaste las notificaciones." : "Desactivaste las notificaciones.");
+        alert(
+            nuevoEstado
+                ? "Activaste las notificaciones."
+                : "Desactivaste las notificaciones."
+        );
     }
 }
 function updateNotificationToggleButton(estado) {
@@ -721,7 +724,6 @@ async function handleNotificationChoice(choice) {
     }
 }
 
-
 function handleForgotPassword(event) {
     event.preventDefault();
 
@@ -768,7 +770,9 @@ function updateUIForLoggedInUser() {
 
     const loginLink = document.getElementById("loginLink");
     const userDropdownToggle = document.getElementById("userDropdownToggle");
-    const userDropdownContainer = document.getElementById("userDropdownContainer");
+    const userDropdownContainer = document.getElementById(
+        "userDropdownContainer"
+    );
     const userDropdownMenu = document.getElementById("userDropdownMenu");
 
     // Oculta botón "Ingresar"
@@ -784,6 +788,10 @@ function updateUIForLoggedInUser() {
 
         if (currentUser.role === "pastor") {
             menuHTML += `<a href="#" onclick="showDashboard()">Panel de control</a>`;
+        }
+
+        if (currentUser.role !== "pastor") {
+            menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
         }
 
         menuHTML += `<a href="#" onclick="cerrarSesion()">Cerrar sesión</a>`;
@@ -818,30 +826,28 @@ function updateUIForLoggedInUser() {
     // Mostrar botón crear evento solo para pastores
     const eventActions = document.getElementById("eventActions");
     if (eventActions) {
-        eventActions.style.display = currentUser.role === "pastor" ? "block" : "none";
+        eventActions.style.display =
+            currentUser.role === "pastor" ? "block" : "none";
     }
 
     updateUpcomingEvents();
 }
 
-
-
 // 👇 Esto garantiza que se reintente mostrar el botón si aún no aparece
 setTimeout(() => {
-  if (
-    currentUser &&
-    currentUser.role === "miembro" &&
-    document.getElementById("botonMiembroContainer")
-  ) {
-    const contenedor = document.getElementById("botonMiembroContainer");
-    contenedor.innerHTML = `
+    if (
+        currentUser &&
+        currentUser.role === "miembro" &&
+        document.getElementById("botonMiembroContainer")
+    ) {
+        const contenedor = document.getElementById("botonMiembroContainer");
+        contenedor.innerHTML = `
       <button class="btn btn-primary" onclick="openModal('miembroModal')">
         completar información personal
       </button>
     `;
-  }
+    }
 }, 1000);
-
 
 function updateUIForLoggedOutUser() {
     // 1) Oculta panel de control (dashboard)
@@ -936,31 +942,35 @@ async function loadAdminData() {
     document.getElementById("formsCount").textContent = cntF;
 
     // Preguntas
-  const { data: preguntas, error } = await supabase
-    .from("preguntas")
-    .select("*")
-    .order("date", { ascending: false });
+    const { data: preguntas, error } = await supabase
+        .from("preguntas")
+        .select("*")
+        .order("date", { ascending: false });
 
-  const contenedor = document.getElementById("listaPreguntas");
-  contenedor.innerHTML = "";
+    const contenedor = document.getElementById("listaPreguntas");
+    contenedor.innerHTML = "";
 
-  if (error || !preguntas || preguntas.length === 0) {
-    contenedor.innerHTML = "<p>No hay preguntas registradas.</p>";
-    return;
-  }
+    if (error || !preguntas || preguntas.length === 0) {
+        contenedor.innerHTML = "<p>No hay preguntas registradas.</p>";
+        return;
+    }
 
-  preguntas.forEach((p) => {
-    const tarjeta = document.createElement("div");
-    tarjeta.className = "pregunta-card";
-    tarjeta.innerHTML = `
+    preguntas.forEach((p) => {
+        const tarjeta = document.createElement("div");
+        tarjeta.className = "pregunta-card";
+        tarjeta.innerHTML = `
       <p><strong>${p.name}</strong> — ${p.email}</p>
       <p><em>${new Date(p.date).toLocaleString()}</em></p>
       <p>${p.question}</p>
-      <textarea id="respuesta-${p.id}" placeholder="Escribe una respuesta...">${p.respuesta || ""}</textarea>
-      <button class="btn btn-primary" onclick="responderPregunta('${p.id}')">Guardar respuesta</button>
+      <textarea id="respuesta-${p.id}" placeholder="Escribe una respuesta...">${
+            p.respuesta || ""
+        }</textarea>
+      <button class="btn btn-primary" onclick="responderPregunta('${
+          p.id
+      }')">Guardar respuesta</button>
     `;
-    contenedor.appendChild(tarjeta);
-  });
+        contenedor.appendChild(tarjeta);
+    });
 }
 
 // Funciones de Gestión de Eventos
@@ -1307,45 +1317,44 @@ document.getElementById("backToDashboard").addEventListener("click", () => {
 });
 
 document.getElementById("formMiembro").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const {
-  data: { user },
-} = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) return alert("Debes iniciar sesión.");
+    if (!user) return alert("Debes iniciar sesión.");
 
-  const form = e.target;
-  const data = {
-    user_id: user.id,
-    nombre_completo: form.nombre_completo.value,
-    documento_identidad: form.documento_identidad.value,
-    edad: parseInt(form.edad.value),
-    genero: form.genero.value,
-    telefono: form.telefono.value,
-    correo: form.correo.value,
-    direccion: form.direccion.value,
-    estado_civil: form.estado_civil.value,
-    familiares_en_iglesia: form.familiares_en_iglesia.checked,
-    tiene_hijos: form.tiene_hijos.checked,
-    asistencia_otra_iglesia: form.asistencia_otra_iglesia.value,
-    bautismo: form.bautismo.checked,
-    motivo_visita: form.motivo_visita.value,
-    necesidades_especificas: form.necesidades_especificas.value,
-    area_interes: form.area_interes.value,
-    rol: "miembro"
-  };
+    const form = e.target;
+    const data = {
+        user_id: user.id,
+        nombre_completo: form.nombre_completo.value,
+        documento_identidad: form.documento_identidad.value,
+        edad: parseInt(form.edad.value),
+        genero: form.genero.value,
+        telefono: form.telefono.value,
+        correo: form.correo.value,
+        direccion: form.direccion.value,
+        estado_civil: form.estado_civil.value,
+        familiares_en_iglesia: form.familiares_en_iglesia.checked,
+        tiene_hijos: form.tiene_hijos.checked,
+        asistencia_otra_iglesia: form.asistencia_otra_iglesia.value,
+        bautismo: form.bautismo.checked,
+        motivo_visita: form.motivo_visita.value,
+        necesidades_especificas: form.necesidades_especificas.value,
+        area_interes: form.area_interes.value,
+        rol: "miembro",
+    };
 
-  const { error } = await supabase.from("miembros").insert([data]);
-  if (error) {
-    alert("Error al guardar: " + error.message);
-  } else {
-    alert("Información guardada correctamente.");
-    closeModal("miembroModal");
-    form.reset();
-  }
+    const { error } = await supabase.from("miembros").insert([data]);
+    if (error) {
+        alert("Error al guardar: " + error.message);
+    } else {
+        alert("Información guardada correctamente.");
+        closeModal("miembroModal");
+        form.reset();
+    }
 });
-
 
 async function cerrarSesion() {
     await supabase.auth.signOut();
@@ -1360,42 +1369,44 @@ async function cerrarSesion() {
 }
 
 async function responderPregunta(id) {
-  const respuesta = document.getElementById(`respuesta-${id}`).value;
+    const respuesta = document.getElementById(`respuesta-${id}`).value;
 
-  const { error } = await supabase
-    .from("preguntas")
-    .update({ respuesta: respuesta, status: "respondida" })
-    .eq("id", id);
+    const { error } = await supabase
+        .from("preguntas")
+        .update({ respuesta: respuesta, status: "respondida" })
+        .eq("id", id);
 
-  if (error) {
-    alert("Error al guardar la respuesta.");
-    return;
-  }
+    if (error) {
+        alert("Error al guardar la respuesta.");
+        return;
+    }
 
-  alert("Respuesta guardada correctamente.");
+    alert("Respuesta guardada correctamente.");
 }
 
 function mostrarFormularioRecuperacion() {
-  closeModal('loginModal');
-  openModal('recuperarModal');
+    closeModal("loginModal");
+    openModal("recuperarModal");
 }
 
 async function enviarCorreoRecuperacion() {
-  const email = document.getElementById("recuperarEmail").value;
-  if (!email) {
-    alert("Por favor ingresa un correo.");
-    return;
-  }
+    const email = document.getElementById("recuperarEmail").value;
+    if (!email) {
+        alert("Por favor ingresa un correo.");
+        return;
+    }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: "http://127.0.0.1:5500/cambiar-clave.html"
-  });
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "http://127.0.0.1:5500/cambiar-clave.html",
+    });
 
-  if (error) {
-    alert("Error al enviar el correo: " + error.message);
-    return;
-  }
+    if (error) {
+        alert("Error al enviar el correo: " + error.message);
+        return;
+    }
 
-  alert("Se ha enviado un correo de recuperación. Revisa tu bandeja de entrada.");
-  closeModal("recuperarModal");
+    alert(
+        "Se ha enviado un correo de recuperación. Revisa tu bandeja de entrada."
+    );
+    closeModal("recuperarModal");
 }

@@ -170,7 +170,7 @@ body {
     color: var(--white);
     position: relative;
     padding-top: 300px;
-    min-height: 1200px;  /* o más si lo necesitas */
+    min-height: 1200px; /* o más si lo necesitas */
     flex-direction: column;
 }
 
@@ -295,10 +295,10 @@ body {
     background: transparent;
     border: 2px solid var(--primary-orange);
     color: var(--white);
-  font-weight: bold;
-  padding: 12px 24px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
 .cta-button.secondary:hover {
@@ -1918,7 +1918,9 @@ a:focus {
     width: 90%;
     max-width: 600px;
     color: var(--text-dark);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .modal-content h2 {
@@ -1953,12 +1955,11 @@ a:focus {
     padding: 25px;
     background: var(--white);
     box-shadow: 0 4px 15px rgba(221, 93, 53, 0.15);
-    
+
     /* 🛠️ nuevo: centrado y ancho controlado */
     max-width: 00px;
     margin: 0 auto;
 }
-
 
 .unified-button:hover {
     box-shadow: 0 8px 25px rgba(221, 93, 53, 0.3);
@@ -2083,15 +2084,15 @@ a:focus {
 }
 
 .pregunta-card {
-  background: #f8f9fa;
-  border: 1px solid #ccc;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 10px;
+    background: #f8f9fa;
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
 }
 
 .pregunta-card textarea {
-  width: 100%;
-  margin-top: 10px;
-  min-height: 80px;
+    width: 100%;
+    margin-top: 10px;
+    min-height: 80px;
 }
