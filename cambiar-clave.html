@@ -14,6 +14,7 @@
       <button onclick="cambiarPassword()">Cambiar contraseña</button>
     </div>
 
+    <!-- Cargar Supabase desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
       const supabase = supabase.createClient(
@@ -21,18 +22,27 @@
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YnJ5cXdvZml0ZWZueHB6b2l1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3Mjg5MTIsImV4cCI6MjA2NjMwNDkxMn0.-pytVRaCeMHV3ktvHJfhqxNjRIYZSh4h8sfigZhhmpk"
       );
 
-      // 1. Establecer sesión desde el token en el hash de la URL
-      const hashParams = new URLSearchParams(window.location.hash.slice(1));
-      const access_token = hashParams.get("access_token");
-      const refresh_token = hashParams.get("refresh_token");
+      let sesionEstablecida = false;
 
-      if (access_token && refresh_token) {
-        supabase.auth.setSession({ access_token, refresh_token }).then(() => {
-          console.log("✅ Sesión temporal activada desde URL");
-        });
-      }
+      // Extraer los tokens desde el hash de la URL y establecer sesión
+      (async () => {
+        const hashParams = new URLSearchParams(window.location.hash.slice(1));
+        const access_token = hashParams.get("access_token");
+        const refresh_token = hashParams.get("refresh_token");
 
-      // 2. Esperar a que la sesión esté activa antes de permitir cambiar contraseña
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (error) {
+            alert("Error al establecer sesión: " + error.message);
+          } else {
+            sesionEstablecida = true;
+            console.log("✅ Sesión de recuperación establecida.");
+          }
+        } else {
+          alert("Debes acceder desde el enlace del correo para cambiar tu contraseña.");
+        }
+      })();
+
       async function cambiarPassword() {
         const newPassword = document.getElementById("newPassword").value;
 
@@ -41,20 +51,17 @@
           return;
         }
 
-        const { data, error: sessionError } = await supabase.auth.getSession();
-        if (!data.session) {
-          alert("Debes acceder desde el enlace del correo.");
+        if (!sesionEstablecida) {
+          alert("La sesión no está activa. Usa el enlace del correo.");
           return;
         }
 
-        const { error } = await supabase.auth.updateUser({
-          password: newPassword,
-        });
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
 
         if (error) {
           alert("Error al cambiar la contraseña: " + error.message);
         } else {
-          alert("Contraseña actualizada correctamente.");
+          alert("Contraseña actualizada correctamente. Ya puedes iniciar sesión.");
           window.location.href = "/";
         }
       }
