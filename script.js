@@ -135,10 +135,12 @@ function initializeNavigation() {
 
     // Cerrar menú móvil al hacer clic en un enlace
     navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-            hamburger.classList.remove("active");
-            navMenu.classList.remove("active");
-        });
+    link.addEventListener("click", (e) => {
+    if (e.target.id !== "usuarioNombre") {
+      hamburger.classList.remove("active");
+      navMenu.classList.remove("active");
+    }
+    });
     });
 
     // Desplazamiento suave para enlaces de navegación
