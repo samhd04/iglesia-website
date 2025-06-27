@@ -2122,3 +2122,20 @@ a:focus {
   margin: 0 auto; /* Centra horizontalmente dentro del contenedor */
 }
 
+#userDropdownContainer {
+  position: relative;
+}
+
+#userDropdownMenu {
+  position: absolute;
+  top: 100%; /* justo debajo del botón */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border-radius: 5px;
+  padding: 10px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  text-align: center;
+}
