@@ -384,24 +384,24 @@ function showDayEvents(year, month, day) {
 function initializeFAQ() {
     faqData = [
         {
-            question: "¿cuáles son los horarios de reunión?",
-            answer: "nos reunimos los domingos a las 9:30 AM. también tenemos reuniones grupales durante la semana.",
+            question: "¿Cuáles son los horarios de reunión?",
+            answer: "Nos reunimos los domingos a las 9:30 AM. también tenemos reuniones grupales durante la semana.",
         },
         {
-            question: "¿tienen programas para niños?",
-            answer: "¡sí! tenemos ministerio infantil durante nuestras reuniones dominicales, con actividades apropiadas para cada edad.",
+            question: "¿Tienen programas para niños?",
+            answer: "¡Sí! tenemos ministerio infantil durante nuestras reuniones dominicales, con actividades apropiadas para cada edad.",
         },
         {
-            question: "¿cómo puedo involucrarme en el ministerio?",
-            answer: "hay muchas maneras de servir. puedes hablar con nuestros líderes después de cualquier reunión o contactarnos directamente.",
+            question: "¿Cómo puedo involucrarme en el ministerio?",
+            answer: "Hay muchas maneras de servir. puedes hablar con nuestros líderes después de cualquier reunión o contactarnos directamente.",
         },
         {
-            question: "¿ofrecen bautismo?",
-            answer: "sí, Acompañamos a los interesados en un proceso de conocer más sobre este importante paso en la vida de un cristiano",
+            question: "¿Ofrecen bautismo?",
+            answer: "Sí, Acompañamos a los interesados en un proceso de conocer más sobre este importante paso en la vida de un cristiano",
         },
         {
-            question: "¿necesito ser miembro para participar?",
-            answer: "¡para nada! todos son bienvenidos a participar en nuestras actividades y reuniones, sin importar si están explorando la fe.",
+            question: "¿Necesito ser miembro para participar?",
+            answer: "¡Para nada! todos son bienvenidos a participar en nuestras actividades y reuniones, sin importar si están explorando la fe.",
         },
     ];
 
@@ -793,7 +793,11 @@ function updateUIForLoggedInUser() {
 
         if (currentUser.role === "pastor") {
             menuHTML += `<a href="#" onclick="showDashboard()">Panel de control</a>`;
+            menuHTML += `<a href="#" onclick="showRoleManager()">Gestionar roles</a>`;
+
         }
+
+        
 
         if (currentUser.role !== "pastor") {
             menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
@@ -1439,4 +1443,87 @@ async function enviarCorreoRecuperacion() {
         "Se ha enviado un correo de recuperación. Revisa tu bandeja de entrada."
     );
     closeModal("recuperarModal");
+}
+
+function showRoleManager() {
+    if (!currentUser) {
+        openModal("loginModal");
+        return;
+    }
+
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("roleManager").style.display = "block";
+    document.body.style.overflow = "hidden";
+
+    document.getElementById("roleManagerUserName").textContent = currentUser.name;
+
+
+    loadRoles();
+}
+
+/*async function showDashboard() {
+    if (!currentUser) {
+        openModal("loginModal");
+        return;
+    }
+
+    document.getElementById("calendarView").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    document.body.style.overflow = "hidden";
+
+    document.getElementById("dashboardUserName").textContent = currentUser.name;
+
+    // Refresca los contadores desde la BD
+    await loadAdminData();
+
+    localStorage.setItem("modo_panel", "activo");
+}*/
+
+
+
+function volverDesdeRoles() {
+    document.getElementById("roleManager").style.display = "none";
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("calendarView").style.display = "block";
+    document.body.style.overflow = "auto";
+}
+
+
+async function loadRoles() {
+    const { data: usuarios, error } = await supabase
+        .from("usuarios")
+        .select("id, nombre, rol");
+
+    const roles = ["invitado", "miembro", "lider", "pastor"];
+    roles.forEach(r => {
+        const ul = document.getElementById(`list-${r}`);
+        if (ul) ul.innerHTML = "";
+    });
+
+    usuarios.forEach(user => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            ${user.nombre}
+            <select onchange="cambiarRol('${user.id}', this.value)">
+                ${roles.map(r =>
+                    `<option value="${r}" ${r === user.rol ? "selected" : ""}>${r}</option>`
+                ).join("")}
+            </select>
+        `;
+        const contenedor = document.getElementById(`list-${user.rol}`);
+        if (contenedor) contenedor.appendChild(li);
+    });
+}
+
+async function cambiarRol(userId, nuevoRol) {
+    const { error } = await supabase
+        .from("usuarios")
+        .update({ rol: nuevoRol })
+        .eq("id", userId);
+
+    if (error) {
+        alert("❌ Error al cambiar el rol");
+    } else {
+        loadRoles(); // Refrescar listas
+    }
 }

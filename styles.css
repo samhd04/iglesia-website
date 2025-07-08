@@ -122,7 +122,7 @@ body {
     transition: color 0.3s ease;
     position: relative;
     font-size: 1rem;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .nav-link:hover {
@@ -186,7 +186,7 @@ body {
     font-weight: 700;
     margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    text-transform: lowercase; /* Following PDF guidelines */
+    /*text-transform: lowercase;*/
 }
 
 .hero-subtitle {
@@ -195,7 +195,7 @@ body {
     opacity: 0.95;
     font-weight: 300;
     color: var(--primary-gray);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .hero-description {
@@ -242,7 +242,7 @@ body {
     font-family: var(--font-heading);
     font-size: 1.1rem;
     margin-bottom: 5px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     color: var(--white);
 }
 
@@ -274,11 +274,17 @@ body {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.stat-number.infinity {
+    font-size: 4rem;  /* Ajusta según gusto */
+    line-height: 1;
+}
+
+
 .stat-label {
     display: block;
     font-size: 0.9rem;
     color: var(--primary-gray);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     margin-top: 5px;
 }
 
@@ -342,7 +348,7 @@ body {
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: all 0.3s ease;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     letter-spacing: 0.5px;
     box-shadow: 0 4px 15px rgba(221, 93, 53, 0.3);
     font-family: var(--font-heading);
@@ -362,7 +368,7 @@ body {
     margin-bottom: 60px;
     color: var(--primary-dark);
     position: relative;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     font-weight: 700;
 }
 
@@ -394,7 +400,7 @@ body {
     font-size: 2rem;
     color: var(--primary-dark);
     margin-bottom: 30px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .founders-info {
@@ -425,14 +431,14 @@ body {
 .founder-card p {
     color: var(--primary-gray);
     font-weight: 500;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .founding-year {
     font-size: 1.1rem;
     color: var(--primary-orange);
     font-weight: 600;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .mission-vision {
@@ -471,7 +477,7 @@ body {
     font-size: 1.6rem;
     margin-bottom: 20px;
     color: var(--primary-dark);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .mission-card p,
@@ -535,7 +541,7 @@ body {
     font-family: var(--font-heading);
     font-size: 1.8rem;
     margin-bottom: 10px;
-    text-transform: lowercase;
+   /*text-transform: lowercase;*/
     color: var(--white);
 }
 
@@ -670,7 +676,7 @@ body {
 .calendar-header h3 {
     font-family: var(--font-heading);
     font-size: 1.8rem;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .calendar-nav {
@@ -765,7 +771,7 @@ body {
     font-size: 1.8rem;
     color: var(--primary-dark);
     margin-bottom: 30px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     text-align: center;
 }
 
@@ -790,7 +796,7 @@ body {
     font-family: var(--font-heading);
     color: var(--primary-dark);
     margin-bottom: 10px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .event-item p {
@@ -875,7 +881,7 @@ body {
     color: var(--primary-dark);
     font-size: 1.1rem;
     font-family: var(--font-heading);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .faq-question i {
@@ -922,7 +928,7 @@ body {
     color: var(--primary-dark);
     font-family: var(--font-heading);
     font-size: 1.8rem;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 /* Contact Section */
@@ -971,7 +977,7 @@ body {
     margin-bottom: 8px;
     color: var(--primary-dark);
     font-family: var(--font-heading);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .contact-item p {
@@ -1002,7 +1008,7 @@ body {
     margin-bottom: 30px;
     text-align: center;
     font-size: 1.8rem;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .radio-group {
@@ -1014,7 +1020,7 @@ body {
     font-weight: 600;
     color: var(--primary-dark);
     margin-bottom: 10px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .radio-options {
@@ -1081,7 +1087,7 @@ textarea {
     display: inline-block;
     text-align: center;
     font-family: var(--font-heading);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     letter-spacing: 0.5px;
 }
 
@@ -1141,7 +1147,7 @@ textarea {
     font-size: 1.5rem;
     margin-bottom: 25px;
     color: var(--primary-orange);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -1267,7 +1273,7 @@ textarea {
     margin-bottom: 35px;
     text-align: center;
     font-size: 2rem;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .form-links {
@@ -1300,7 +1306,7 @@ textarea {
     margin-bottom: 15px;
     color: var(--primary-dark);
     font-family: var(--font-heading);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .password-requirements ul {
@@ -1351,7 +1357,7 @@ textarea {
 
 .dashboard-header h2 {
     font-family: var(--font-heading);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
     font-size: 1.8rem;
 }
 
@@ -1386,7 +1392,7 @@ textarea {
     font-family: var(--font-heading);
     color: var(--primary-dark);
     margin-bottom: 15px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .stat-card span {
@@ -1489,10 +1495,6 @@ textarea {
 
     .hero-stats {
         gap: 30px;
-    }
-
-    .stat-number {
-        font-size: 2rem;
     }
 
     .hero-actions {
@@ -1946,7 +1948,7 @@ a:focus {
     color: var(--primary-dark);
     text-align: center;
     margin-bottom: 20px;
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .modal-content p {
@@ -1992,7 +1994,7 @@ a:focus {
     font-weight: 600;
     color: var(--primary-orange);
     font-family: var(--font-heading);
-    text-transform: lowercase;
+   /*text-transform: lowercase;*/
 }
 
 .unified-button-wrapper {
@@ -2031,7 +2033,7 @@ a:focus {
     font-weight: 600;
     color: var(--primary-orange);
     font-family: var(--font-heading);
-    text-transform: lowercase;
+    /*text-transform: lowercase;*/
 }
 
 .cta-button.accent {
@@ -2143,4 +2145,33 @@ a:focus {
   z-index: 999;
   min-width: 180px;
   text-align: center;
+}
+
+.roles-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.role-column {
+    flex: 1;
+    min-width: 200px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.user-list li {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-list button {
+    font-size: 0.8rem;
+    padding: 4px 8px;
 }
