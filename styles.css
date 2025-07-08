@@ -99,6 +99,7 @@ body {
     line-height: 1.1;
     text-transform: none; /* As specified in PDF for "minúsculas" approach */
     letter-spacing: -0.5px;
+    display: inline-block;
 }
 
 .tagline {
@@ -1428,10 +1429,6 @@ textarea {
         height: 70px;
     }
 
-    .church-name {
-        font-size: 1.1rem;
-    }
-
     .tagline {
         font-size: 0.8rem;
     }
@@ -1879,12 +1876,6 @@ a:focus {
 /* sigue ocultando con hidden */
 .hidden {
     display: none;
-}
-
-.church-name {
-    display: inline-block;
-    line-height: 1.2;
-    font-family: var(--font-heading);
 }
 
 .dark-text {
