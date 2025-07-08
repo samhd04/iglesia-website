@@ -2171,3 +2171,9 @@ a:focus {
     font-size: 0.8rem;
     padding: 4px 8px;
 }
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .logo-title {
+        font-size: 1rem;
+    }
+}
