@@ -9,6 +9,7 @@
             name="description"
             content="Una iglesia para todos. Bienvenidos a la casa de Dios, Un lugar para adorar."
         />
+
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -1160,5 +1161,56 @@
                 </button>
             </div>
         </div>
+
+       <!-- Modal para subir prédica -->
+<div class="modal" id="uploadPredicaModal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('uploadPredicaModal')">&times;</span>
+    <h3 style="text-align: center;">Subir nueva prédica</h3><br>
+    <form id="uploadForm">
+      <label>Nombre de la prédica</label>
+      <input type="text" name="nombre_predica" required />
+
+      <label>Serie</label>
+      <input type="text" name="serie" />
+
+      <label>Fecha</label>
+      <input type="date" name="fecha" required />
+
+      <label>Archivo (PDF o PPTX)</label>
+      <input type="file" name="archivo" accept=".pdf,.ppt,.pptx" required />
+
+      <button type="submit" class="btn btn-primary">Subir</button>
+    </form>
+  </div>
+</div>
+
+
+
+<!-- Modal para ver prédicas -->
+<div class="modal" id="verPredicasModal">
+  <div class="modal-content">
+
+    <span class="close" onclick="closeModal('verPredicasModal')">&times;</span>
+    <h3 style="text-align: center;">Prédicas</h3><br>
+
+    <label>Filtrar por nombre</label>
+    <input type="text" id="filtroNombre" /><br><br>
+
+    <label>Filtrar por serie</label>
+    <input type="text" id="filtroSerie" /><br><br>
+
+    <label>Filtrar por fecha</label>
+    <input type="date" id="filtroFecha" /><br><br>
+
+    <div style="margin-top: 10px; margin-bottom: 15px;">
+      <button class="btn blue" onclick="filtrarPredicas()">🔍 Buscar prédica</button>
+      <button class="btn grey lighten-1 black-text" onclick="limpiarFiltros()">📄 Ver todas</button>
+    </div>
+
+    <div id="listaPredicas"></div>
+  </div>
+</div>
+
     </body>
 </html>

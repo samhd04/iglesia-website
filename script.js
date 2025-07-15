@@ -6,6 +6,7 @@ let events = [];
 let faqData = [];
 let questions = [];
 let attendeeForms = [];
+let predicas = [];
 
 // Inicializa Supabase
 const supabase = window.supabase.createClient(
@@ -797,7 +798,15 @@ function updateUIForLoggedInUser() {
 
         }
 
-        
+        // Subir prédica (para líderes y pastores)
+        if (["pastor", "líder"].includes(currentUser.role)) {
+            menuHTML += `<a href="#" onclick="openModal('uploadPredicaModal'); inicializarFormularioPredica();">Subir prédica</a>`;
+
+        }
+
+        // Ver prédicas (para todos)
+        menuHTML += `<a href="#" onclick="openModal('verPredicasModal'); cargarPredicas();">Ver prédicas</a>`;
+
 
         if (currentUser.role !== "pastor") {
             menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
@@ -831,6 +840,7 @@ function updateUIForLoggedInUser() {
             `;
         }
     }
+
 
     // Mostrar botón crear evento solo para pastores
     const eventActions = document.getElementById("eventActions");
@@ -1526,4 +1536,170 @@ async function cambiarRol(userId, nuevoRol) {
     } else {
         loadRoles(); // Refrescar listas
     }
+}
+
+function addDropdownButton(text, onClick) {
+    const btn = document.createElement("button");
+    btn.className = "dropdown-item";
+    btn.innerText = text;
+    btn.onclick = onClick;
+    document.getElementById("userDropdownMenu").appendChild(btn);
+}
+
+async function cargarPredicas() {
+    const { data, error } = await supabase
+        .from("predicas")
+        .select("*")
+        .order("fecha", { ascending: false });
+
+    if (!error) {
+        predicas = data;
+        filtrarPredicas();
+    }
+}
+
+function filtrarPredicas() {
+    const nombre = document.getElementById("filtroNombre").value.toLowerCase();
+    const serie = document.getElementById("filtroSerie").value.toLowerCase();
+    const fecha = document.getElementById("filtroFecha").value;
+
+    const resultados = predicas.filter(p =>
+        (!nombre || p.nombre.toLowerCase().includes(nombre)) &&
+        (!serie || p.serie?.toLowerCase().includes(serie)) &&
+        (!fecha || p.fecha === fecha)
+    );
+
+    const contenedor = document.getElementById("listaPredicas");
+    contenedor.innerHTML = "";
+
+    resultados.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "predica-item";
+        div.innerHTML = `
+            <strong>${p.nombre}</strong> (${p.fecha})<br>
+            <em>${p.serie || "Sin serie"}</em><br>
+            <a href="${p.archivo_url}" download="${p.archivo_nombre}" target="_blank">📥 Descargar</a>
+            ${(currentUser?.id === p.autor_id || currentUser?.role === 'pastor') ? `
+                <button onclick="borrarPredica('${p.id}')">🗑 Eliminar</button>` : ""}
+        `;
+        contenedor.appendChild(div);
+    });
+}
+
+async function borrarPredica(id) {
+    if (!confirm("¿Eliminar esta prédica?")) return;
+    const { error } = await supabase.from("predicas").delete().eq("id", id);
+    if (!error) {
+        alert("✅ Eliminado");
+        cargarPredicas();
+    } else {
+        alert("❌ Error al eliminar");
+    }
+}
+
+
+
+function mostrarMensaje(texto, tipo = "success") {
+    const div = document.createElement("div");
+    div.textContent = texto;
+    div.style.background = tipo === "success" ? "#4caf50" : "#f44336";
+    div.style.color = "white";
+    div.style.padding = "12px 18px";
+    div.style.marginTop = "10px";
+    div.style.borderRadius = "8px";
+    div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+    div.style.fontSize = "15px";
+    div.style.fontFamily = "Arial, sans-serif";
+
+    const contenedor = document.getElementById("mensajeEstado");
+    contenedor.appendChild(div);
+
+    setTimeout(() => {
+        div.remove();
+    }, 4000);
+}
+
+
+function inicializarFormularioPredica() {
+    const uploadForm = document.getElementById("uploadForm");
+    if (!uploadForm || uploadForm.dataset.init === "true") return;
+
+    uploadForm.dataset.init = "true"; // evita doble carga
+
+    uploadForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const archivo = uploadForm.archivo?.files?.[0];
+        if (!archivo) return mostrarMensaje("❌ Selecciona un archivo", "error");
+
+        // Validación opcional del tipo de archivo
+        const tiposPermitidos = [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
+            "application/vnd.ms-powerpoint" // .ppt
+        ];
+        if (!tiposPermitidos.includes(archivo.type)) {
+            return mostrarMensaje("❌ Tipo de archivo no permitido", "error");
+        }
+
+        const nombre = uploadForm.nombre_predica.value.trim();
+        const serie = uploadForm.serie.value.trim();
+        const fecha = uploadForm.fecha.value;
+        const ext = archivo.name.split(".").pop();
+        const filename = `predica-${Date.now()}.${ext}`;
+
+        // Subir archivo
+        console.log("📂 Archivo a subir:", archivo);
+
+        const { error: uploadError } = await supabase.storage
+            .from("predicasarchivos")
+            .upload(filename, archivo, {
+                cacheControl: "3600",
+                upsert: true
+            });
+
+        if (uploadError) {
+            console.error("❌ Error subiendo archivo:", uploadError);
+            return mostrarMensaje("❌ Error subiendo archivo", "error");
+        }
+
+        // Obtener URL pública
+        const { data: urlData, error: urlError } = await supabase.storage
+            .from("predicasarchivos")
+            .getPublicUrl(filename);
+
+        if (urlError || !urlData?.publicUrl) {
+            console.error("❌ Error obteniendo URL pública:", urlError);
+            return mostrarMensaje("❌ No se pudo obtener URL del archivo", "error");
+        }
+
+        const publicUrl = urlData.publicUrl;
+
+        // Insertar en la tabla
+        const { error: insertError } = await supabase.from("predicas").insert([{
+            nombre,
+            serie,
+            fecha,
+            archivo_url: publicUrl,
+            archivo_nombre: archivo.name,
+            autor_id: currentUser.id,
+        }]);
+
+        if (insertError) {
+            console.error("❌ Error insertando en la base de datos:", insertError);
+            return mostrarMensaje("❌ Error guardando datos", "error");
+        }
+
+        mostrarMensaje("✅ Prédica subida exitosamente", "success");
+        closeModal("uploadPredicaModal");
+        uploadForm.reset();
+        cargarPredicas();
+    });
+}
+
+function limpiarFiltros() {
+    document.getElementById("filtroNombre").value = "";
+    document.getElementById("filtroSerie").value = "";
+    document.getElementById("filtroFecha").value = "";
+    filtrarPredicas();
 }
