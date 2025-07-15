@@ -805,8 +805,7 @@ function updateUIForLoggedInUser() {
         }
 
         // Ver prédicas (para todos)
-        menuHTML += `<a href="#" onclick="openModal('verPredicasModal'); cargarPredicas();">Ver prédicas</a>`;
-
+        menuHTML += `<a href="#" onclick="abrirModalVerPredicas()">Ver prédicas</a>`;
 
         if (currentUser.role !== "pastor") {
             menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
@@ -1547,6 +1546,8 @@ function addDropdownButton(text, onClick) {
 }
 
 async function cargarPredicas() {
+    console.log("🔁 Ejecutando cargarPredicas");
+
     const { data, error } = await supabase
         .from("predicas")
         .select("*")
@@ -1556,6 +1557,11 @@ async function cargarPredicas() {
         predicas = data;
         filtrarPredicas();
     }
+
+    console.log("✅ Prédicas cargadas:", data);
+
+  predicas = data;
+  filtrarPredicas();
 }
 
 function filtrarPredicas() {
@@ -1702,4 +1708,17 @@ function limpiarFiltros() {
     document.getElementById("filtroSerie").value = "";
     document.getElementById("filtroFecha").value = "";
     filtrarPredicas();
+}
+
+function verTodasLasPredicas() {
+  document.getElementById("filtroNombre").value = "";
+  document.getElementById("filtroSerie").value = "";
+  document.getElementById("filtroFecha").value = "";
+  filtrarPredicas();
+}
+
+function abrirModalVerPredicas() {
+  console.log("✅ abrirModalVerPredicas fue llamado");
+  cargarPredicas(); // Asegura que los datos estén listos
+  openModal("verPredicasModal"); // Abre el modal
 }
