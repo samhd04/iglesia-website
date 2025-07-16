@@ -1350,7 +1350,7 @@ async function guardarInformacionMiembro(e) {
     e.preventDefault();
     const { data, error } = await supabase.auth.getUser();
 
-    if (error) return showMessage(error.message, "error.");
+    if (error) return showMessage(error.message, "error");
 
     const form = e.target;
     const data2 = {
@@ -1651,7 +1651,7 @@ async function borrarPredica(id) {
     }
 
     console.log("✅ Registro eliminado de la base de datos");
-    mostrarMensaje("✅ Prédica eliminada correctamente", "success");
+    showMessage("✅ Prédica eliminada correctamente", "success");
     cargarPredicas();
 }
 
@@ -1701,7 +1701,7 @@ function inicializarFormularioPredica() {
             "application/vnd.ms-powerpoint" // .ppt
         ];
         if (!tiposPermitidos.includes(archivo.type)) {
-            return mostrarMensaje("❌ Tipo de archivo no permitido", "error");
+            return showMessage("❌ Tipo de archivo no permitido", "error");
         }
 
         const nombre = uploadForm.nombre_predica.value.trim();
@@ -1752,7 +1752,7 @@ function inicializarFormularioPredica() {
             return mostrarMensaje("❌ Error guardando datos", "error");
         }
 
-        mostrarMensaje("✅ Prédica subida exitosamente", "success");
+        showMessage("✅ Prédica subida exitosamente", "success");
         closeModal("uploadPredicaModal");
         uploadForm.reset();
         cargarPredicas();
