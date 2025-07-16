@@ -69,12 +69,12 @@ supabase.auth.onAuthStateChange((event, session) => {
     await loadStoredData();
 
     // si era admin **y** estaba en modo_panel, abre dashboard
-    if (
+    /*if (
         currentUser.role === "pastor" &&
         localStorage.getItem("modo_panel") === "activo"
     ) {
         showDashboard();
-    }
+    }*/
 })();
 
 // Meses en español
@@ -1594,14 +1594,57 @@ function filtrarPredicas() {
 
 async function borrarPredica(id) {
     if (!confirm("¿Eliminar esta prédica?")) return;
-    const { error } = await supabase.from("predicas").delete().eq("id", id);
-    if (!error) {
-        alert("✅ Eliminado");
-        cargarPredicas();
-    } else {
-        alert("❌ Error al eliminar");
+
+    console.log("🟡 Buscando prédica con id:", id);
+
+    // Paso 1: obtener la prédica
+    const { data: predica, error: fetchError } = await supabase
+        .from("predicas")
+        .select("archivo_url, archivo_nombre")
+        .eq("id", id)
+        .single();
+
+    if (fetchError || !predica) {
+        console.error("❌ No se pudo obtener la prédica:", fetchError);
+        return mostrarMensaje("❌ No se pudo obtener la prédica", "error");
     }
+
+    console.log("📄 Datos obtenidos de la prédica:", predica);
+
+    // Paso 2: extraer nombre del archivo
+    const archivoNombre = predica.archivo_url.split("/").pop();
+    console.log("🧾 Nombre del archivo a eliminar:", archivoNombre);
+
+    // Paso 3: eliminar archivo del bucket
+    const { error: deleteFileError } = await supabase.storage
+        .from("predicasarchivos")
+        .remove([archivoNombre]);
+
+    if (deleteFileError) {
+        console.error("❌ Error al eliminar archivo del storage:", deleteFileError);
+    } else {
+        console.log("✅ Archivo eliminado del bucket correctamente");
+    }
+
+    // Paso 4: eliminar registro de la base de datos
+    const { error: deleteDbError } = await supabase
+        .from("predicas")
+        .delete()
+        .eq("id", id);
+
+    if (deleteDbError) {
+        console.error("❌ Error al eliminar el registro de la BD:", deleteDbError);
+        return mostrarMensaje("❌ No se pudo eliminar de la base de datos", "error");
+    }
+
+    console.log("✅ Registro eliminado de la base de datos");
+    mostrarMensaje("✅ Prédica eliminada correctamente", "success");
+    cargarPredicas();
 }
+
+
+
+
 
 
 

@@ -854,7 +854,7 @@
                 <h2>Panel de control</h2>
                 <div class="dashboard-user">
                     <span id="dashboardUserName"></span>
-                    <button class="btn btn-secondary" onclick="volverDesdeRoles()">
+                    <button id="backToDashboard" class="btn btn-secondary" onclick="volverDesdeRoles()">
                         Volver
                     </button>
                 </div>
@@ -911,7 +911,7 @@
             <h2>Gestión de Roles</h2>
             <div class="dashboard-user">
                 <span id="roleManagerUserName"></span>
-                <button class="btn btn-secondary" onclick="volverDesdeRoles()">
+                <button id="backToDashboard" class="btn btn-secondary" onclick="volverDesdeRoles()">
                     Volver
                 </button>
             </div>
@@ -1203,14 +1203,18 @@
     <label>Filtrar por fecha</label>
     <input type="date" id="filtroFecha" /><br><br>
 
-    <div style="margin-top: 10px; margin-bottom: 15px;">
-      <button class="btn blue" onclick="filtrarPredicas()">🔍 Buscar prédica</button><br>
-      <button class="btn grey lighten-1 black-text" onclick="limpiarFiltros()">📄 Ver todas</button>
+    <div style="margin-top: 10px; margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <button class="btn btn-secondary" onclick="filtrarPredicas()">🔍 Buscar prédica</button>
+    <button class="btn btn-danger" onclick="limpiarFiltros()">📄 Ver todas</button>
     </div>
 
+    <h5 style="margin-top: 25px; font-weight: bold;">Resultados de búsqueda</h5>
     <div id="listaPredicas"></div>
   </div>
 </div>
+
+<div id="mensajeEstado" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
 
     </body>
 </html>
