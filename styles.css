@@ -1119,6 +1119,16 @@ textarea {
     border-color: var(--primary-dark);
 }
 
+.green {
+  background-color: #43a047;
+  color: white;
+}
+
+.grey {
+  background-color: #757575;
+  color: white;
+}
+
 /* Footer */
 .footer {
     background: var(--primary-dark);

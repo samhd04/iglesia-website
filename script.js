@@ -799,9 +799,9 @@ function updateUIForLoggedInUser() {
         }
 
         //Calendario de servidores
-        if (["pastor", "líder", "servidor"].includes(currentUser.role)) {
+        /*if (["pastor", "líder", "servidor"].includes(currentUser.role)) {
         menuHTML += `<a href="#" onclick="abrirCalendarioServidores()">Calendario de servidores</a>`;
-        }
+        }*/
 
 
         // Subir prédica (para líderes y pastores)
@@ -813,8 +813,14 @@ function updateUIForLoggedInUser() {
         // Ver prédicas (para todos)
         menuHTML += `<a href="#" onclick="abrirModalVerPredicas()">Ver prédicas</a>`;
 
+        if (["pastor", "líder"].includes(currentUser.role)) {
+        menuHTML += `<a href="#" onclick="abrirRetroalimentacion()">Resultados</a>`;
+        }
+
+
         if (currentUser.role !== "pastor") {
             menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
+            menuHTML += `<a href="#" onclick="abrirEncuestaSatisfaccion()">Encuesta de satisfacción</a>`;
         }
 
         menuHTML += `<a href="#" onclick="cerrarSesion()">Cerrar sesión</a>`;
@@ -1771,4 +1777,145 @@ function abrirModalVerPredicas() {
   console.log("✅ abrirModalVerPredicas fue llamado");
   cargarPredicas(); // Asegura que los datos estén listos
   openModal("verPredicasModal"); // Abre el modal
+}
+
+
+function abrirEncuestaSatisfaccion() {
+  const modal = document.getElementById("encuestaModal");
+  if (modal) {
+    modal.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function cerrarEncuestaSatisfaccion() {
+  const modal = document.getElementById("encuestaModal");
+  if (modal) {
+    modal.style.display = "none";
+    document.body.style.overflow = "auto";
+  }
+}
+
+
+async function enviarEncuesta() {
+event.preventDefault();
+  console.log("➡ Enviando encuesta...");
+
+  const asistencia = document.querySelector('input[name="asistencia"]:checked')?.value;
+  const experiencia = document.querySelector('input[name="experiencia"]:checked')?.value;
+  const pastor = document.querySelector('input[name="pastor"]:checked')?.value;
+  const servicio = document.querySelector('input[name="servicio"]:checked')?.value;
+  const ubicacion = document.querySelector('input[name="ubicacion"]:checked')?.value;
+  const ambiente = document.querySelector('input[name="ambiente"]:checked')?.value;
+  const mejoras = document.getElementById("mejoras").value.trim();
+  const comentarios = document.getElementById("comentarioEncuesta").value.trim();
+
+  if (!asistencia || !experiencia || !pastor || !servicio || !ubicacion || !ambiente || !mejoras) {
+    alert("⚠️ Por favor, completa todos los campos obligatorios.");
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("encuestas_satisfaccion")
+      .insert([
+        {
+          asistencia,
+          experiencia,
+          pastor,
+          servicio,
+          ubicacion,
+          ambiente,
+          mejoras,
+          comentarios, // <- ya corregido
+        },
+      ]);
+
+    if (error) {
+  console.error("❌ Error guardando encuesta:", error.message, error.details);
+  showMessage("Hubo un error al enviar la encuesta. Inténtalo de nuevo.", "error.");
+}else {
+      console.log("✅ Encuesta guardada:", data);
+      showMessage("✅ ¡Gracias por responder la encuesta!","success");
+      document.getElementById("encuestaModal").style.display = "none";
+    }
+  } catch (e) {
+    console.error("💥 Error inesperado:", e);
+    showMessage("Error inesperado al enviar la encuesta.", "error.");
+  }
+}
+
+async function abrirRetroalimentacion() {
+
+console.log("📊 Abriendo resumen de encuestas...");
+  /*document.getElementById("calendarView").style.display = "none";*/
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("retroalimentacionPanel").style.display = "block";
+  document.body.style.overflow = "auto";
+
+  const { data, error } = await supabase.from("encuestas_satisfaccion").select("*");
+
+  if (error) {
+    console.error("Error obteniendo encuestas:", error);
+    alert("❌ No se pudo cargar la retroalimentación.");
+    return;
+  }
+
+  mostrarTablaEncuestas(data);
+  mostrarResumenEstadistico(data);
+}
+
+function cerrarRetroalimentacion() {
+  document.getElementById("retroalimentacionPanel").style.display = "none";
+  /*document.getElementById("calendarView").style.display = "block";*/
+  document.body.style.overflow = "auto";
+}
+
+function mostrarTablaEncuestas(data) {
+  const contenedor = document.getElementById("tablaEncuestas");
+  if (data.length === 0) {
+    contenedor.innerHTML = "<p>No hay encuestas registradas.</p>";
+    return;
+  }
+
+  let html = "<table class='highlight'><thead><tr>";
+  html += "<th>Asistencia</th><th>Experiencia</th><th>Pastor</th><th>Servicio</th><th>Ubicación</th><th>Ambiente</th><th>Mejoras</th><th>Comentarios</th>";
+  html += "</tr></thead><tbody>";
+
+  for (const row of data) {
+    html += `<tr>
+      <td>${row.asistencia}</td>
+      <td>${row.experiencia}</td>
+      <td>${row.pastor}</td>
+      <td>${row.servicio}</td>
+      <td>${row.ubicacion}</td>
+      <td>${row.ambiente}</td>
+      <td>${row.mejoras}</td>
+      <td>${row.comentarios || ''}</td>
+    </tr>`;
+  }
+
+  html += "</tbody></table>";
+  contenedor.innerHTML = html;
+}
+
+function mostrarResumenEstadistico(data) {
+  const resumen = document.getElementById("resumenEstadisticas");
+
+  const contar = (campo, valor) => data.filter((d) => d[campo] === valor).length;
+
+  const total = data.length;
+  const resumenHTML = `
+    <h5>📊 Resumen Estadístico:</h5>
+    <ul>
+      <li><strong>Asistencia:</strong> Siempre: ${contar("asistencia", "Siempre")}, Casi siempre: ${contar("asistencia", "Casi siempre")}</li>
+      <li><strong>Experiencia:</strong> Excelente: ${contar("experiencia", "Excelente")}, Buena: ${contar("experiencia", "Buena")}</li>
+      <li><strong>Pastor:</strong> Excelente: ${contar("pastor", "Excelente")}, Buena: ${contar("pastor", "Buena")}</li>
+      <li><strong>Servicio:</strong> Excelente: ${contar("servicio", "Excelente")}, Buena: ${contar("servicio", "Buena")}</li>
+      <li><strong>Ambiente:</strong> Muy acogedor: ${contar("ambiente", "Muy acogedor")}, Cálido: ${contar("ambiente", "Cálido")}</li>
+      <li><strong>Total de respuestas:</strong> ${total}</li>
+    </ul>
+  `;
+
+  resumen.innerHTML = resumenHTML;
 }

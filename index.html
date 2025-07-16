@@ -1217,5 +1217,93 @@
 <div id="mensajeEstado" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
 
+<!-- Modal de Encuesta de Satisfacción -->
+<div id="encuestaModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+    <span class="close" onclick="cerrarEncuestaSatisfaccion()">×</span>
+    <h3 style="text-align:center;">Encuesta de Satisfacción</h3><br>
+
+    <form id="formEncuesta" onsubmit="enviarEncuesta(event)">
+      <!-- Estilo para agrupar las opciones y reducir espacios -->
+<style>
+  .opciones label {
+    display: block;
+    margin: 4px 0;
+  }
+</style>
+
+<!-- Pregunta 1 -->
+<p><strong>1. ¿Con qué frecuencia asistes a nuestras reuniones?</strong></p>
+<div class="opciones">
+  <label><input type="radio" name="asistencia" value="Siempre" required> Siempre</label>
+  <label><input type="radio" name="asistencia" value="Casi siempre"> Casi siempre</label>
+  <label><input type="radio" name="asistencia" value="A veces"> A veces</label>
+  <label><input type="radio" name="asistencia" value="Nunca"> Nunca</label>
+</div>
+
+<!-- Pregunta 2 -->
+<p><strong>2. ¿Cómo calificarías tu experiencia general?</strong></p>
+<div class="opciones">
+  <label><input type="radio" name="experiencia" value="Excelente" required> Excelente</label>
+  <label><input type="radio" name="experiencia" value="Buena"> Buena</label>
+  <label><input type="radio" name="experiencia" value="Regular"> Regular</label>
+  <label><input type="radio" name="experiencia" value="Mala"> Mala</label>
+</div>
+
+<!-- Pregunta 3 -->
+<p><strong>3. ¿Cómo evalúas al pastor y la familia pastoral?</strong></p>
+<div class="opciones">
+  <label><input type="radio" name="pastor" value="Excelente" required> Excelente</label>
+  <label><input type="radio" name="pastor" value="Buena"> Buena</label>
+  <label><input type="radio" name="pastor" value="Regular"> Regular</label>
+  <label><input type="radio" name="pastor" value="Mala"> Mala</label>
+</div>
+
+<!-- Pregunta 4 -->
+<p><strong>4. ¿Qué opinas del equipo de servicio (alabanza, audiovisual, staff, etc)?</strong></p>
+<div class="opciones">
+  <label><input type="radio" name="servicio" value="Excelente" required> Excelente</label>
+  <label><input type="radio" name="servicio" value="Buena"> Buena</label>
+  <label><input type="radio" name="servicio" value="Regular"> Regular</label>
+  <label><input type="radio" name="servicio" value="Mala"> Mala</label>
+</div>
+
+<!-- Pregunta 5 -->
+<p><strong>5. ¿Qué opinas del espacio y ubicación de la iglesia?</strong></p>
+<div class="opciones">
+  <label><input type="radio" name="ubicacion" value="Muy cómoda" required> Muy cómoda</label>
+  <label><input type="radio" name="ubicacion" value="Adecuada"> Adecuada</label>
+  <label><input type="radio" name="ubicacion" value="Limitada"> Limitada</label>
+  <label><input type="radio" name="ubicacion" value="Incómoda"> Incómoda</label>
+</div>
+
+<!-- Pregunta 6 -->
+<p><strong>6. ¿Cómo describirías el ambiente con las demás personas?</strong></p>
+<div class="opciones">
+  <label><input type="radio" name="ambiente" value="Muy acogedor" required> Muy acogedor</label>
+  <label><input type="radio" name="ambiente" value="Cálido"> Cálido</label>
+  <label><input type="radio" name="ambiente" value="Frío"> Frío</label>
+  <label><input type="radio" name="ambiente" value="Hostil"> Hostil</label>
+</div>
+
+<!-- Pregunta 7 -->
+<p><strong>7. ¿Qué áreas crees que podrían mejorar?</strong></p>
+<textarea id="mejoras" class="browser-default" style="width: 100%; min-height: 80px;" placeholder="Escribe tu opinión aquí..." required></textarea>
+
+
+      <p><strong>8. Comentarios adicionales (opcional)</strong></p>
+      <textarea id="comentarioEncuesta" name="comentario" class="browser-default" style="width: 100%; min-height: 80px;" placeholder="Comentarios libres..."></textarea>
+
+      <!-- Botones alineados horizontalmente -->
+      <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;">
+        <button type="submit" class="btn green">Enviar</button>
+        <button class="btn grey" type="button" onclick="cerrarEncuestaSatisfaccion()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
     </body>
 </html>
