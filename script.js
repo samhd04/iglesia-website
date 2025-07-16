@@ -798,6 +798,12 @@ function updateUIForLoggedInUser() {
 
         }
 
+        //Calendario de servidores
+        if (["pastor", "líder", "servidor"].includes(currentUser.role)) {
+        menuHTML += `<a href="#" onclick="abrirCalendarioServidores()">Calendario de servidores</a>`;
+        }
+
+
         // Subir prédica (para líderes y pastores)
         if (["pastor", "líder"].includes(currentUser.role)) {
             menuHTML += `<a href="#" onclick="openModal('uploadPredicaModal'); inicializarFormularioPredica();">Subir prédica</a>`;
@@ -1503,7 +1509,8 @@ async function loadRoles() {
         .from("usuarios")
         .select("id, nombre, rol");
 
-    const roles = ["invitado", "miembro", "lider", "pastor"];
+    const roles = ["miembro", "servidor", "líder", "pastor"];
+
     roles.forEach(r => {
         const ul = document.getElementById(`list-${r}`);
         if (ul) ul.innerHTML = "";
