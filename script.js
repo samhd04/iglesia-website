@@ -814,7 +814,7 @@ function updateUIForLoggedInUser() {
         menuHTML += `<a href="#" onclick="abrirModalVerPredicas()">Ver prédicas</a>`;
 
         if (["pastor", "líder"].includes(currentUser.role)) {
-        menuHTML += `<a href="#" onclick="abrirRetroalimentacion()">Resultados</a>`;
+        menuHTML += `<a href="#" onclick="abrirResultadosEncuesta()">Resultados</a>`;
         }
 
 
@@ -1919,3 +1919,179 @@ function mostrarResumenEstadistico(data) {
 
   resumen.innerHTML = resumenHTML;
 }
+
+async function abrirResultadosEncuesta() {
+  openModal("resultadosModal");
+
+  const { data: encuestas, error } = await supabase
+    .from("encuestas_satisfaccion")
+    .select("*")
+    .order("fecha_envio", { ascending: false });
+
+  if (error || !encuestas || encuestas.length === 0) {
+    document.getElementById("tablaEncuestas").innerHTML =
+      "<p>No hay encuestas registradas.</p>";
+    return;
+  }
+
+  // Construir tabla
+  let tablaHTML = `
+    <table class="tabla-encuesta">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Asistencia</th>
+          <th>Experiencia</th>
+          <th>Pastor</th>
+          <th>Servicio</th>
+          <th>Ubicación</th>
+          <th>Ambiente</th>
+          <th>Mejoras</th>
+          <th>Comentarios</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  encuestas.forEach((e) => {
+    tablaHTML += `
+      <tr>
+        <td>${new Date(e.fecha_envio).toLocaleDateString()}</td>
+        <td>${e.asistencia}</td>
+        <td>${e.experiencia}</td>
+        <td>${e.pastor}</td>
+        <td>${e.servicio}</td>
+        <td>${e.ubicacion}</td>
+        <td>${e.ambiente}</td>
+        <td>${e.mejoras || "-"}</td>
+        <td>${e.comentarios || "-"}</td>
+      </tr>
+    `;
+  });
+
+  tablaHTML += "</tbody></table>";
+  document.getElementById("tablaEncuestas").innerHTML = tablaHTML;
+
+  // Gráficos
+  const titulosPreguntas = {
+  asistencia: "¿Con qué frecuencia asistes a nuestras reuniones?",
+  experiencia: "¿Cómo calificarías tu experiencia general?ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ",  
+  pastor: "¿Cómo evalúas al pastor y la familia pastoral?ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ",
+  servicio: "¿Qué opinas del equipo de servicio (alabanza, audiovisual, staff, etc)?",
+  ubicacion: "¿Qué opinas del espacio y ubicación de la iglesia?",
+  ambiente: "¿Cómo describirías el ambiente con las demás personas?"
+};
+
+  const preguntas = ["asistencia", "experiencia", "pastor", "servicio", "ubicacion", "ambiente"];
+  const opciones = {
+    asistencia: ["Siempre", "Casi siempre", "A veces", "Nunca"],
+    experiencia: ["Excelente", "Buena", "Regular", "Mala"],
+    pastor: ["Excelente", "Buena", "Regular", "Mala"],
+    servicio: ["Excelente", "Buena", "Regular", "Mala"],
+    ubicacion: ["Muy cómoda", "Adecuada", "Limitada", "Incómoda"],
+    ambiente: ["Muy acogedor", "Cálido", "Frío", "Hostil"]
+  };
+  const contenedorGraficos = document.getElementById("graficosEncuesta");
+contenedorGraficos.innerHTML = ""; // Limpiar
+
+preguntas.forEach((pregunta) => {
+  const respuestas = encuestas.map((e) => e[pregunta]);
+  const labels = opciones[pregunta];
+  const conteo = labels.map((label) =>
+    respuestas.filter((r) => r === label).length
+  );
+
+  const graficoBox = document.createElement("div");
+  graficoBox.className = "grafico-box";
+
+  const titulo = document.createElement("h5");
+  titulo.textContent = titulosPreguntas[pregunta] || pregunta;
+  titulo.style.textAlign = "center";
+  titulo.style.marginBottom = "10px";
+
+  const canvas = document.createElement("canvas");
+  canvas.id = `grafico-${pregunta}`;
+  canvas.width = 300;
+  canvas.height = 300;
+
+  graficoBox.appendChild(titulo);
+  graficoBox.appendChild(canvas);
+  contenedorGraficos.appendChild(graficoBox);
+
+  const ctx = canvas.getContext("2d");
+  new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Respuestas",
+        data: conteo,
+        backgroundColor: [
+          "#FF6384",
+          "#36A2EB",
+          "#FFCE56",
+          "#8BC34A",
+          "#9C27B0",
+          "#FF9800"
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      }
+    }
+  });
+});
+
+}
+
+function exportarEncuestasAExcel() {
+  const tabla = document.querySelector(".tabla-encuesta");
+  if (!tabla) {
+    alert("No hay datos para exportar");
+    return;
+  }
+
+  // Obtener encabezados
+  const headers = Array.from(tabla.querySelectorAll("thead th")).map((th) =>
+    th.innerText.trim()
+  );
+
+  // Obtener filas de datos
+  const rows = Array.from(tabla.querySelectorAll("tbody tr")).map((tr) => {
+    const cells = tr.querySelectorAll("td");
+    const rowData = {};
+    headers.forEach((header, i) => {
+      rowData[header] = cells[i]?.innerText || "";
+    });
+    return rowData;
+  });
+
+  // Crear workbook y worksheet
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+
+  // Aplicar autofiltros (como tabla)
+  ws["!autofilter"] = {
+    ref: XLSX.utils.encode_range({
+      s: { r: 0, c: 0 },
+      e: { r: rows.length, c: headers.length - 1 },
+    }),
+  };
+
+  // Ajustar anchos de columna automáticamente
+  ws["!cols"] = headers.map(() => ({ wch: 20 }));
+
+  // Añadir a libro y exportar
+  XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+  XLSX.writeFile(wb, "resultados_encuesta.xlsx");
+}
+
+
+
+
+

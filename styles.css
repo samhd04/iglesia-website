@@ -2206,3 +2206,46 @@ a:focus {
 .close-button:hover {
   color: #e53935;
 }
+
+.tabla-encuesta {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.tabla-encuesta th,
+.tabla-encuesta td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+.tabla-encuesta th {
+  background-color: #f5f5f5;
+}
+
+#graficosEncuesta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.grafico-box {
+  flex: 1 1 30%;
+  max-width: 30%;
+  box-sizing: border-box;
+}
+
+.tabla-encuesta {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.tabla-encuesta th,
+.tabla-encuesta td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+.tabla-encuesta th {
+  background-color: #f0f0f0;
+}

@@ -10,6 +10,11 @@
             content="Una iglesia para todos. Bienvenidos a la casa de Dios, Un lugar para adorar."
         />
 
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+
+
         <link
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -1302,6 +1307,25 @@
     </form>
   </div>
 </div>
+
+<!-- Modal de Resultados de Encuesta -->
+<div id="resultadosModal" class="modal">
+  <div class="modal-content resultados" style="max-width: 90vw; overflow-x: auto;">
+    <span class="close" onclick="closeModal('resultadosModal')">&times;</span>
+    <h2 style="text-align:center;">Resultados de Encuesta de Satisfacción</h2>
+
+    <h4 style="margin-top: 30px;">📋 Tabla de respuestas</h4>
+    <div id="tablaEncuestas"></div>
+
+    <h4 style="margin-top: 50px;">📊 Gráficos de satisfacción</h4>
+    <div id="graficosEncuesta" style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-top: 20px;"></div>
+
+    <div style="text-align: center; margin-top: 40px;">
+      <button class="btn green" onclick="exportarEncuestasAExcel()">📁 Exportar a Excel</button>
+    </div>
+  </div>
+</div>
+
 
 
 
