@@ -105,11 +105,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadSampleData();
     updateFooterYear();
 
-    // 1️⃣ Verificar sesión en Supabase
+    //  Verificar sesión en Supabase
     const { data, error } = await supabase.auth.getSession();
     if (data.session) {
         const user = data.session.user;
-        // 2️⃣ Traer perfil (nombre y rol)
+        //  Traer perfil (nombre y rol)
         const { data: perfil } = await supabase
             .from("usuarios")
             .select("nombre, rol")
@@ -124,8 +124,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
     }
-
-    // 3️⃣ Cargar datos guardados (eventos, FAQ, etc.)
+    mostrarCalendarioServidores();
+    //  Cargar datos guardados (eventos, FAQ, etc.)
     loadStoredData();
 });
 
@@ -569,7 +569,7 @@ async function submitQuestion(event) {
     document.getElementById("faqForm").reset();
 }
 // ========================
-// 🔽 Función: cargar servidores en el <select>
+// Función: cargar servidores en el <select>
 // ========================
 async function cargarServidoresEnSelect() {
   const { data, error } = await supabase
@@ -592,6 +592,65 @@ async function cargarServidoresEnSelect() {
     select.appendChild(option);
   });
 }
+
+function mostrarServidoresAsignados(eventoId) {
+  const contenedor = document.getElementById("servidoresAsignados");
+  contenedor.innerHTML = "Cargando servidores asignados...";
+
+  supabase
+    .from("asignaciones_reunion")
+    .select("servidor_id, usuarios(nombre)")
+    .eq("evento_id", eventoId)
+    .then(({ data, error }) => {
+      if (error) {
+        console.error("Error al obtener asignaciones:", error);
+        contenedor.innerHTML = "No se pudieron cargar los servidores.";
+        return;
+      }
+
+      if (data.length === 0) {
+        contenedor.innerHTML = "No hay servidores asignados para esta reunión.";
+        return;
+      }
+
+      const lista = data.map(asignacion => `🔹 ${asignacion.usuarios?.nombre || 'Servidor sin nombre'}`);
+      contenedor.innerHTML = `
+        <h4>Servidores asignados:</h4>
+        <ul>${lista.map(nombre => `<li>${nombre}</li>`).join("")}</ul>
+      `;
+    });
+}
+async function mostrarCalendarioServidores() {
+  const contenedor = document.getElementById("calendar-servidores");
+  contenedor.innerHTML = "Cargando reuniones...";
+
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("id, title, date");
+
+  if (error) {
+    console.error("Error al cargar eventos:", error);
+    contenedor.innerHTML = "Error al cargar reuniones.";
+    return;
+  }
+
+  contenedor.innerHTML = ""; // limpiar
+
+  data.forEach(evento => {
+    const eventoDiv = document.createElement("div");
+    eventoDiv.className = "evento-servidor";
+    eventoDiv.innerText = `${evento.date} - ${evento.title}`;
+
+    //  Cuando haces clic, se carga CA04
+    eventoDiv.addEventListener("click", () => {
+      selectedEventId = evento.id;
+      mostrarServidoresAsignados(evento.id);
+    });
+
+    contenedor.appendChild(eventoDiv);
+  });
+}
+
 document.getElementById("confirmar-asignacion").addEventListener("click", async () => {
   const servidorId = document.getElementById("select-servidores").value;
 
