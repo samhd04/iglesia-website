@@ -1260,6 +1260,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function editEvent(id) {
+    selectedEventId = id;
     const ev = events.find((e) => e.id === id);
     if (!ev) return showMessage("Evento no encontrado", "error");
     if (currentUser.role !== "pastor")
