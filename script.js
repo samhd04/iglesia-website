@@ -117,6 +117,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             .single();
         currentUser = { id: user.id, name: perfil.nombre, role: perfil.rol };
         updateUIForLoggedInUser();
+        // Mostrar modal y cargar lista de servidores al hacer clic
+        document.getElementById("btn-asignar-servidor").addEventListener("click", () => {
+            cargarServidoresEnSelect();
+         document.getElementById("modal-asignacion").style.display = "block";
+        });
+
     }
 
     // 3️⃣ Cargar datos guardados (eventos, FAQ, etc.)
@@ -561,6 +567,36 @@ async function submitQuestion(event) {
         "success"
     );
     document.getElementById("faqForm").reset();
+}
+// ========================
+// 🔽 Función: cargar servidores en el <select>
+// ========================
+async function cargarServidoresEnSelect() {
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("id, nombre")
+    .eq("rol", "servidor");
+
+  const select = document.getElementById("select-servidores");
+  select.innerHTML = ""; // Limpiar contenido anterior
+
+  if (error) {
+    console.error("Error al cargar servidores:", error);
+    return;
+  }
+
+  data.forEach((servidor) => {
+    const option = document.createElement("option");
+    option.value = servidor.id;
+    option.textContent = servidor.nombre;
+    select.appendChild(option);
+  });
+}
+
+// Funciones de Modal
+function openModal(modalId) {
+  document.getElementById(modalId).style.display = "block";
+  document.body.style.overflow = "hidden";
 }
 
 // Funciones de Modal
