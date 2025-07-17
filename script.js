@@ -117,12 +117,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             .single();
         currentUser = { id: user.id, name: perfil.nombre, role: perfil.rol };
         updateUIForLoggedInUser();
-        // Mostrar modal y cargar lista de servidores al hacer clic
-        document.getElementById("btn-asignar-servidor").addEventListener("click", () => {
-            cargarServidoresEnSelect();
-         document.getElementById("modal-asignacion").style.display = "block";
-        });
-
     }
     mostrarCalendarioServidores();
     //  Cargar datos guardados (eventos, FAQ, etc.)
