@@ -639,6 +639,7 @@ function mostrarServidoresAsignados(eventoId) {
     });
 }
 async function mostrarCalendarioServidores() {
+  document.getElementById("calendario-servidores").style.display = "block";
   const contenedor = document.getElementById("calendar-servidores");
   contenedor.innerHTML = "Cargando reuniones...";
 
@@ -656,7 +657,7 @@ async function mostrarCalendarioServidores() {
 
   data.forEach(evento => {
     const eventoDiv = document.createElement("div");
-    eventoDiv.className = "evento-servidor";
+    eventoDiv.className = "servidor-card";
     eventoDiv.innerText = `${evento.date} - ${evento.title}`;
 
     //  Cuando haces clic, se carga CA04
@@ -671,6 +672,9 @@ async function mostrarCalendarioServidores() {
 
 document.getElementById("confirmar-asignacion").addEventListener("click", async () => {
   const servidorId = document.getElementById("select-servidores").value;
+  console.log("Servidor seleccionado:", servidorId);
+  console.log("Evento seleccionado:", selectedEventId);
+
 
   if (!servidorId) {
     return showMessage("Selecciona un servidor para asignar", "error");
@@ -2190,6 +2194,26 @@ preguntas.forEach((pregunta) => {
 });
 
 }
+// Abrir modal al hacer clic en el botón
+document.getElementById("btn-asignar-servidor").addEventListener("click", () => {
+  document.getElementById("modal-asignacion").style.display = "block";
+  document.body.style.overflow = "hidden";
+});
+
+// Cerrar modal al hacer clic en la X
+document.getElementById("cerrar-modal").addEventListener("click", () => {
+  document.getElementById("modal-asignacion").style.display = "none";
+  document.body.style.overflow = "auto";
+});
+
+// Cerrar modal al hacer clic fuera del contenido
+window.addEventListener("click", (event) => {
+  const modal = document.getElementById("modal-asignacion");
+  if (event.target === modal) {
+    modal.style.display = "none";
+    document.body.style.overflow = "auto";
+  }
+});
 
 function exportarEncuestasAExcel() {
   const tabla = document.querySelector(".tabla-encuesta");
