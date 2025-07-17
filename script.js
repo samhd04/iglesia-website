@@ -592,6 +592,34 @@ async function cargarServidoresEnSelect() {
     select.appendChild(option);
   });
 }
+document.getElementById("confirmar-asignacion").addEventListener("click", async () => {
+  const servidorId = document.getElementById("select-servidores").value;
+
+  if (!servidorId) {
+    return showMessage("Selecciona un servidor para asignar", "error");
+  }
+
+  if (!selectedEventId) {
+    return showMessage("No hay evento seleccionado", "error");
+  }
+
+  const { error } = await supabase.from("asignaciones_reunion").insert({
+    servidor_id: servidorId,
+    evento_id: selectedEventId,
+    asignado_por: currentUser.id,
+    fecha_asignacion: new Date().toISOString(),
+    estado_asistencia: "pendiente",
+    area_servicio: "" // puedes cambiar esto si agregas input
+  });
+
+  if (error) {
+    console.error("Error al asignar:", error);
+    return showMessage("Error al asignar servidor", "error");
+  }
+
+  showMessage("Servidor asignado correctamente", "success");
+  document.getElementById("modal-asignacion").style.display = "none";
+});
 
 // Funciones de Modal
 function openModal(modalId) {
