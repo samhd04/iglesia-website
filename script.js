@@ -105,11 +105,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadSampleData();
     updateFooterYear();
 
-    //  Verificar sesión en Supabase
+    // 1️⃣ Verificar sesión en Supabase
     const { data, error } = await supabase.auth.getSession();
     if (data.session) {
         const user = data.session.user;
-        //  Traer perfil (nombre y rol)
+        // 2️⃣ Traer perfil (nombre y rol)
         const { data: perfil } = await supabase
             .from("usuarios")
             .select("nombre, rol")
@@ -124,8 +124,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
     }
-    mostrarCalendarioServidores();
-    //  Cargar datos guardados (eventos, FAQ, etc.)
+
+    // 3️⃣ Cargar datos guardados (eventos, FAQ, etc.)
     loadStoredData();
 });
 
@@ -569,11 +569,7 @@ async function submitQuestion(event) {
     document.getElementById("faqForm").reset();
 }
 // ========================
-<<<<<<< HEAD
-// Función: cargar servidores en el <select>
-=======
 // 🔽 Función: cargar servidores en el <select>
->>>>>>> 2cfb8c08eebf99bb40f3d0b6d2c15060666a93d7
 // ========================
 async function cargarServidoresEnSelect() {
   const { data, error } = await supabase
@@ -597,100 +593,6 @@ async function cargarServidoresEnSelect() {
   });
 }
 
-<<<<<<< HEAD
-function mostrarServidoresAsignados(eventoId) {
-  const contenedor = document.getElementById("servidoresAsignados");
-  contenedor.innerHTML = "Cargando servidores asignados...";
-
-  supabase
-    .from("asignaciones_reunion")
-    .select("servidor_id, usuarios(nombre)")
-    .eq("evento_id", eventoId)
-    .then(({ data, error }) => {
-      if (error) {
-        console.error("Error al obtener asignaciones:", error);
-        contenedor.innerHTML = "No se pudieron cargar los servidores.";
-        return;
-      }
-
-      if (data.length === 0) {
-        contenedor.innerHTML = "No hay servidores asignados para esta reunión.";
-        return;
-      }
-
-      const lista = data.map(asignacion => `🔹 ${asignacion.usuarios?.nombre || 'Servidor sin nombre'}`);
-      contenedor.innerHTML = `
-        <h4>Servidores asignados:</h4>
-        <ul>${lista.map(nombre => `<li>${nombre}</li>`).join("")}</ul>
-      `;
-    });
-}
-async function mostrarCalendarioServidores() {
-  document.getElementById("calendario-servidores").style.display = "block";
-  const contenedor = document.getElementById("calendar-servidores");
-  contenedor.innerHTML = "Cargando reuniones...";
-
-  const { data, error } = await supabase
-    .from("eventos")
-    .select("id, title, date");
-
-  if (error) {
-    console.error("Error al cargar eventos:", error);
-    contenedor.innerHTML = "Error al cargar reuniones.";
-    return;
-  }
-
-  contenedor.innerHTML = ""; // limpiar
-
-  data.forEach(evento => {
-    const eventoDiv = document.createElement("div");
-    eventoDiv.className = "servidor-card";
-    eventoDiv.innerText = `${evento.date} - ${evento.title}`;
-
-    //  Cuando haces clic, se carga CA04
-    eventoDiv.addEventListener("click", () => {
-      selectedEventId = evento.id;
-      mostrarServidoresAsignados(evento.id);
-    });
-
-    contenedor.appendChild(eventoDiv);
-  });
-}
-
-document.getElementById("confirmar-asignacion").addEventListener("click", async () => {
-  const servidorId = document.getElementById("select-servidores").value;
-  console.log("Servidor seleccionado:", servidorId);
-  console.log("Evento seleccionado:", selectedEventId);
-
-
-  if (!servidorId) {
-    return showMessage("Selecciona un servidor para asignar", "error");
-  }
-
-  if (!selectedEventId) {
-    return showMessage("No hay evento seleccionado", "error");
-  }
-
-  const { error } = await supabase.from("asignaciones_reunion").insert({
-    servidor_id: servidorId,
-    evento_id: selectedEventId,
-    asignado_por: currentUser.id,
-    fecha_asignacion: new Date().toISOString(),
-    estado_asistencia: "pendiente",
-    area_servicio: "" // puedes cambiar esto si agregas input
-  });
-
-  if (error) {
-    console.error("Error al asignar:", error);
-    return showMessage("Error al asignar servidor", "error");
-  }
-
-  showMessage("Servidor asignado correctamente", "success");
-  document.getElementById("modal-asignacion").style.display = "none";
-});
-
-=======
->>>>>>> 2cfb8c08eebf99bb40f3d0b6d2c15060666a93d7
 // Funciones de Modal
 function openModal(modalId) {
   document.getElementById(modalId).style.display = "block";
@@ -1330,7 +1232,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function editEvent(id) {
-    selectedEventId = id;
     const ev = events.find((e) => e.id === id);
     if (!ev) return showMessage("Evento no encontrado", "error");
     if (currentUser.role !== "pastor")
@@ -2183,26 +2084,6 @@ preguntas.forEach((pregunta) => {
 });
 
 }
-// Abrir modal al hacer clic en el botón
-document.getElementById("btn-asignar-servidor").addEventListener("click", () => {
-  document.getElementById("modal-asignacion").style.display = "block";
-  document.body.style.overflow = "hidden";
-});
-
-// Cerrar modal al hacer clic en la X
-document.getElementById("cerrar-modal").addEventListener("click", () => {
-  document.getElementById("modal-asignacion").style.display = "none";
-  document.body.style.overflow = "auto";
-});
-
-// Cerrar modal al hacer clic fuera del contenido
-window.addEventListener("click", (event) => {
-  const modal = document.getElementById("modal-asignacion");
-  if (event.target === modal) {
-    modal.style.display = "none";
-    document.body.style.overflow = "auto";
-  }
-});
 
 function exportarEncuestasAExcel() {
   const tabla = document.querySelector(".tabla-encuesta");
