@@ -117,6 +117,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             .single();
         currentUser = { id: user.id, name: perfil.nombre, role: perfil.rol };
         updateUIForLoggedInUser();
+        // Mostrar modal y cargar lista de servidores al hacer clic
+        document.getElementById("btn-asignar-servidor").addEventListener("click", () => {
+            cargarServidoresEnSelect();
+         document.getElementById("modal-asignacion").style.display = "block";
+        });
+
     }
     mostrarCalendarioServidores();
     //  Cargar datos guardados (eventos, FAQ, etc.)
@@ -563,7 +569,11 @@ async function submitQuestion(event) {
     document.getElementById("faqForm").reset();
 }
 // ========================
+<<<<<<< HEAD
 // Función: cargar servidores en el <select>
+=======
+// 🔽 Función: cargar servidores en el <select>
+>>>>>>> 2cfb8c08eebf99bb40f3d0b6d2c15060666a93d7
 // ========================
 async function cargarServidoresEnSelect() {
   const { data, error } = await supabase
@@ -587,6 +597,7 @@ async function cargarServidoresEnSelect() {
   });
 }
 
+<<<<<<< HEAD
 function mostrarServidoresAsignados(eventoId) {
   const contenedor = document.getElementById("servidoresAsignados");
   contenedor.innerHTML = "Cargando servidores asignados...";
@@ -678,6 +689,8 @@ document.getElementById("confirmar-asignacion").addEventListener("click", async 
   document.getElementById("modal-asignacion").style.display = "none";
 });
 
+=======
+>>>>>>> 2cfb8c08eebf99bb40f3d0b6d2c15060666a93d7
 // Funciones de Modal
 function openModal(modalId) {
   document.getElementById(modalId).style.display = "block";
