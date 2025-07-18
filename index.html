@@ -40,8 +40,6 @@
 </script>
     </head>
     <body>
-
-        
         <!-- Navigation -->
         <nav class="navbar" id="navbar">
             <div class="nav-container">
@@ -977,7 +975,7 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-        <script src="script.js"></script>
+        
 
         <div id="pastoresModal" class="modal">
             <div class="modal-content">
@@ -1347,13 +1345,15 @@
         <span class="close" onclick="closeModal('asignarServidorModal')">&times;</span>
         <h2>Asignar Servidores a Eventos</h2>
 
-        <!-- Contenedor para el calendario y la lista de servidores -->
-        <div class="content-container">
+        <!-- Contenedor de la fila que contiene el calendario y la lista de servidores -->
+        <div style="display: flex; justify-content: space-between;">
             <!-- Contenedor para el calendario a la izquierda -->
-            <div id="calendarioContainer"></div>
+            <div id="calendarioContainer" style="flex: 1; margin-right: 20px;">
+                <!-- Aquí irá el calendario -->
+            </div>
 
             <!-- Contenedor para la lista de servidores a la derecha -->
-            <div id="servidoresContainer">
+            <div id="servidoresContainer" style="flex: 1;">
                 <h3>Servidores Disponibles</h3>
                 <ul id="servidoresList">
                     <!-- Los servidores serán cargados dinámicamente aquí -->
@@ -1367,5 +1367,59 @@
 
 
 
+
+<!-- Modal para Crear Devocional -->
+<div id="devocionalModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('devocionalModal')">&times;</span>
+        <h4 align="center">Crear Devocional</h4><br>
+        <form id="devocionalForm">
+            <label for="devocionalTitle">Título</label>
+            <input type="text" id="devocionalTitle" placeholder="Título del devocional" required>
+
+            <label for="devocionalText">Texto del Devocional</label>
+            <textarea id="devocionalText" placeholder="Texto del devocional" required></textarea>
+
+            <label for="devocionalDate">Fecha</label>
+            <input type="date" id="devocionalDate" required>
+
+            <label for="devocionalBiblicalReferences">Apoyos Bíblicos</label>
+            <input type="text" id="devocionalBiblicalReferences" placeholder="Apoyos bíblicos">
+
+            <label for="devocionalMedia">Media (Opcional)</label>
+            <input type="file" id="devocionalMedia" accept="image/*, video/*">
+
+            <button type="submit" class="btn btn-primary">Guardar Devocional</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Modal para Mostrar el Devocional -->
+<div id="devocionalViewModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('devocionalViewModal')">&times;</span>
+        <h4 align="center">Devocional del Día</h4><br>
+
+        <p><strong>Fecha:</strong> <span id="devocionalViewDate"></span></p>
+        <p><strong>Título:</strong> <span id="devocionalViewTitle"></span></p><br>
+        <p><strong>Texto:</strong> <span id="devocionalViewText"></span></p><br>
+        <p><strong>Apoyos Bíblicos:</strong> <span id="devocionalViewBiblicalReferences"></span></p><br>
+        
+        <!-- Para los elementos interactivos (imágenes o videos) -->
+        <div id="devocionalViewMedia">
+            <p><strong>Elementos Interactivos:</strong></p><br>
+            <div id="mediaContainer"></div> <!-- Aquí se mostrarán imágenes o videos -->
+        </div>
+
+        <button onclick="completarDevocional()" class="btn green">Completar</button>
+    </div>
+</div>
+
+
+
+
+
+<script src="script.js"></script>
     </body>
 </html>

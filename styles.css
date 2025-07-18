@@ -2356,3 +2356,19 @@ a:focus {
     }
 }
 
+/* Estilo para el calendario y la lista de servidores */
+.left-container {
+    flex: 1; /* La sección del calendario ocupa el 50% del espacio disponible */
+    margin-right: 20px; /* Espacio entre el calendario y la lista */
+}
+
+.right-container {
+    flex: 1; /* La lista de servidores ocupa el 50% del espacio disponible */
+}
+
+/* Asegúrate de que los contenedores no se solapen */
+#calendarioContainer,
+#servidoresContainer {
+    overflow: auto;
+}
+

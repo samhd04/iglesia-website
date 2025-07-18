@@ -650,7 +650,7 @@ async function handleLogin(event) {
         .single();
 
     currentUser = { id: data.user.id, name: perfil.nombre, role: perfil.rol };
-    mostrarBotonNotificacionesSiUsuarioActivo();
+    /*mostrarBotonNotificacionesSiUsuarioActivo();*/
     updateUIForLoggedInUser();
     await loadStoredData();
     updateCalendar();
@@ -684,7 +684,7 @@ async function handleRegister(event) {
         },
     ]);
     currentUser = { id: data.user.id, name: name, role: role };
-    mostrarBotonNotificacionesSiUsuarioActivo();
+    /*mostrarBotonNotificacionesSiUsuarioActivo();*/
     showMessage(`¡Registro exitoso, ${name}!`, "success");
     closeModal("registerModal");
     openModal("notificationModal");
@@ -840,7 +840,13 @@ function updateUIForLoggedInUser() {
         if (currentUser.role === "pastor") {
             menuHTML += `<a href="#" onclick="showDashboard()">Panel de control</a>`;
             menuHTML += `<a href="#" onclick="showRoleManager()">Gestionar roles</a>`;
+            menuHTML += `<a href="#" onclick="openDevocionalForm()">Crear devocional</a>`;
 
+
+        }
+
+        if (currentUser.role === "servidor" || currentUser.role === "miembro") {
+            menuHTML += `<a href="#" id="verDevocionalBtn" onclick="viewDevocionalCreado()">Ver devocional</a>`;
         }
 
         if (["pastor", "líder"].includes(currentUser.role)) {
@@ -2264,9 +2270,272 @@ async function cargarEventos() {
 
 
 
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-    document.body.style.overflow = 'auto';
+
+
+
+
+
+
+async function crearDevocional(titulo, texto, fecha, apoyos_biblicos, elementos_interactivos, usuario_id) {
+    const { error } = await supabase
+        .from("devocionales")
+        .insert([
+            { 
+                titulo: titulo, 
+                texto: texto, 
+                fecha: fecha, 
+                apoyos_biblicos: apoyos_biblicos, 
+                elementos_interactivos: elementos_interactivos, 
+                usuario_id: usuario_id 
+            }
+        ]);
+
+    if (error) {
+        console.error("❌ Error al crear el devocional:", error);
+    } else {
+        console.log("✔️ Devocional creado con éxito");
+    }
 }
 
+async function obtenerDevocionalDia() {
+    const fechaHoy = new Date().toISOString().split('T')[0];  // Obtener la fecha actual en formato YYYY-MM-DD
+
+    const { data, error } = await supabase
+        .from("devocionales")
+        .select("*")
+        .eq("fecha", fechaHoy)  // Filtrar por la fecha actual
+        .single();  // Solo obtener un devocional (el de hoy)
+
+    if (error) {
+        console.error("❌ Error al obtener el devocional:", error);
+        return null;
+    }
+
+    console.log("Devocional del día:", data);
+    return data;
+}
+
+// Función para abrir el modal de crear devocional
+function openDevocionalForm() {
+    document.getElementById("devocionalModal").style.display = "block";
+}
+
+// Función para cerrar el modal de crear devocional
+function closeDevocionalForm() {
+    document.getElementById("devocionalModal").style.display = "none";
+}
+
+// Agregar un evento para cerrar el modal cuando el usuario haga clic fuera del contenido
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById("devocionalModal");
+    if (event.target === modal) {
+        closeDevocionalForm();
+    }
+});
+
+document.getElementById("devocionalForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    // Obtener los valores del formulario
+    const title = document.getElementById("devocionalTitle").value;
+    const text = document.getElementById("devocionalText").value;
+    const date = document.getElementById("devocionalDate").value;  // La fecha debe estar en formato YYYY-MM-DD
+    const biblicalReferences = document.getElementById("devocionalBiblicalReferences").value;
+    const media = document.getElementById("devocionalMedia").files[0];  // Obtener el archivo multimedia
+
+    // Subir el archivo multimedia (si existe)
+    const elementosInteractivos = media ? await uploadMedia(media) : null;
+
+    // Obtener el usuario actual usando getUser()
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error) {
+        console.error("❌ Error al obtener el usuario:", error);
+        return;
+    }
+
+    if (!user) {
+        console.error("❌ Usuario no autenticado");
+        return;
+    }
+
+    const usuarioId = user.id;  // Aquí obtenemos el usuario_id del usuario autenticado
+
+    // Guardar el devocional en Supabase
+    const { data, errorInsert } = await supabase
+        .from("devocionales")  // Asegúrate de que el nombre de la tabla sea correcto
+        .insert([
+            {
+                titulo: title,                             // Cambiado 'title' por 'titulo'
+                texto: text,                               // Cambiado 'text' por 'texto'
+                fecha: date,                               // Cambiado 'date' por 'fecha'
+                apoyos_biblicos: biblicalReferences,       // Cambiado 'biblical_references' por 'apoyos_biblicos'
+                elementos_interactivos: elementosInteractivos,  // Cambiado 'media_url' por 'elementos_interactivos'
+                usuario_id: usuarioId,                             // Usar el usuario_id del usuario autenticado
+            }
+        ]);
+
+    if (errorInsert) {
+        console.error("❌ Error al crear el devocional:", errorInsert);
+    } else {
+        console.log("✔️ Devocional creado con éxito");
+    }
+
+    // Cerrar el modal después de guardar
+    closeDevocionalForm();
+    alert("Devocional creado exitosamente.");
+});
+
+
+// Función para subir el archivo de media (si hay uno)
+async function uploadMedia(file) {
+    const { data, error } = await supabase.storage
+        .from("devocionales")  // Nombre del bucket en Supabase
+        .upload(`media/${file.name}`, file);
+
+    if (error) {
+        console.error("Error subiendo media:", error);
+        return null;
+    }
+
+    // Retorna la URL o el Key del archivo subido (puedes usarlo como URL)
+    return data.Key;  // Devuelve la URL o la ruta del archivo subido
+}
+
+
+async function viewDevocional() {
+    const { data: devocional, error } = await supabase
+        .from("devocionales")
+        .select("*")
+        .eq("fecha", new Date().toISOString().split("T")[0]) // Devocional solo de hoy
+        .single();
+
+    if (error || !devocional) {
+        showMessage("No hay devocional disponible para hoy","error.");
+        console.error("Error cargando devocional:", error);
+        return;
+    }
+
+    // Mostrar el devocional en la UI (puedes usar un modal o un área en la página)
+    /*showMessage(`Devocional de hoy: ${devocional.titulo}\n`,"success");*/
+
+    // Mostrar el devocional en el modal
+    // Actualizar el contenido del modal con el título y texto del devocional
+    document.getElementById("devocionalTitle").textContent = devocional.titulo;
+    document.getElementById("devocionalText").textContent = devocional.texto;
+
+    // Mostrar el modal
+    document.getElementById("devocionalModal").style.display = "block"; 
+}
+
+// Cerrar el modal de devocional
+function closeDevocionalModal() {
+    document.getElementById("devocionalModal").style.display = "none";
+}
+
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById("devocionalModal");
+    if (event.target === modal) {
+        closeDevocionalModal();
+    }
+});
+
+// Mostrar el botón de ver devocional si el usuario es miembro o servidor
+function showDevocionalButton() {
+    if (currentUser.role === "servidor" || currentUser.role === "miembro") {
+        const devocionalBtn = document.getElementById("verDevocionalBtn");
+        if (devocionalBtn) {
+            devocionalBtn.style.display = "block";  // Mostrar el botón
+        }
+    }
+}
+
+async function viewDevocionalCreado() {
+    // Obtener el devocional del día
+    const { data: devocional, error } = await supabase
+        .from("devocionales")
+        .select("*")
+        .eq("fecha", new Date().toISOString().split("T")[0]) // Solo devocional de hoy
+        .single();  // Solo obtener un devocional (el de hoy)
+
+    if (error || !devocional) {
+        return showMessage("No hay devocional disponible para hoy", "error");
+
+    }
+
+    // Actualizar el contenido del nuevo modal con los datos del devocional
+    document.getElementById("devocionalViewTitle").textContent = devocional.titulo;
+    document.getElementById("devocionalViewText").textContent = devocional.texto;
+
+    // Mostrar la fecha del devocional
+    document.getElementById("devocionalViewDate").textContent = devocional.fecha;
+
+    // Mostrar los apoyos bíblicos
+    document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos;
+
+    // Mostrar los elementos interactivos (si existen, como imágenes o videos)
+    const mediaContainer = document.getElementById("mediaContainer");
+    mediaContainer.innerHTML = ''; // Limpiar el contenedor de media
+
+    if (devocional.elementos_interactivos) {
+        // Si existen elementos interactivos, mostramos imágenes o videos
+        const elementos = devocional.elementos_interactivos.split(','); // Suponiendo que están separados por comas
+
+        elementos.forEach(elemento => {
+            const ext = elemento.split('.').pop(); // Extraemos la extensión para identificar si es imagen o video
+
+            const mediaElement = document.createElement(ext === 'mp4' || ext === 'webm' ? 'video' : 'img');
+            mediaElement.src = elemento;
+            mediaElement.alt = 'Elemento interactivo';
+            mediaElement.style.maxWidth = '100%'; // Para asegurarnos de que no se desborde
+
+            if (ext === 'mp4' || ext === 'webm') {
+                mediaElement.controls = true; // Solo si es video, se agregan los controles
+            }
+
+            mediaContainer.appendChild(mediaElement);
+        });
+    }
+
+    // Mostrar el modal
+    document.getElementById("devocionalViewModal").style.display = "block";
+}
+
+// Función para cerrar el modal del devocional
+function closeDevocionalViewModal() {
+    document.getElementById("devocionalViewModal").style.display = "none";
+}
+
+async function completarDevocional() {
+    // Obtener el devocional del día
+    const { data: devocional, error } = await supabase
+        .from("devocionales")
+        .select("*")
+        .eq("fecha", new Date().toISOString().split("T")[0]) // Solo devocional de hoy
+        .single();  // Solo obtener el devocional de hoy
+
+    if (error || !devocional) {
+        console.error("Error cargando devocional:", error);
+        return;
+    }
+
+    // Actualizar la columna "vistas" sumando 1
+    const { error: updateError } = await supabase
+        .from("devocionales")
+        .update({ vistas: devocional.vistas + 1 })  // Sumar 1 a la columna "vistas"
+        .eq("id", devocional.id);  // Actualizar el devocional con el ID correspondiente
+
+    if (updateError) {
+        console.error("Error actualizando las vistas:", updateError);
+    } else {
+        console.log("✔️ Vistas actualizadas con éxito");
+    }
+
+    // Cerrar el modal después de actualizar
+    closeDevocionalViewModal();
+}
+
+function closeDevocionalViewModal() {
+    document.getElementById("devocionalViewModal").style.display = "none";  // Cerrar el modal
+}
 
