@@ -13,6 +13,16 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
+<!-- jQuery (requerido por FullCalendar v3) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Moment.js (requerido por FullCalendar v3) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<!-- FullCalendar v3 -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.5/dist/fullcalendar.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.5/dist/fullcalendar.min.css" rel="stylesheet">
+
 
 
         <link
@@ -30,6 +40,8 @@
 </script>
     </head>
     <body>
+
+        
         <!-- Navigation -->
         <nav class="navbar" id="navbar">
             <div class="nav-container">
@@ -1325,6 +1337,32 @@
     </div>
   </div>
 </div>
+
+
+
+
+<!-- Modal de asignación de servidores -->
+<div id="asignarServidorModal" class="modal-big">
+    <div class="modal-content-big">
+        <span class="close" onclick="closeModal('asignarServidorModal')">&times;</span>
+        <h2>Asignar Servidores a Eventos</h2>
+
+        <!-- Contenedor para el calendario y la lista de servidores -->
+        <div class="content-container">
+            <!-- Contenedor para el calendario a la izquierda -->
+            <div id="calendarioContainer"></div>
+
+            <!-- Contenedor para la lista de servidores a la derecha -->
+            <div id="servidoresContainer">
+                <h3>Servidores Disponibles</h3>
+                <ul id="servidoresList">
+                    <!-- Los servidores serán cargados dinámicamente aquí -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 

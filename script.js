@@ -117,11 +117,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             .single();
         currentUser = { id: user.id, name: perfil.nombre, role: perfil.rol };
         updateUIForLoggedInUser();
-        // Mostrar modal y cargar lista de servidores al hacer clic
-        document.getElementById("btn-asignar-servidor").addEventListener("click", () => {
-            cargarServidoresEnSelect();
-         document.getElementById("modal-asignacion").style.display = "block";
-        });
 
     }
 
@@ -594,16 +589,30 @@ async function cargarServidoresEnSelect() {
 }
 
 // Funciones de Modal
+// Función para abrir el modal
 function openModal(modalId) {
-  document.getElementById(modalId).style.display = "block";
-  document.body.style.overflow = "hidden";
+    const modal = document.getElementById(modalId);
+    modal.style.display = "block";  // Muestra el modal
+    document.body.style.overflow = "hidden";  // Desactiva el scroll en el fondo
+
+    // Añadir un evento de clic para cerrar el modal cuando se haga clic fuera de él
+    modal.addEventListener('click', function(event) {
+        // Verificar si el clic es fuera del contenido del modal
+        // Y solo cerrar si el modal no es el de login
+        if (event.target === modal && modalId !== "loginModal") {
+            closeModal(modalId);  // Cierra el modal si no es el loginModal
+        }
+    });
 }
 
-// Funciones de Modal
-function openModal(modalId) {
-    document.getElementById(modalId).style.display = "block";
-    document.body.style.overflow = "hidden";
+// Función para cerrar el modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = "none";  // Oculta el modal
+    document.body.style.overflow = "auto";  // Restaura el scroll en el fondo
 }
+
+
 
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = "none";
@@ -834,10 +843,10 @@ function updateUIForLoggedInUser() {
 
         }
 
-        //Calendario de servidores
-        /*if (["pastor", "líder", "servidor"].includes(currentUser.role)) {
-        menuHTML += `<a href="#" onclick="abrirCalendarioServidores()">Calendario de servidores</a>`;
-        }*/
+        if (["pastor", "líder"].includes(currentUser.role)) {
+            menuHTML += `<a href="#" onclick="abrirCalendarioServidores()">Calendario de Servidores</a>`;
+        }
+
 
 
         // Subir prédica (para líderes y pastores)
@@ -2129,5 +2138,135 @@ function exportarEncuestasAExcel() {
 
 
 
+
+function abrirCalendarioServidores() {
+    openModal("asignarServidorModal");  // Abre el modal de asignación de servidores
+    cargarCalendarios();  // Cargar calendario de eventos
+    cargarServidores();  // Cargar la lista de servidores
+}
+
+
+async function cargarCalendarios() {
+    const eventos = await cargarEventos();  // Cargar los eventos desde Supabase
+
+    // Llenar el calendario de eventos
+    $('#calendarioContainer').fullCalendar({
+        events: eventos.map(evento => ({
+            title: evento.title,
+            start: evento.start,
+            end: evento.end
+        })),
+        droppable: true,  // Habilitar "arrastrar y soltar"
+        drop: function(info) {
+            // Aquí va tu lógica para asignar un servidor a un evento
+            const servidorAsignado = document.getElementById("servidoresList").querySelector(".assigned");
+            if (servidorAsignado) {
+                const servidorNombre = servidorAsignado.textContent;
+                const evento = info.event;
+                alert(`Servidor ${servidorNombre} asignado al evento ${evento.title}`);
+            }
+        }
+    });
+
+    // Llenar el calendario de servidores (con los mismos eventos)
+    $('#calendarioContainerServidores').fullCalendar({
+        events: eventos.map(evento => ({
+            title: evento.title,
+            start: evento.start,
+            end: evento.end
+        })),
+        droppable: true,  // Habilitar "arrastrar y soltar"
+        drop: function(info) {
+            // Aquí va tu lógica para asignar un servidor a un evento
+            const servidorAsignado = document.getElementById("servidoresList").querySelector(".assigned");
+            if (servidorAsignado) {
+                const servidorNombre = servidorAsignado.textContent;
+                const evento = info.event;
+                alert(`Servidor ${servidorNombre} asignado al evento ${evento.title}`);
+            }
+        }
+    });
+}
+
+
+
+
+
+async function cargarServidores() {
+    const { data, error } = await supabase
+        .from("usuarios")
+        .select("id, nombre")
+        .eq("rol", "servidor");  // Filtra solo los servidores
+
+    if (error) {
+        console.error("❌ Error al cargar servidores:", error);
+        return;
+    }
+
+    const listaServidores = document.getElementById("servidoresList");
+    listaServidores.innerHTML = "";  // Limpiar la lista antes de agregar los servidores
+
+    data.forEach((servidor) => {
+        const li = document.createElement("li");
+        li.textContent = servidor.nombre;
+        li.setAttribute("draggable", true);  // Hacer que los servidores sean arrastrables
+        li.setAttribute("data-id", servidor.id);  // Asignar ID para la asignación
+        li.addEventListener("dragstart", function () {
+            this.classList.add("assigned");  // Marcar como servidor asignado
+        });
+        listaServidores.appendChild(li);
+    });
+}
+
+
+async function asignarServidorAEvento(eventId, servidorId) {
+    const { error } = await supabase
+        .from("asignaciones_servidores")
+        .insert([
+            { evento_id: eventId, servidor_id: servidorId }
+        ]);
+
+    if (error) {
+        console.error("❌ Error al asignar servidor:", error);
+    } else {
+        console.log("✔️ Servidor asignado al evento");
+    }
+}
+
+async function cargarEventos() {
+    const { data, error } = await supabase
+        .from("eventos")  // Asegúrate de que esta sea la tabla correcta
+        .select("id, title, date, time");  // Usa los nombres de campos correctos
+
+    if (error) {
+        console.error("❌ Error al cargar eventos:", error.message);
+        return [];
+    }
+
+    // Verifica si los eventos se están cargando correctamente
+    console.log("Eventos cargados:", data);
+
+    // Convierte los datos de eventos para que tengan el formato adecuado para FullCalendar
+    const eventos = data.map(evento => {
+        // Combina la fecha (date) y la hora (time) en un formato adecuado para FullCalendar
+        const startDate = `${evento.date}T${evento.time}`;
+
+        return {
+            title: evento.title,
+            start: startDate,  // La fecha completa para el evento
+            end: startDate,    // Para este ejemplo, el evento dura solo un instante (igual para start y end)
+            id: evento.id
+        };
+    });
+
+    return eventos;
+}
+
+
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+    document.body.style.overflow = 'auto';
+}
 
 
