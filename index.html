@@ -1353,13 +1353,16 @@
             </div>
 
             <!-- Contenedor para la lista de servidores a la derecha -->
-            <div id="servidoresContainer" style="flex: 1;">
+            <div id="servidoresContainer" style="flex: 1;" class="ocultar">
                 <h3>Servidores Disponibles</h3>
                 <ul id="servidoresList">
                     <!-- Los servidores serán cargados dinámicamente aquí -->
                 </ul>
+                
             </div>
+            
         </div>
+        
     </div>
 </div>
 
@@ -1374,6 +1377,9 @@
         <span class="close" onclick="closeModal('devocionalModal')">&times;</span>
         <h4 align="center">Crear Devocional</h4><br>
         <form id="devocionalForm">
+            <label for="devocionalLink">Link Virtual</label>
+            <input type="text" id="devocionalLink" placeholder="Link de la reunión virtual (opcional)">
+
             <label for="devocionalTitle">Título</label>
             <input type="text" id="devocionalTitle" placeholder="Título del devocional" required>
 
@@ -1387,7 +1393,7 @@
             <input type="text" id="devocionalBiblicalReferences" placeholder="Apoyos bíblicos">
 
             <label for="devocionalMedia">Media (Opcional)</label>
-            <input type="file" id="devocionalMedia" accept="image/*, video/*">
+            <input type="file" id="devocionalMedia" accept="image/*,video/*" multiple>
 
             <button type="submit" class="btn btn-primary">Guardar Devocional</button>
         </form>
@@ -1397,24 +1403,51 @@
 
 <!-- Modal para Mostrar el Devocional -->
 <div id="devocionalViewModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal('devocionalViewModal')">&times;</span>
-        <h4 align="center">Devocional del Día</h4><br>
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('devocionalViewModal')">&times;</span>
+    <h4 align="center">Devocional del Día</h4><br>
 
-        <p><strong>Fecha:</strong> <span id="devocionalViewDate"></span></p>
-        <p><strong>Título:</strong> <span id="devocionalViewTitle"></span></p><br>
-        <p><strong>Texto:</strong> <span id="devocionalViewText"></span></p><br>
-        <p><strong>Apoyos Bíblicos:</strong> <span id="devocionalViewBiblicalReferences"></span></p><br>
-        
-        <!-- Para los elementos interactivos (imágenes o videos) -->
-        <div id="devocionalViewMedia">
-            <p><strong>Elementos Interactivos:</strong></p><br>
-            <div id="mediaContainer"></div> <!-- Aquí se mostrarán imágenes o videos -->
-        </div>
+    <p><strong>Fecha:</strong> <span id="devocionalViewDate"></span></p>
 
-        <button onclick="completarDevocional()" class="btn green">Completar</button>
+    <!-- Mensaje cuando NO hay devocional -->
+    <p id="noDevocionalMsg" style="display:none; font-style:italic; color:#555; margin-top:5px;">
+      No hay devocional para esta fecha.
+    </p>
+
+    <div id="rowLink" class="devocional-row">
+      <p><strong>Link virtual:</strong>
+        <a id="devocionalViewLink" target="_blank">No hay enlace disponible</a>
+      </p>
     </div>
+
+    <div id="rowTitulo" class="devocional-row">
+      <p><strong>Título:</strong> <span id="devocionalViewTitle"></span></p><br>
+    </div>
+
+    <div id="rowTexto" class="devocional-row">
+      <p><strong>Texto:</strong> <span id="devocionalViewText"></span></p><br>
+    </div>
+
+    <div id="rowApoyos" class="devocional-row">
+      <p><strong>Apoyos Bíblicos:</strong> <span id="devocionalViewBiblicalReferences"></span></p><br>
+    </div>
+
+    <div id="rowMultimedia" class="devocional-row">
+      <p><strong>Multimedia:</strong></p>
+      <div id="mediaContainer"></div><br>
+    </div>
+
+    <label for="fechaDevocional">Para ver los devocionales anteriores selecciona una fecha:</label>
+    <input type="date" id="fechaDevocional" onchange="filtrarDevocionalPorFecha()" /><br>
+
+    <div class="btn-completar-wrapper">
+  <button onclick="completarDevocional()" class="btn green" id="btnCompletar">Completar</button>
 </div>
+
+  </div>
+</div>
+
+
 
 
 

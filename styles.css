@@ -1654,6 +1654,15 @@ textarea {
     border-left: 4px solid #dc2626;
 }
 
+.message.warning {
+    background: #fef2f2;
+    color:  #f39c12;
+    border: 1px solid #fecaca;
+    border-left: 4px  #f39c12;
+}
+/* Estilo para el mensaje de advertencia (warning) */
+
+
 .message.info {
     background: var(--light-orange);
     color: var(--primary-dark);
@@ -2372,3 +2381,104 @@ a:focus {
     overflow: auto;
 }
 
+/* Estilos para el botón Informar Inasistencia */
+.btn-informar {
+    background-color: #f1c40f; /* Color amarillo */
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.btn-informar:hover {
+    background-color: #e0b60f; /* Color amarillo más oscuro al pasar el ratón */
+}
+
+.btn-informar:active {
+    background-color: #c39b0f; /* Color amarillo más oscuro al hacer clic */
+}
+
+.btn-informar {
+    background-color: #f1c40f; /* Color amarillo */
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    margin-top: auto; /* Esto empuja el botón hacia abajo */
+    align-self: center; /* Centra el botón */
+}
+
+.btn-informar:hover {
+    background-color: #e0b60f; /* Color amarillo más oscuro al pasar el ratón */
+}
+
+.btn-informar:active {
+    background-color: #c39b0f; /* Color amarillo más oscuro al hacer clic */
+}
+
+
+
+
+/* Estilos para el contenedor de la lista de servidores */
+#servidoresContainer {
+    display: flex;
+    flex-direction: column;  /* Para que los elementos se apilen de arriba hacia abajo */
+    justify-content: space-between;  /* Asegura que el contenido se distribuya */
+    height: 100%;  /* Tomamos el 100% de la altura disponible */
+}
+
+/* Estilo para el botón Informar Inasistencia */
+.btn-informar {
+    background-color: #f1c40f; /* Color amarillo */
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    margin-top: 20px; /* Asegura que el botón no esté pegado al contenido anterior */
+}
+
+.btn-informar:hover {
+    background-color: #e0b60f; /* Color amarillo más oscuro al pasar el ratón */
+}
+
+.btn-informar:active {
+    background-color: #c39b0f; /* Color amarillo más oscuro al hacer clic */
+}
+
+/* Estilo para ocultar la lista de servidores */
+.ocultar {
+    display: none;
+}
+
+#devocionalViewLink.sin-link {
+    color: #999;
+    cursor: default;
+    text-decoration: none;
+    pointer-events: none;
+    font-style: italic;
+}
+
+.devocional-row { transition: opacity .2s ease; }
+
+.btn-completar-wrapper {
+  text-align: center;
+  margin-top: 25px;
+}
+
+.btn-completar-wrapper #btnCompletar {
+  display: inline-block;
+}

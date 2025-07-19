@@ -8,6 +8,20 @@ let questions = [];
 let attendeeForms = [];
 let predicas = [];
 
+// Obtener la fecha actual en UTC
+const fechaUTC = new Date();
+
+// Ajustar la hora a la zona horaria de Colombia (UTC-5)
+const fechaColombia = new Date(fechaUTC.setHours(fechaUTC.getHours() - 5));
+
+console.log("Fecha y hora en Colombia:", fechaColombia);
+
+// Convertir a formato YYYY-MM-DD
+const fechaColombiaFormato = fechaColombia.toISOString().split('T')[0];
+console.log("Fecha en formato YYYY-MM-DD:", fechaColombiaFormato);
+
+
+
 // Inicializa Supabase
 const supabase = window.supabase.createClient(
     "https://lubryqwofitefnxpzoiu.supabase.co",
@@ -657,6 +671,8 @@ async function handleLogin(event) {
     updateUpcomingEvents();
     closeModal("loginModal");
     showMessage(`¡Bienvenido de nuevo, ${perfil.nombre}!`, "success");
+
+
 }
 
 async function handleRegister(event) {
@@ -2268,6 +2284,11 @@ async function cargarEventos() {
     return eventos;
 }
 
+/*document.getElementById("informarInasistenciaBtn").addEventListener("click", function() {
+    alert("Inasistencia informada");
+});*/
+
+
 
 
 
@@ -2298,7 +2319,7 @@ async function crearDevocional(titulo, texto, fecha, apoyos_biblicos, elementos_
 }
 
 async function obtenerDevocionalDia() {
-    const fechaHoy = new Date().toISOString().split('T')[0];  // Obtener la fecha actual en formato YYYY-MM-DD
+    const fechaHoy = fechaColombia  // Obtener la fecha actual en formato YYYY-MM-DD
 
     const { data, error } = await supabase
         .from("devocionales")
@@ -2334,81 +2355,123 @@ window.addEventListener('click', function(event) {
 });
 
 document.getElementById("devocionalForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Obtener los valores del formulario
-    const title = document.getElementById("devocionalTitle").value;
-    const text = document.getElementById("devocionalText").value;
-    const date = document.getElementById("devocionalDate").value;  // La fecha debe estar en formato YYYY-MM-DD
-    const biblicalReferences = document.getElementById("devocionalBiblicalReferences").value;
-    const media = document.getElementById("devocionalMedia").files[0];  // Obtener el archivo multimedia
+  const title  = document.getElementById("devocionalTitle").value.trim();
+  const text   = document.getElementById("devocionalText").value.trim();
+  const date   = document.getElementById("devocionalDate").value;
+  const biblicalReferences = document.getElementById("devocionalBiblicalReferences").value.trim();
 
-    // Subir el archivo multimedia (si existe)
-    const elementosInteractivos = media ? await uploadMedia(media) : null;
+  // Archivos (puede ser 0, 1 o varios)
+  const files = document.getElementById("devocionalMedia").files;
+  console.log('[FORM] Cantidad de archivos seleccionados:', files.length);
 
-    // Obtener el usuario actual usando getUser()
-    const { data: { user }, error } = await supabase.auth.getUser();
+  // Subir (esto devolverá string "url1,url2,..." o null)
+  const elementosInteractivos = files.length ? await uploadMultipleMedia(files) : null;
+  console.log('[FORM] elementos_interactivos a guardar =>', elementosInteractivos);
 
-    if (error) {
-        console.error("❌ Error al obtener el usuario:", error);
-        return;
-    }
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) {
+    console.error('Usuario no autenticado');
+    showMessage('Debes iniciar sesión', 'error');
+    return;
+  }
 
-    if (!user) {
-        console.error("❌ Usuario no autenticado");
-        return;
-    }
+// (Opcional) conservar vistas si ya existía un devocional en esa fecha
+let vistasAnterior = 0;
+const { data: filaExistente, error: selError } = await supabase
+  .from('devocionales')
+  .select('vistas')
+  .eq('fecha', date)
+  .maybeSingle();
 
-    const usuarioId = user.id;  // Aquí obtenemos el usuario_id del usuario autenticado
+if (!selError && filaExistente && typeof filaExistente.vistas === 'number') {
+  vistasAnterior = filaExistente.vistas;
+}
 
-    // Guardar el devocional en Supabase
-    const { data, errorInsert } = await supabase
-        .from("devocionales")  // Asegúrate de que el nombre de la tabla sea correcto
-        .insert([
-            {
-                titulo: title,                             // Cambiado 'title' por 'titulo'
-                texto: text,                               // Cambiado 'text' por 'texto'
-                fecha: date,                               // Cambiado 'date' por 'fecha'
-                apoyos_biblicos: biblicalReferences,       // Cambiado 'biblical_references' por 'apoyos_biblicos'
-                elementos_interactivos: elementosInteractivos,  // Cambiado 'media_url' por 'elementos_interactivos'
-                usuario_id: usuarioId,                             // Usar el usuario_id del usuario autenticado
-            }
-        ]);
+const linkVirtualInput = document.getElementById('devocionalLink');
+const linkVirtual = linkVirtualInput ? linkVirtualInput.value.trim() : null;
 
-    if (errorInsert) {
-        console.error("❌ Error al crear el devocional:", errorInsert);
-    } else {
-        console.log("✔️ Devocional creado con éxito");
-    }
 
-    // Cerrar el modal después de guardar
-    closeDevocionalForm();
-    alert("Devocional creado exitosamente.");
+// Objeto final
+const filaDevocional = {
+  fecha: date,
+  titulo: title,
+  texto: text,
+  apoyos_biblicos: biblicalReferences || null,
+  elementos_interactivos: elementosInteractivos,
+  usuario_id: userData.user.id,
+  vistas: vistasAnterior,        // quita esta línea si no usas 'vistas'
+  link: linkVirtual || null      // agrega si tienes el campo link
+};
+
+console.log('[UPSERT] Enviando:', filaDevocional);
+
+const { data: upsertData, error: errorUpsert } = await supabase
+  .from('devocionales')
+  .upsert([filaDevocional], {
+    onConflict: 'fecha',            // requiere UNIQUE(fecha)
+    returning: 'representation'
+  });
+
+if (errorUpsert) {
+  console.error('❌ Error guardando devocional (upsert):', errorUpsert);
+  showMessage('Error guardando devocional', 'error');
+  return;
+}
+
+console.log('✔️ Devocional creado/actualizado:', upsertData);
+showMessage('Devocional guardado (creado o sobrescrito).', 'success');
+closeDevocionalForm();
+form.reset();
+
 });
+
+
 
 
 // Función para subir el archivo de media (si hay uno)
 async function uploadMedia(file) {
-    const { data, error } = await supabase.storage
-        .from("devocionales")  // Nombre del bucket en Supabase
-        .upload(`media/${file.name}`, file);
+  const ext = file.name.split('.').pop();
+  const nombre = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    if (error) {
-        console.error("Error subiendo media:", error);
-        return null;
-    }
+  // Subir al bucket (asegúrate de que el bucket se llama 'devocionales')
+  const { data, error } = await supabase.storage
+    .from('devocionales')
+    .upload(`media/${nombre}`, file);
 
-    // Retorna la URL o el Key del archivo subido (puedes usarlo como URL)
-    return data.Key;  // Devuelve la URL o la ruta del archivo subido
+  if (error) {
+    console.error('[UPLOAD][ERROR]', error);
+    return null;
+  }
+
+  // Obtener URL pública
+  const { data: pub } = supabase.storage
+    .from('devocionales')
+    .getPublicUrl(data.path);
+
+  console.log('[UPLOAD] URL pública =>', pub.publicUrl);
+  return pub.publicUrl;
 }
+
+async function uploadMultipleMedia(fileList) {
+  const urls = [];
+  for (const file of fileList) {
+    const url = await uploadMedia(file);
+    if (url) urls.push(url);
+  }
+  return urls.length ? urls.join(',') : null;
+}
+
+
 
 
 async function viewDevocional() {
     const { data: devocional, error } = await supabase
         .from("devocionales")
         .select("*")
-        .eq("fecha", new Date().toISOString().split("T")[0]) // Devocional solo de hoy
-        .single();
+        .eq("fecha", fechaColombiaFormato) // Devocional solo de hoy
+        .single();  // Solo obtener el devocional de hoy
 
     if (error || !devocional) {
         showMessage("No hay devocional disponible para hoy","error.");
@@ -2416,17 +2479,56 @@ async function viewDevocional() {
         return;
     }
 
-    // Mostrar el devocional en la UI (puedes usar un modal o un área en la página)
-    /*showMessage(`Devocional de hoy: ${devocional.titulo}\n`,"success");*/
-
     // Mostrar el devocional en el modal
-    // Actualizar el contenido del modal con el título y texto del devocional
-    document.getElementById("devocionalTitle").textContent = devocional.titulo;
-    document.getElementById("devocionalText").textContent = devocional.texto;
+    document.getElementById("devocionalViewTitle").textContent = devocional.link;
+    document.getElementById("devocionalViewTitle").textContent = devocional.titulo;
+    document.getElementById("devocionalViewText").textContent = devocional.texto;
+    document.getElementById("devocionalViewDate").textContent = devocional.fecha;
+    document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos;
+
+    // Mostrar el enlace virtual en el modal
+    // Mostrar el enlace del devocional
+const devocionalLink = document.getElementById("devocionalViewLink");
+
+// Verificar si el devocional tiene un enlace
+if (devocionalLink.link && devocional.link.trim() !== "") {
+    devocionalLink.href = devocional.link;  // Asigna el enlace real al href
+    devocionalLink.textContent = "Ver Devocional";  // Establece el texto del enlace
+} else {
+    devocionalLink.removeAttribute("href");  // Elimina el atributo href si no hay enlace
+    devocionalLink.textContent = "No disponible";  // Si no hay enlace, mostramos "No disponible"
+}
+
+
+    // Mostrar los elementos interactivos (si existen)
+    const mediaContainer = document.getElementById("mediaContainer");
+    mediaContainer.innerHTML = '';  // Limpiar el contenedor de medios
+
+    if (devocional.elementos_interactivos) {
+        const elementos = devocional.elementos_interactivos.split(','); // Suponiendo que están separados por comas
+
+        elementos.forEach(elemento => {
+            const ext = elemento.split('.').pop(); // Extraemos la extensión para identificar si es imagen o video
+
+            const mediaElement = document.createElement(ext === 'mp4' || ext === 'webm' ? 'video' : 'img');
+            mediaElement.src = elemento;
+            mediaElement.alt = 'Elemento interactivo';
+            mediaElement.style.maxWidth = '100%'; // Para asegurarnos de que no se desborde
+
+            if (ext === 'mp4' || ext === 'webm') {
+                mediaElement.controls = true; // Agregar controles solo si es video
+            }
+
+            mediaContainer.appendChild(mediaElement);
+            renderElementosInteractivos(devocional.elementos_interactivos);
+
+        });
+    }
 
     // Mostrar el modal
-    document.getElementById("devocionalModal").style.display = "block"; 
+    document.getElementById("devocionalViewModal").style.display = "block";
 }
+
 
 // Cerrar el modal de devocional
 function closeDevocionalModal() {
@@ -2450,12 +2552,13 @@ function showDevocionalButton() {
     }
 }
 
-async function viewDevocionalCreado() {
+/*async function viewDevocionalCreado() {
     // Obtener el devocional del día
+    
     const { data: devocional, error } = await supabase
         .from("devocionales")
         .select("*")
-        .eq("fecha", new Date().toISOString().split("T")[0]) // Solo devocional de hoy
+        .eq("fecha", fechaColombiaFormato) // Solo devocional de hoy
         .single();  // Solo obtener un devocional (el de hoy)
 
     if (error || !devocional) {
@@ -2468,10 +2571,13 @@ async function viewDevocionalCreado() {
     document.getElementById("devocionalViewText").textContent = devocional.texto;
 
     // Mostrar la fecha del devocional
+    
+
     document.getElementById("devocionalViewDate").textContent = devocional.fecha;
 
     // Mostrar los apoyos bíblicos
     document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos;
+    setDevocionalLink(devocional);
 
     // Mostrar los elementos interactivos (si existen, como imágenes o videos)
     const mediaContainer = document.getElementById("mediaContainer");
@@ -2494,12 +2600,132 @@ async function viewDevocionalCreado() {
             }
 
             mediaContainer.appendChild(mediaElement);
+            renderElementosInteractivos(devocional.elementos_interactivos);
+
         });
+        renderElementosInteractivos(devocional.elementos_interactivos);
+
     }
 
     // Mostrar el modal
     document.getElementById("devocionalViewModal").style.display = "block";
+}*/
+
+/*async function viewDevocionalCreado() {
+  limpiarDevocionalView();
+
+  const hoy = fechaHoyColombia();
+  console.log('[DEVOCIONAL] Fecha hoy (Bogotá):', hoy);
+
+  const { data: devocional, error } = await supabase
+    .from("devocionales")
+    .select("*")
+    .eq("fecha", hoy)
+    .single();
+
+  const titleEl  = document.getElementById("devocionalViewTitle");
+  const textEl   = document.getElementById("devocionalViewText");
+  const dateEl   = document.getElementById("devocionalViewDate");
+  const refsEl   = document.getElementById("devocionalViewBiblicalReferences");
+  const linkEl   = document.getElementById("devocionalViewLink");
+  const btnCompletar = document.getElementById("btnCompletar");
+
+  if (!devocional || error) {
+    // No hay devocional hoy → mostrar mensaje y permitir filtro
+    dateEl.textContent = hoy;
+    titleEl.innerHTML = '<em>No hay devocional creado para hoy.</em>';
+    textEl.textContent = '';
+    refsEl.textContent = '';
+    if (linkEl) {
+      linkEl.textContent = 'No disponible';
+      linkEl.removeAttribute('href');
+    }
+    renderElementosInteractivos(null);
+    if (btnCompletar) btnCompletar.style.display = 'none';
+  } else {
+    // Hay devocional → mostrar datos
+    dateEl.textContent  = devocional.fecha;
+    titleEl.textContent = devocional.titulo;
+    textEl.textContent  = devocional.texto;
+    refsEl.textContent  = devocional.apoyos_biblicos || '';
+    
+    if (linkEl) {
+      if (devocional.link && devocional.link.trim() !== '') {
+        linkEl.textContent = devocional.link;
+        linkEl.href = devocional.link.startsWith('http')
+          ? devocional.link
+          : 'https://' + devocional.link;
+        linkEl.target = '_blank';
+        linkEl.rel = 'noopener noreferrer';
+      } else {
+        linkEl.textContent = 'No disponible';
+        linkEl.removeAttribute('href');
+      }
+    }
+
+    renderElementosInteractivos(devocional.elementos_interactivos);
+    if (btnCompletar) btnCompletar.style.display = 'inline-block';
+  }
+
+  // Pre-cargar el input de filtro con la fecha de hoy para conveniencia
+  const inputFiltro = document.getElementById("fechaDevocional");
+  if (inputFiltro) inputFiltro.value = hoy;
+
+  // Abrir el modal siempre
+  document.getElementById("devocionalViewModal").style.display = "block";
+}*/
+
+async function viewDevocionalCreado() {
+  const btnCompletar = document.getElementById("btnCompletar");
+  const noMsg = document.getElementById("noDevocionalMsg");
+
+  limpiarDevocionalView();
+  ocultarFilasDevocional();
+  if (noMsg) noMsg.style.display = "none";
+  if (btnCompletar) btnCompletar.style.display = "none";
+
+  const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" }); // YYYY-MM-DD
+  document.getElementById("devocionalViewDate").textContent = hoy;
+  const inputFiltro = document.getElementById("fechaDevocional");
+  if (inputFiltro) inputFiltro.value = hoy;
+
+  const { data: devocional, error } = await supabase
+    .from("devocionales")
+    .select("*")
+    .eq("fecha", hoy)
+    .single();
+
+  if (!devocional || error) {
+    // No existe devocional hoy
+    toggleNoDevocionalMsg(true);          // Mostrar mensaje
+    ocultarFilasDevocional();
+    /*if (noMsg) noMsg.style.display = "block";*/
+  } else {
+    // Rellenar datos
+    toggleNoDevocionalMsg(false);
+    mostrarFilasDevocional(devocional);
+    document.getElementById("devocionalViewTitle").textContent = devocional.titulo || "";
+    document.getElementById("devocionalViewText").textContent = devocional.texto || "";
+    document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos || "";
+    const linkEl = document.getElementById("devocionalViewLink");
+    if (linkEl) {
+      if (devocional.link && devocional.link.trim() !== "") {
+        linkEl.textContent = devocional.link;
+        linkEl.href = devocional.link.startsWith("http") ? devocional.link : "https://" + devocional.link;
+      } else {
+        linkEl.textContent = "No hay enlace disponible";
+        linkEl.removeAttribute("href");
+      }
+    }
+    manejarMultimedia(devocional.elementos_interactivos);
+    if (btnCompletar) btnCompletar.style.display = "inline-block";
+  }
+
+  document.getElementById("devocionalViewModal").style.display = "block";
 }
+
+
+
 
 // Función para cerrar el modal del devocional
 function closeDevocionalViewModal() {
@@ -2511,7 +2737,7 @@ async function completarDevocional() {
     const { data: devocional, error } = await supabase
         .from("devocionales")
         .select("*")
-        .eq("fecha", new Date().toISOString().split("T")[0]) // Solo devocional de hoy
+        .eq("fecha", fechaColombiaFormato) // Solo devocional de hoy
         .single();  // Solo obtener el devocional de hoy
 
     if (error || !devocional) {
@@ -2538,4 +2764,425 @@ async function completarDevocional() {
 function closeDevocionalViewModal() {
     document.getElementById("devocionalViewModal").style.display = "none";  // Cerrar el modal
 }
+
+// Función para filtrar devocionales por fecha
+/*async function filtrarDevocionalPorFecha() {
+    const fechaSeleccionada = document.getElementById("fechaDevocional").value;  // Captura la fecha seleccionada
+
+    // Asegurarse de que la fecha seleccionada no esté vacía
+    if (!fechaSeleccionada) {
+        alert("Por favor, selecciona una fecha válida.");
+        return;
+    }
+
+    console.log("Fecha seleccionada:", fechaSeleccionada);  // Verifica que la fecha esté siendo capturada correctamente
+
+    // Obtener el devocional correspondiente a la fecha seleccionada
+    const { data: devocional, error } = await supabase
+        .from("devocionales")
+        .select("*")
+        .eq("fecha", fechaSeleccionada)  // Filtramos por la fecha seleccionada
+        .single();  // Solo obtener un devocional (el de la fecha seleccionada)
+
+    if (error || !devocional) {
+        console.error("Error al obtener el devocional:", error);
+        showMessage("No hay devocional disponible para esta fecha.","error");
+        return;
+    }
+
+    // Mostrar el contenido del devocional en el div correspondiente
+    mostrarDevocional(devocional);
+}*/
+
+/*async function filtrarDevocionalPorFecha() {
+  const fechaSeleccionada = document.getElementById("fechaDevocional").value;
+  if (!fechaSeleccionada) return;
+
+  console.log('[FILTRO] Fecha seleccionada:', fechaSeleccionada);
+
+  const { data: devocional, error } = await supabase
+    .from("devocionales")
+    .select("*")
+    .eq("fecha", fechaSeleccionada)
+    .single();
+
+  const titleEl  = document.getElementById("devocionalViewTitle");
+  const textEl   = document.getElementById("devocionalViewText");
+  const dateEl   = document.getElementById("devocionalViewDate");
+  const refsEl   = document.getElementById("devocionalViewBiblicalReferences");
+  const linkEl   = document.getElementById("devocionalViewLink");
+  const btnCompletar = document.getElementById("btnCompletar");
+
+  if (!devocional || error) {
+    dateEl.textContent  = fechaSeleccionada;
+    titleEl.innerHTML   = '<em>No hay devocional para esta fecha.</em>';
+    textEl.textContent  = '';
+    refsEl.textContent  = '';
+    if (linkEl) {
+      linkEl.textContent = 'No disponible';
+      linkEl.removeAttribute('href');
+    }
+    renderElementosInteractivos(null);
+    if (btnCompletar) btnCompletar.style.display = 'none';
+    return;
+  }
+
+  // Mostrar devocional filtrado
+  dateEl.textContent  = devocional.fecha;
+  titleEl.textContent = devocional.titulo;
+  textEl.textContent  = devocional.texto;
+  refsEl.textContent  = devocional.apoyos_biblicos || '';
+
+  if (linkEl) {
+    if (devocional.link && devocional.link.trim() !== '') {
+      linkEl.textContent = devocional.link;
+      linkEl.href = devocional.link.startsWith('http')
+        ? devocional.link
+        : 'https://' + devocional.link;
+      linkEl.target = '_blank';
+      linkEl.rel = 'noopener noreferrer';
+    } else {
+      linkEl.textContent = 'No disponible';
+      linkEl.removeAttribute('href');
+    }
+  }
+
+  renderElementosInteractivos(devocional.elementos_interactivos);
+  if (btnCompletar) btnCompletar.style.display = 'inline-block';
+}*/
+
+async function filtrarDevocionalPorFecha() {
+  const fechaSeleccionada = document.getElementById("fechaDevocional").value;
+  if (!fechaSeleccionada) return;
+
+  const btnCompletar = document.getElementById("btnCompletar");
+  const noMsg = document.getElementById("noDevocionalMsg");
+
+  limpiarDevocionalView();
+  ocultarFilasDevocional();
+  if (noMsg) noMsg.style.display = "none";
+  if (btnCompletar) btnCompletar.style.display = "none";
+
+  document.getElementById("devocionalViewDate").textContent = fechaSeleccionada;
+
+  const { data: devocional, error } = await supabase
+    .from("devocionales")
+    .select("*")
+    .eq("fecha", fechaSeleccionada)
+    .single();
+
+  if (!devocional || error) {
+    if (noMsg) noMsg.style.display = "block";
+    return;
+  }
+
+  document.getElementById("devocionalViewTitle").textContent = devocional.titulo || "";
+  document.getElementById("devocionalViewText").textContent = devocional.texto || "";
+  document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos || "";
+
+  const linkEl = document.getElementById("devocionalViewLink");
+  if (linkEl) {
+    if (devocional.link && devocional.link.trim() !== "") {
+      linkEl.textContent = devocional.link;
+      linkEl.href = devocional.link.startsWith("http") ? devocional.link : "https://" + devocional.link;
+    } else {
+      linkEl.textContent = "No hay enlace disponible";
+      linkEl.removeAttribute("href");
+    }
+  }
+
+  mostrarFilasDevocional(devocional);
+  manejarMultimedia(devocional.elementos_interactivos);
+  if (btnCompletar) btnCompletar.style.display = "inline-block";
+}
+
+
+// Función para mostrar el devocional en el contenedor debajo de la fecha
+function mostrarDevocional(devocional) {
+    // Asignar los valores a los elementos del devocional
+    document.getElementById("devocionalViewTitle").textContent = devocional.titulo;
+    document.getElementById("devocionalViewText").textContent = devocional.texto;  // Mostrar el contenido del devocional
+    document.getElementById("devocionalViewDate").textContent = devocional.fecha;
+    document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos;
+    setDevocionalLink(devocional);
+
+
+    // Mostrar el div que contiene el devocional filtrado
+    document.getElementById("devocionalViewModal").style.display = "block";  // Mostrar el div
+
+    
+
+}
+
+
+async function filtrarDevocionalPorFecha() {
+
+
+    const fechaSeleccionada = document.getElementById("fechaDevocional").value;  // Captura la fecha seleccionada
+
+    if (!fechaSeleccionada) {
+        alert("Por favor, selecciona una fecha válida.");
+        return;
+    }
+
+    console.log("Fecha seleccionada:", fechaSeleccionada);  // Verifica que la fecha esté siendo capturada correctamente
+
+    // Obtener el devocional correspondiente a la fecha seleccionada
+    const { data: devocional, error } = await supabase
+        .from("devocionales")
+        .select("*")
+        .eq("fecha", fechaSeleccionada)  // Filtramos por la fecha seleccionada
+        .single();  // Solo obtener un devocional (el de la fecha seleccionada)
+
+    console.log("Devocional filtrado:", devocional);
+
+    if (error || !devocional) {
+        console.error("Error al obtener el devocional:", error);
+        showMessage("No hay devocional disponible para esta fecha.","error");
+        toggleNoDevocionalMsg(true);
+        ocultarFilasDevocional();
+        return;
+    }
+
+    // Mostrar el contenido del devocional en el div correspondiente
+    mostrarFilasDevocional(devocional);
+    mostrarDevocional(devocional);
+    btnCompletar.style.display = "inline-block";
+}
+
+function mostrarDevocional(devocional) {
+    // Asignar los valores a los elementos del devocional
+    document.getElementById("devocionalViewTitle").textContent = devocional.titulo;
+    document.getElementById("devocionalViewText").textContent = devocional.texto;
+    document.getElementById("devocionalViewDate").textContent = devocional.fecha;
+    document.getElementById("devocionalViewBiblicalReferences").textContent = devocional.apoyos_biblicos;
+
+    setDevocionalLink(devocional); 
+    manejarMultimedia(devocional.elementos_interactivos);
+    toggleNoDevocionalMsg(false);
+    renderElementosInteractivos(devocional.elementos_interactivos);
+    btnCompletar.style.display = "inline-block";
+
+
+    // Mostrar el div que contiene el devocional filtrado
+    document.getElementById("devocionalViewModal").style.display = "block";  // Mostrar el div
+}
+
+function setDevocionalLink(devocional) {
+    const linkEl = document.getElementById('devocionalViewLink');
+    if (!linkEl) return;
+
+    let raw = (devocional.link ?? '').trim();
+
+    // Algunos registros viejos guardaron 'EMPTY'
+    if (raw.toUpperCase() === 'EMPTY') raw = '';
+
+    if (raw !== '') {
+        // Normaliza protocolo
+        if (!/^https?:\/\//i.test(raw)) {
+            raw = 'https://' + raw;
+        }
+        linkEl.textContent = raw;
+        linkEl.href = raw;
+        linkEl.target = '_blank';
+        linkEl.rel = 'noopener noreferrer';
+        linkEl.classList.remove('sin-link');
+        linkEl.style.pointerEvents = 'auto';
+    } else {
+        // Estado sin link
+        linkEl.textContent = 'No hay enlace disponible';
+        linkEl.removeAttribute('href');
+        linkEl.removeAttribute('target');
+        linkEl.classList.add('sin-link');
+        linkEl.style.pointerEvents = 'none';
+    }
+
+    console.log('[setDevocionalLink] valor final mostrado =', linkEl.textContent);
+}
+
+function renderElementosInteractivos(valor) {
+  const mediaContainer = document.getElementById("mediaContainer");
+  if (!mediaContainer) return;
+
+  mediaContainer.innerHTML = '';
+
+  if (!valor) {
+    mediaContainer.innerHTML = '<em style="color:#666;">Sin elementos multimedia.</em>';
+    return;
+  }
+
+  const lista = valor.split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  console.log('[RENDER] URLs =>', lista);
+
+  lista.forEach(url => {
+    const lower = url.toLowerCase();
+    const isVideo = lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.ogg');
+
+    const el = document.createElement(isVideo ? 'video' : 'img');
+    el.src = url;
+    el.style.maxWidth = '100%';
+    el.style.marginTop = '10px';
+    if (isVideo) el.controls = true;
+
+    el.onerror = () => {
+      el.replaceWith(Object.assign(document.createElement('div'), {
+        innerHTML: `<span style="color:#c00;font-size:0.85rem;">Error cargando: ${url}</span>`
+      }));
+    };
+
+    mediaContainer.appendChild(el);
+  });
+}
+
+function fechaHoyColombia() {
+  // 'en-CA' produce YYYY-MM-DD
+  return new Date().toLocaleString('en-CA', { timeZone: 'America/Bogota' }).split(',')[0];
+}
+
+function limpiarDevocionalView() {
+  document.getElementById("devocionalViewDate").textContent = '';
+  document.getElementById("devocionalViewTitle").textContent = '';
+  document.getElementById("devocionalViewText").textContent = '';
+  document.getElementById("devocionalViewBiblicalReferences").textContent = '';
+  const linkEl = document.getElementById("devocionalViewLink");
+  if (linkEl) {
+    linkEl.textContent = '';
+    linkEl.removeAttribute('href');
+  }
+  const mediaContainer = document.getElementById("mediaContainer");
+  if (mediaContainer) mediaContainer.innerHTML = '';
+}
+
+function ocultarFilasDevocional() {
+  ["rowLink","rowTitulo","rowTexto","rowApoyos","rowMultimedia"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+}
+
+function limpiarDevocionalView() {
+  document.getElementById("devocionalViewTitle").textContent = "";
+  document.getElementById("devocionalViewText").textContent = "";
+  document.getElementById("devocionalViewBiblicalReferences").textContent = "";
+  document.getElementById("devocionalViewDate").textContent = "";
+  const linkEl = document.getElementById("devocionalViewLink");
+  if (linkEl) {
+    linkEl.textContent = "No hay enlace disponible";
+    linkEl.removeAttribute("href");
+  }
+  const mediaContainer = document.getElementById("mediaContainer");
+  if (mediaContainer) mediaContainer.innerHTML = "";
+}
+
+function mostrarFilasDevocional(devocional) {
+  // Helper para mostrar una fila si el valor existe
+  function showIf(id, condicion = true) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = condicion ? "block" : "none";
+  }
+
+  // Link: siempre mostramos la fila (aunque no haya link) para que se vea el mensaje "No hay enlace disponible"
+  showIf("rowLink", true);
+
+  // Título / Texto / Apoyos bíblicos
+  showIf("rowTitulo", !!(devocional.titulo && devocional.titulo.trim() !== ""));
+  showIf("rowTexto", !!(devocional.texto && devocional.texto.trim() !== ""));
+  showIf("rowApoyos", !!(devocional.apoyos_biblicos && devocional.apoyos_biblicos.trim() !== ""));
+
+  // Multimedia:
+  const rowMultimedia = document.getElementById("rowMultimedia");
+  const mediaContainer = document.getElementById("mediaContainer");
+
+  if (!rowMultimedia || !mediaContainer) return; // Si no están en el DOM, salir seguro.
+
+  mediaContainer.innerHTML = ""; // Limpiamos antes de reconstruir
+
+  const valor = devocional.elementos_interactivos;
+
+  if (!valor) {
+    rowMultimedia.style.display = "none";
+    return;
+  }
+
+  // Soporta: string con un solo archivo, lista separada por comas, o JSON de array
+  let lista = [];
+  if (Array.isArray(valor)) {
+    lista = valor;
+  } else if (typeof valor === "string") {
+    const trimmed = valor.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      // Intentar parsear JSON
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) lista = parsed;
+      } catch (e) {
+        // Si falla, tratamos como lista separada por comas
+        lista = trimmed.split(",").map(s => s.trim());
+      }
+    } else {
+      lista = trimmed.split(",").map(s => s.trim());
+    }
+  }
+
+  // Filtrar vacíos
+  lista = lista.filter(Boolean);
+
+  if (!lista.length) {
+    rowMultimedia.style.display = "none";
+    return;
+  }
+
+  // Crear los elementos multimedia
+  lista.forEach(url => {
+    const lower = url.toLowerCase();
+    const isVideo = lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".ogg");
+    const el = document.createElement(isVideo ? "video" : "img");
+    el.src = url;
+    el.style.maxWidth = "100%";
+    el.style.marginTop = "8px";
+    if (isVideo) el.controls = true;
+    mediaContainer.appendChild(el);
+  });
+
+  rowMultimedia.style.display = "block";
+}
+
+
+function manejarMultimedia(valor) {
+  const row = document.getElementById("rowMultimedia");
+  const mediaContainer = document.getElementById("mediaContainer");
+  if (!row || !mediaContainer) return;
+  mediaContainer.innerHTML = "";
+  if (!valor) {
+    row.style.display = "none";
+    return;
+  }
+  const lista = valor.split(',').map(s => s.trim()).filter(Boolean);
+  if (!lista.length) {
+    row.style.display = "none";
+    return;
+  }
+  lista.forEach(url => {
+    const lower = url.toLowerCase();
+    const isVideo = lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".ogg");
+    const el = document.createElement(isVideo ? "video" : "img");
+    el.src = url;
+    el.style.maxWidth = "100%";
+    el.style.marginTop = "8px";
+    if (isVideo) el.controls = true;
+    mediaContainer.appendChild(el);
+  });
+  row.style.display = "block";
+}
+
+function toggleNoDevocionalMsg(visible) {
+  const msg = document.getElementById("noDevocionalMsg");
+  if (msg) msg.style.display = visible ? "block" : "none";
+}
+
+
+
 
