@@ -8,6 +8,8 @@ let questions = [];
 let attendeeForms = [];
 let predicas = [];
 
+
+
 // Obtener la fecha actual en UTC
 const fechaUTC = new Date();
 
@@ -2169,76 +2171,147 @@ function abrirCalendarioServidores() {
 
 
 async function cargarCalendarios() {
-    const eventos = await cargarEventos();  // Cargar los eventos desde Supabase
+  // 0. Destruir instancias previas
+  moment.locale('es');
 
-    // Llenar el calendario de eventos
-    $('#calendarioContainer').fullCalendar({
-        events: eventos.map(evento => ({
-            title: evento.title,
-            start: evento.start,
-            end: evento.end
-        })),
-        droppable: true,  // Habilitar "arrastrar y soltar"
-        drop: function(info) {
-            // Aquí va tu lógica para asignar un servidor a un evento
-            const servidorAsignado = document.getElementById("servidoresList").querySelector(".assigned");
-            if (servidorAsignado) {
-                const servidorNombre = servidorAsignado.textContent;
-                const evento = info.event;
-                alert(`Servidor ${servidorNombre} asignado al evento ${evento.title}`);
-            }
-        }
-    });
+  ['#calendarioContainer', '#calendarioContainerServidores'].forEach(sel => {
+    if ($(sel).data('fullCalendar')) $(sel).fullCalendar('destroy');
+  });
 
-    // Llenar el calendario de servidores (con los mismos eventos)
-    $('#calendarioContainerServidores').fullCalendar({
-        events: eventos.map(evento => ({
-            title: evento.title,
-            start: evento.start,
-            end: evento.end
-        })),
-        droppable: true,  // Habilitar "arrastrar y soltar"
-        drop: function(info) {
-            // Aquí va tu lógica para asignar un servidor a un evento
-            const servidorAsignado = document.getElementById("servidoresList").querySelector(".assigned");
-            if (servidorAsignado) {
-                const servidorNombre = servidorAsignado.textContent;
-                const evento = info.event;
-                alert(`Servidor ${servidorNombre} asignado al evento ${evento.title}`);
-            }
-        }
-    });
+  const eventos = await cargarEventos();
+
+  async function mostrarDetalleEvento(ev) {
+  console.log("⚙️ Buscando en Supabase el evento", ev.id);
+
+  const { data: evento, error } = await supabase
+    .from("eventos")
+    .select("title, date, time, location, description")
+    .eq("id", ev.id)
+    .single();
+
+  console.log("Resultado Supabase:", { evento, error });
+
+  if (error || !evento) {
+    alert("No se encontró información para este evento");
+    return;
+  }
+
+  // ✅ MOSTRAR el panel de detalles
+  // Posición inicial del panel (abajo a la derecha)
+    const panel = document.getElementById("detalleEventoServidores");
+    panel.style.bottom = "20px";
+    panel.style.right = "20px";
+    panel.style.left = "";
+    panel.style.top = "";
+    panel.style.display = "block";
+
+  document.getElementById("detalleEventoServidores").style.display = "block";
+
+  document.getElementById("btnAsignarServidores").classList.remove("ocultar");
+
+
+  // ✅ LLENAR el contenido con los datos del evento
+  document.getElementById("detalleTitulo").textContent        = evento.title;
+  document.getElementById("detalleTitulo").setAttribute("data-id", ev.id);
+  document.getElementById("detalleFecha").textContent         = evento.date;
+  document.getElementById("detalleHora").textContent          = evento.time        || "";
+  document.getElementById("detalleLugar").textContent         = evento.location    || "";
+  document.getElementById("detalleDescripcion").textContent   = evento.description || "";
+
+  // ✅ CARGAR servidores asignados
+  const { data: asignados } = await supabase
+    .from("asignaciones_servidores")
+    .select("servidor_id, usuarios:servidor_id(nombre)")
+    .eq("evento_id", ev.id);
+
+const ul = document.getElementById("listaServidoresAsignados");
+ul.innerHTML = "";
+
+// ✅ MARCAR los servidores asignados como seleccionados
+const servidoresAsignados = asignados.map(a => String(a.servidor_id));
+
+document.querySelectorAll('#servidoresList li').forEach(li => {
+  const servidorId = li.getAttribute("data-id");
+  if (servidoresAsignados.includes(servidorId)) {
+    li.classList.add("seleccionado");
+  } else {
+    li.classList.remove("seleccionado");
+  }
+});
+
+
+
+  if (!asignados || asignados.length === 0) {
+  const li = document.createElement("li");
+  li.textContent = "Sin asignaciones";
+  li.classList.add("sin-link"); // ⬅️ Aplica el estilo aquí
+  ul.appendChild(li);
+} else {
+  asignados.forEach((a) => {
+    const li = document.createElement("li");
+    li.textContent = a.usuarios?.nombre || "Nombre no disponible";
+    ul.appendChild(li);
+  });
 }
+
+
+
+}
+
+
+
+  const opciones = {
+    editable: false,
+    droppable: true,
+    eventClick: mostrarDetalleEvento,
+    lang: 'es'
+  };
+
+  $('#calendarioContainer').fullCalendar({
+    ...opciones,
+    events: eventos.map(e => ({ id: e.id, title: e.title, start: e.start, end: e.end }))
+  });
+
+  $('#calendarioContainerServidores').fullCalendar({
+    ...opciones,
+    events: eventos.map(e => ({ id: e.id, title: e.title, start: e.start, end: e.end }))
+  });
+}
+
 
 
 
 
 
 async function cargarServidores() {
-    const { data, error } = await supabase
-        .from("usuarios")
-        .select("id, nombre")
-        .eq("rol", "servidor");  // Filtra solo los servidores
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("id, nombre")
+    .eq("rol", "servidor");
 
-    if (error) {
-        console.error("❌ Error al cargar servidores:", error);
-        return;
-    }
+  if (error) {
+    console.error("❌ Error al cargar servidores:", error);
+    return;
+  }
 
-    const listaServidores = document.getElementById("servidoresList");
-    listaServidores.innerHTML = "";  // Limpiar la lista antes de agregar los servidores
+  const listaServidores = document.getElementById("servidoresList");
+  listaServidores.innerHTML = "";
 
-    data.forEach((servidor) => {
-        const li = document.createElement("li");
-        li.textContent = servidor.nombre;
-        li.setAttribute("draggable", true);  // Hacer que los servidores sean arrastrables
-        li.setAttribute("data-id", servidor.id);  // Asignar ID para la asignación
-        li.addEventListener("dragstart", function () {
-            this.classList.add("assigned");  // Marcar como servidor asignado
-        });
-        listaServidores.appendChild(li);
+  data.forEach((servidor) => {
+    const li = document.createElement("li");
+    li.textContent = servidor.nombre;
+    li.setAttribute("data-id", servidor.id);
+
+    li.style.cursor = "pointer";
+
+    li.addEventListener("click", function () {
+      this.classList.toggle("seleccionado"); // estilo visual
     });
+
+    listaServidores.appendChild(li);
+  });
 }
+
 
 
 async function asignarServidorAEvento(eventId, servidorId) {
@@ -2277,7 +2350,7 @@ async function cargarEventos() {
             title: evento.title,
             start: startDate,  // La fecha completa para el evento
             end: startDate,    // Para este ejemplo, el evento dura solo un instante (igual para start y end)
-            id: evento.id
+            id: String(evento.id)
         };
     });
 
@@ -2287,6 +2360,130 @@ async function cargarEventos() {
 /*document.getElementById("informarInasistenciaBtn").addEventListener("click", function() {
     alert("Inasistencia informada");
 });*/
+
+function cerrarDetalleEvento() {
+  const panel = document.getElementById("detalleEventoServidores");
+  if (panel) panel.style.display = "none";
+
+  // También ocultamos el botón de asignar
+  document.getElementById("btnAsignarServidores")?.classList.add("ocultar");
+
+  // Deseleccionamos servidores
+  document.querySelectorAll("#servidoresList li.selected").forEach(li => {
+    li.classList.remove("selected");
+  });
+}
+
+
+async function asignarServidoresSeleccionados() {
+  const servidoresSeleccionados = [...document.querySelectorAll('#servidoresList li.seleccionado')]
+    .map(li => li.getAttribute("data-id"));
+
+  const eventoId = document.getElementById("detalleTitulo").getAttribute("data-id");
+
+  if (!eventoId) {
+    alert("No hay un evento activo para asignar.");
+    return;
+  }
+
+  // ✅ Obtener asignaciones actuales
+  const { data: asignadosExistentes, error: errorConsulta } = await supabase
+    .from("asignaciones_servidores")
+    .select("servidor_id")
+    .eq("evento_id", eventoId);
+
+  if (errorConsulta) {
+    console.error("❌ Error al consultar asignaciones existentes:", errorConsulta);
+    alert("Error al verificar asignaciones previas.");
+    return;
+  }
+
+  const idsYaAsignados = asignadosExistentes.map(a => String(a.servidor_id));
+
+  // ➕ Determinar nuevos servidores a asignar
+  const nuevos = servidoresSeleccionados.filter(id => !idsYaAsignados.includes(id));
+
+  // ➖ Determinar servidores a eliminar (deseleccionados pero estaban antes)
+  const aEliminar = idsYaAsignados.filter(id => !servidoresSeleccionados.includes(id));
+
+  // ⏫ Insertar nuevos
+  if (nuevos.length > 0) {
+    const nuevosRegistros = nuevos.map(id => ({
+      evento_id: eventoId,
+      servidor_id: id
+    }));
+
+    const { error: errorInsert } = await supabase.from("asignaciones_servidores").insert(nuevosRegistros);
+    if (errorInsert) {
+      console.error("❌ Error al asignar nuevos servidores:", errorInsert);
+      alert("Error al asignar nuevos servidores.");
+      return;
+    }
+  }
+
+  // ⏬ Eliminar deseleccionados
+  if (aEliminar.length > 0) {
+    const { error: errorDelete } = await supabase
+      .from("asignaciones_servidores")
+      .delete()
+      .match({ evento_id: eventoId })
+      .in("servidor_id", aEliminar);
+
+    if (errorDelete) {
+      console.error("❌ Error al quitar servidores:", errorDelete);
+      alert("Error al quitar servidores deseleccionados.");
+      return;
+    }
+  }
+
+  showMessage("✔️ Asignaciones actualizadas correctamente.", "success");
+  cerrarDetalleEvento();
+}
+
+
+
+// Hace que el panel de detalles se pueda arrastrar
+function hacerPanelMovible(panelId, handleId) {
+  const panel = document.getElementById(panelId);
+  const handle = document.getElementById(handleId);
+
+  let offsetX = 0, offsetY = 0, isDragging = false;
+
+  handle.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    const rect = panel.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    panel.style.position = 'fixed'; // clave: usar fixed
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    panel.style.left = `${e.clientX - offsetX}px`;
+    panel.style.top = `${e.clientY - offsetY}px`;
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.body.style.userSelect = '';
+  });
+}
+
+
+
+
+
+// Activa el arrastre al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+  hacerPanelMovible("detalleEventoServidores", "barraMovimiento");
+});
+
+
+
+
+
+
 
 
 

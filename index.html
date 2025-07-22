@@ -12,6 +12,18 @@
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+        <!-- jQuery y Moment deben ir primero -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+<!-- FullCalendar (v3.x) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+
+<!-- Idioma español -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/es.js"></script>
+
+
+
 
 <!-- jQuery (requerido por FullCalendar v3) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1341,30 +1353,74 @@
 
 <!-- Modal de asignación de servidores -->
 <div id="asignarServidorModal" class="modal-big">
-    <div class="modal-content-big">
-        <span class="close" onclick="closeModal('asignarServidorModal')">&times;</span>
-        <h2>Asignar Servidores a Eventos</h2>
+  <div class="modal-content-big">
+    <span class="close" onclick="closeModal('asignarServidorModal')">&times;</span>
+    <h2>Asignar Servidores a Eventos</h2>
 
-        <!-- Contenedor de la fila que contiene el calendario y la lista de servidores -->
-        <div style="display: flex; justify-content: space-between;">
-            <!-- Contenedor para el calendario a la izquierda -->
-            <div id="calendarioContainer" style="flex: 1; margin-right: 20px;">
-                <!-- Aquí irá el calendario -->
-            </div>
+    <!-- Contenedor principal: calendario y lado derecho -->
+    <div style="display: flex; height: 450px;">
+      
+      <!-- 🗓 Calendario -->
+      <div id="calendarioContainer" style="flex: 1; margin-right: 20px;">
+        <!-- FullCalendar va aquí -->
+      </div>
 
-            <!-- Contenedor para la lista de servidores a la derecha -->
-            <div id="servidoresContainer" style="flex: 1;" class="ocultar">
-                <h3>Servidores Disponibles</h3>
-                <ul id="servidoresList">
-                    <!-- Los servidores serán cargados dinámicamente aquí -->
-                </ul>
-                
-            </div>
-            
-        </div>
-        
+      <!-- ➤ Lado derecho: lista de servidores + detalles -->
+      <!-- ➤ Lado derecho -->
+<div id="servidoresContainer" style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+
+  <!-- 🔄 Contenedor que alterna entre servidores y lista de eventos personales -->
+  <div id="contenidoServidores">
+    
+    <!-- Solo para servidores -->
+    <div id="listaEventosDelServidor" style="display: none;">
+      <h3>Eventos donde debes servir</h3>
+      <ul id="eventosAsignadosList"></ul>
     </div>
+
+    <!-- Solo para líderes/pastores -->
+    <div id="bloqueServidoresDisponibles">
+  <h3>Servidores Disponibles</h3>
+  <p style="font-style: italic; font-size: 0.8em; color: #666;">
+    Selecciona un evento, luego haz clic sobre los servidores que deseas asignar y finalmente presiona el botón de abajo para confirmar.
+  </p><br>
+  <ul id="servidoresList" style="margin-bottom: 1em;">
+    <!-- Se cargan desde JS -->
+  </ul>
 </div>
+
+  </div>
+
+  <button id="btnAsignarServidores" class="btn-informar ocultar" onclick="asignarServidoresSeleccionados()">
+    Asignar servidores al evento
+  </button>
+
+  <!-- 🔵 Detalles del evento seleccionado -->
+  <div id="detalleEventoServidores" class="panel-detalle-evento">
+    <div id="barraMovimiento" class="drag-bar">
+      <strong>Detalles del evento</strong>
+      <span class="close" onclick="closeModal('detalleEventoServidores')">&times;</span>
+    </div>
+
+    <h3 id="detalleTitulo"></h3>
+    <p><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
+    <p><strong>Hora:</strong> <span id="detalleHora"></span></p>
+    <p><strong>Lugar:</strong> <span id="detalleLugar"></span></p>
+    <p><strong>Descripción:</strong> <span id="detalleDescripcion"></span></p>
+    <h4>Servidores asignados</h4>
+    <ul id="listaServidoresAsignados"></ul>
+  </div>
+</div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
 
 
 
