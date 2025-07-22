@@ -23,6 +23,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/es.js"></script>
 
 
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
 <!-- jQuery (requerido por FullCalendar v3) -->
@@ -1351,10 +1352,11 @@
 
 
 
+
 <!-- Modal de asignación de servidores -->
 <div id="asignarServidorModal" class="modal-big">
   <div class="modal-content-big">
-    <span class="close" onclick="closeModal('asignarServidorModal')">&times;</span>
+    <span class="close" class="" onclick="closeModal('asignarServidorModal')">&times;</span>
     <h2>Asignar Servidores a Eventos</h2>
 
     <!-- Contenedor principal: calendario y lado derecho -->
@@ -1374,8 +1376,10 @@
     
     <!-- Solo para servidores -->
     <div id="listaEventosDelServidor" style="display: none;">
-      <h3>Eventos donde debes servir</h3>
-      <ul id="eventosAsignadosList"></ul>
+      <!--<h3>Eventos donde debes servir</h3> -->
+      <!--<ul id="eventosAsignadosList"></ul> -->
+      <h5 id="tituloEventosServidor" class="section-title">Eventos donde debes servir</h5>
+      <ul id="eventosServidorCollapsible" class="collapsible popout"></ul>
     </div>
 
     <!-- Solo para líderes/pastores -->
@@ -1391,9 +1395,13 @@
 
   </div>
 
-  <button id="btnAsignarServidores" class="btn-informar ocultar" onclick="asignarServidoresSeleccionados()">
-    Asignar servidores al evento
-  </button>
+  <button id="btnAsignarServidores"
+        class="btn-asignar-servidores waves-effect waves-light"
+        onclick="asignarServidoresSeleccionados()">
+  <i class="material-icons left">group_add</i>
+  Asignar servidores al evento
+</button>
+
 
   <!-- 🔵 Detalles del evento seleccionado -->
   <div id="detalleEventoServidores" class="panel-detalle-evento">

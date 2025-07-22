@@ -22,6 +22,19 @@ console.log("Fecha y hora en Colombia:", fechaColombia);
 const fechaColombiaFormato = fechaColombia.toISOString().split('T')[0];
 console.log("Fecha en formato YYYY-MM-DD:", fechaColombiaFormato);
 
+//Formatear fecha y hora
+function formateaFecha(fechaISO){
+  return new Date(fechaISO).toLocaleDateString("es-CO", { timeZone:"America/Bogota" });
+}
+function formateaHora(fechaISO){
+  return new Date(fechaISO).toLocaleTimeString("es-CO", {
+    timeZone:"America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+
 
 
 // Inicializa Supabase
@@ -867,7 +880,7 @@ function updateUIForLoggedInUser() {
             menuHTML += `<a href="#" id="verDevocionalBtn" onclick="viewDevocionalCreado()">Ver devocional</a>`;
         }
 
-        if (["pastor", "líder"].includes(currentUser.role)) {
+        if (["pastor", "líder", "servidor"].includes(currentUser.role)) {
             menuHTML += `<a href="#" onclick="abrirCalendarioServidores()">Calendario de Servidores</a>`;
         }
 
@@ -2163,11 +2176,195 @@ function exportarEncuestasAExcel() {
 
 
 
-function abrirCalendarioServidores() {
-    openModal("asignarServidorModal");  // Abre el modal de asignación de servidores
-    cargarCalendarios();  // Cargar calendario de eventos
-    cargarServidores();  // Cargar la lista de servidores
+
+
+
+
+// --- abrirCalendarioServidores() ---
+async function abrirCalendarioServidores() {
+  openModal("asignarServidorModal");
+
+  if (!currentUser) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) await loadUserProfile(user.id);
+  }
+
+  const esServidor = currentUser?.role === "servidor";
+
+  const bloqueServidores = document.getElementById("bloqueServidoresDisponibles");
+  const listaEventosSrv  = document.getElementById("listaEventosDelServidor");
+  const btnAsignar       = document.getElementById("btnAsignarServidores");
+
+  if (esServidor) {
+    bloqueServidores.style.display = "none";
+    listaEventosSrv.style.display  = "block";
+    btnAsignar.style.display       = "none";  // ← ocultar botón global
+
+    await cargarEventosAsignadosServidor();
+  } else {
+    bloqueServidores.style.display = "block";
+    listaEventosSrv.style.display  = "none";
+
+    btnAsignar.style.display   = "inline-block";
+    btnAsignar.textContent     = "Asignar servidores al evento";
+    btnAsignar.disabled        = false;
+    btnAsignar.classList.remove("ocultar");
+
+    await cargarServidores();
+  }
+
+  cargarCalendarios();
 }
+
+
+
+
+
+async function cargarEventosAsignadosServidor() {
+  const ul = document.getElementById("eventosServidorCollapsible");
+  if (!ul) return;
+
+  ul.innerHTML = `<li style="text-align:center;padding:12px;">Cargando...</li>`;
+
+  // 1) Asignaciones del servidor
+  const { data: asigns, error: e1 } = await supabase
+    .from("asignaciones_servidores")          // ← tabla real
+    .select("id, evento_id")
+    .eq("servidor_id", currentUser.id);        // ← columna real
+
+  if (e1) {
+    console.error(e1);
+    ul.innerHTML = `<li style="padding:12px;color:red;text-align:center;">Error cargando asignaciones</li>`;
+    return;
+  }
+
+  if (!asigns || asigns.length === 0) {
+    ul.innerHTML = `<li style="padding:12px;text-align:center;">No tienes eventos asignados.</li>`;
+    return;
+  }
+
+  // 2) Eventos (alias en español para no tocar el resto del código)
+  const ids = asigns.map(a => a.evento_id);
+
+  const { data: eventos, error: e2 } = await supabase
+    .from("eventos")
+    .select(`
+      id,
+      titulo:title,
+      fecha:date,
+      hora:time,
+      lugar:location,
+      descripcion:description,
+      audiencia:audience
+    `)
+    .in("id", ids);
+
+  if (e2) {
+    console.error(e2);
+    ul.innerHTML = `<li style="padding:12px;color:red;text-align:center;">Error cargando eventos</li>`;
+    return;
+  }
+
+  const eventosPorId = Object.fromEntries(eventos.map(ev => [ev.id, ev]));
+
+  // 3) Render
+// ... después de obtener eventosPorId
+
+ul.innerHTML = "";
+asigns.forEach(a => {
+  const ev = eventosPorId[a.evento_id];
+  if (!ev) return;
+
+  const fechaIni = ev.fecha ? formateaFecha(ev.fecha) : "—";
+  const [horaIni, horaFin] = dividirHora(ev.hora);
+
+  const chipHTML  = ev.audiencia ? `<span class="chip">${ev.audiencia}</span>` : "";
+  const lugarHTML = ev.lugar ? `<p><strong>Lugar:</strong> ${ev.lugar}</p>` : "";
+  const descHTML  = ev.descripcion ? `<p><strong>Descripción:</strong> ${ev.descripcion}</p>` : "";
+  const rangoHora = horaFin ? ` - ${horaFin}` : "";
+
+  const li = document.createElement("li");
+  li.innerHTML = `
+    <div class="collapsible-header btn-ev-servidor" data-evento-id="${ev.id}">
+      <i class="material-icons">event</i>
+      <span>${fechaIni} - ${ev.titulo}</span>
+      ${chipHTML}
+      <i class="material-icons rotate-icon">expand_more</i>
+    </div>
+    <div class="collapsible-body">
+      <p><strong>Hora:</strong> ${horaIni}${rangoHora}</p>
+      ${lugarHTML}
+      ${descHTML}
+      <div class="inasistencia-box">
+        <button class="btn-inasistencia waves-effect waves-light" onclick="informarInasistencia(${ev.id})">
+          <i class="material-icons left">report_problem</i>
+          Informar inasistencia
+        </button>
+      </div>
+    </div>
+  `;
+  ul.appendChild(li);
+});
+
+// Reinit Collapsible (después de pintar)
+if (window.M) {
+  const old = M.Collapsible.getInstance(ul);
+  if (old) old.destroy();
+  // espera al siguiente frame por si el modal recién se abrió
+  requestAnimationFrame(() => {
+    M.Collapsible.init(ul, { accordion: false });
+  });
+} else {
+  // Fallback simple si Materialize no está
+  initAccordionFallback(ul);
+}
+
+}
+
+function initAccordionFallback(ul){
+  ul.querySelectorAll('.collapsible-body').forEach(b => b.style.display = 'none');
+  ul.querySelectorAll('.collapsible-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const li = h.parentElement;
+      const body = h.nextElementSibling;
+      const open = body.style.display === 'block';
+      body.style.display = open ? 'none' : 'block';
+      li.classList.toggle('active', !open);
+    });
+  });
+}
+
+
+function formateaFecha(isoDate){
+  try {
+    return new Date(isoDate).toLocaleDateString("es-CO", { timeZone:"America/Bogota" });
+  } catch {
+    return isoDate;
+  }
+}
+
+function dividirHora(h){
+  if (!h) return ["—", ""];
+  // Soporta "HH:MM - HH:MM", "HH:MM–HH:MM" o solo "HH:MM"
+  const parts = h.split(/[-–]/);
+  if (parts.length === 2) return [parts[0].trim(), parts[1].trim()];
+  return [h.trim(), ""];
+}
+
+function informarInasistencia(eventoId){
+  if (window.M?.toast) {
+    M.toast({ html: 'Función aún no activa', displayLength: 2500 });
+  } else {
+    alert('Función aún no activa');
+  }
+}
+
+
+
+
+
+
+
 
 
 async function cargarCalendarios() {
@@ -2181,6 +2378,8 @@ async function cargarCalendarios() {
   const eventos = await cargarEventos();
 
   async function mostrarDetalleEvento(ev) {
+    const esServidor = currentUser && currentUser.role === "servidor";
+
   console.log("⚙️ Buscando en Supabase el evento", ev.id);
 
   const { data: evento, error } = await supabase
@@ -2204,6 +2403,22 @@ async function cargarCalendarios() {
     panel.style.left = "";
     panel.style.top = "";
     panel.style.display = "block";
+
+    if (esServidor) {
+    document.getElementById("bloqueServidoresDisponibles").style.display = "none";
+    document.getElementById("listaEventosDelServidor").style.display = "block";
+    document.getElementById("btnAsignarServidores").textContent = "Informar inasistencia (no activo)";
+    document.getElementById("btnAsignarServidores").disabled = true;
+    document.getElementById("btnAsignarServidores").classList.remove("ocultar");
+
+    await cargarEventosAsignadosServidor(); // Mostrar la lista del servidor
+  } else {
+    document.getElementById("bloqueServidoresDisponibles").style.display = "block";
+    document.getElementById("listaEventosDelServidor").style.display = "none";
+    document.getElementById("btnAsignarServidores").textContent = "Asignar servidores al evento";
+    document.getElementById("btnAsignarServidores").disabled = false;
+    document.getElementById("btnAsignarServidores").classList.remove("ocultar");
+  }
 
   document.getElementById("detalleEventoServidores").style.display = "block";
 
@@ -2314,6 +2529,7 @@ async function cargarServidores() {
 
 
 
+
 async function asignarServidorAEvento(eventId, servidorId) {
     const { error } = await supabase
         .from("asignaciones_servidores")
@@ -2382,7 +2598,7 @@ async function asignarServidoresSeleccionados() {
   const eventoId = document.getElementById("detalleTitulo").getAttribute("data-id");
 
   if (!eventoId) {
-    alert("No hay un evento activo para asignar.");
+    showMessage("No hay un evento activo para asignar.","error");
     return;
   }
 
@@ -3379,6 +3595,9 @@ function toggleNoDevocionalMsg(visible) {
   const msg = document.getElementById("noDevocionalMsg");
   if (msg) msg.style.display = visible ? "block" : "none";
 }
+
+
+
 
 
 

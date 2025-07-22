@@ -2388,7 +2388,7 @@ a:focus {
 /* Estilos para el botón Informar Inasistencia */
 .btn-informar {
     background-color: #f1c40f; /* Color amarillo */
-    color: white;
+    color: #4e342e;
     padding: 10px 20px;
     font-size: 16px;
     border: none;
@@ -2750,4 +2750,238 @@ a:focus {
 .fc .fc-daygrid-day-frame {
   padding: 0 !important;
   margin: 0 !important;
+}
+
+/* Botón/encabezado del acordeón */
+#listaEventosDelServidor .collapsible-header.btn-ev-servidor{
+  background: #ffe082;            /* Amber lighten-3 */
+  border-radius: 8px;
+  margin: 6px 0;
+  padding: 12px 16px !important;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Icono que rota */
+#listaEventosDelServidor .rotate-icon{
+  margin-left: auto;
+  transition: transform .2s;
+}
+#listaEventosDelServidor li.active .rotate-icon{
+  transform: rotate(180deg);
+}
+
+/* Cuerpo del acordeón */
+#listaEventosDelServidor .collapsible-body{
+  background:#fff8e1;             /* Amber lighten-5 */
+  border-left:4px solid #ffb300;  /* Amber darken-2 */
+  padding:16px 20px;
+  border-radius:0 0 8px 8px;
+}
+
+/* Chips pequeños */
+#listaEventosDelServidor .chip{
+  margin-left: 8px;
+}
+
+#eventosServidorCollapsible li{
+  list-style: none;
+}
+
+/* Encabezado del acordeón */
+#listaEventosDelServidor .collapsible-header.btn-ev-servidor{
+  background: #ffe082;      /* Amber lighten-3 */
+  border-radius: 8px;
+  margin: 6px 0;
+  padding: 12px 16px !important;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#listaEventosDelServidor .rotate-icon{
+  margin-left: auto;
+  transition: transform .2s;
+}
+#listaEventosDelServidor li.active .rotate-icon{
+  transform: rotate(180deg);
+}
+
+#listaEventosDelServidor .collapsible-body{
+  background:#fff8e1;       /* Amber lighten-5 */
+  border-left:4px solid #ffb300;
+  padding:16px 20px;
+  border-radius:0 0 8px 8px;
+}
+
+/* Botón bonito dentro del evento */
+.inasistencia-box{
+  text-align: right;
+  margin-top: 14px;
+}
+.btn-inasistencia{
+  background: #ffca28;      /* Amber 400 */
+  color: #4e342e;
+  border-radius: 18px;
+  font-weight: 500;
+  padding: 6px 18px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.18);
+  line-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+}
+.btn-inasistencia:hover{
+  filter: brightness(0.95);
+}
+.btn-inasistencia i{
+  font-size: 18px;
+  line-height: 18px;
+}
+
+#eventosServidorCollapsible li{
+  list-style:none;
+}
+
+/* Encabezado del acordeón (verde) */
+#listaEventosDelServidor .collapsible-header.btn-ev-servidor{
+  background:#a5d6a7;            /* green lighten-3 */
+  border-radius:8px;
+  margin:6px 0;
+  padding:12px 16px !important;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* Flecha que rota */
+#listaEventosDelServidor .rotate-icon{
+  margin-left:auto;
+  transition:transform .2s;
+}
+#listaEventosDelServidor li.active .rotate-icon{
+  transform:rotate(180deg);
+}
+
+/* Cuerpo del acordeón (verde claro) */
+#listaEventosDelServidor .collapsible-body{
+  background:#e8f5e9;            /* green lighten-5 */
+  border-left:4px solid #43a047; /* green darken-1 */
+  padding:16px 20px;
+  border-radius:0 0 8px 8px;
+}
+
+/* Botón dentro del evento */
+.inasistencia-box{
+  text-align:right;
+  margin-top:14px;
+}
+.btn-inasistencia{
+  background:#66bb6a;            /* green lighten-2 */
+  color:#1b5e20;
+  border-radius:18px;
+  font-weight:500;
+  padding:6px 18px;
+  box-shadow:0 2px 4px rgba(0,0,0,.18);
+  line-height:32px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border:none;
+}
+.btn-inasistencia:hover{
+  filter:brightness(.95);
+}
+.btn-inasistencia i{
+  font-size:18px;
+  line-height:18px;
+}
+
+#tituloEventosServidor.section-title{
+  font-size: 1.1rem;   /* ~18px */
+  margin: 6px 0 12px;
+  font-weight: 600;
+  color: #2e7d32;      /* verde oscuro */
+}
+
+.btn-inasistencia{
+  background:#ffca28;      /* amarillo */
+  color:#4e342e;
+  border-radius:18px;
+  font-weight:500;
+  padding:6px 18px;
+  box-shadow:0 2px 4px rgba(0,0,0,.18);
+  line-height:32px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border:none;
+}
+.btn-inasistencia:hover{ filter:brightness(.95); }
+
+#tituloEventosServidor{
+  color:#000 !important;
+  font-size:3rem;          /* ajusta si quieres */
+  margin: 4px 0 12px;
+  font-weight:600;
+  text-align:center;
+}
+
+.btn-asignar-servidores{
+  background: linear-gradient(135deg,#4caf50,#2e7d32);
+  color:#fff;
+  border:none;
+  border-radius:28px;
+  padding:12px 26px;
+  font-weight:600;
+  letter-spacing:.2px;
+  box-shadow:0 4px 10px rgba(0,0,0,.25);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size: 1.2rem; 
+  transition:transform .15s, box-shadow .15s, filter .15s;
+  text-transform: none;          /* para que no quede todo en MAYÚSCULAS */
+}
+.btn-asignar-servidores:hover{
+  filter:brightness(.95);
+  box-shadow:0 6px 14px rgba(0,0,0,.28);
+  transform:translateY(-1px);
+}
+.btn-asignar-servidores:active{
+  transform:translateY(0);
+  box-shadow:0 3px 8px rgba(0,0,0,.22);
+}
+.btn-asignar-servidores:disabled{
+  background:#bdbdbd !important;
+  color:#fafafa !important;
+  box-shadow:none;
+  cursor:not-allowed;
+}
+.btn-asignar-servidores .material-icons{
+  font-size:20px;
+  line-height:20px;
+}
+
+/* Mata cualquier borde/outline/box-shadow del botón */
+#btnAsignarServidores,
+#btnAsignarServidores:focus,
+#btnAsignarServidores:active,
+#btnAsignarServidores:focus-visible,
+#btnAsignarServidores:focus:not(:active),
+#btnAsignarServidores:focus-within,
+button#btnAsignarServidores.waves-effect:focus {
+  outline: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Materialize genera un ripple que a veces deja bordes raros */
+.waves-effect .waves-ripple{
+  display:none !important;
 }
