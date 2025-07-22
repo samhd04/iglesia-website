@@ -68,7 +68,7 @@
                         <span class="orange-text">De Él Para Ti</span>
                     </span>
 
-                    >
+                    
                 </div>
                 <ul class="nav-menu" id="nav-menu">
                     <li><a href="#inicio" class="nav-link">Inicio</a></li>
@@ -77,6 +77,17 @@
                     <li><a href="#eventos" class="nav-link">Eventos</a></li>
                     <li><a href="#preguntas" class="nav-link">Preguntas</a></li>
                     <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                    <li class="flex-spacer"></li>
+                    <!-- Botón de notificaciones -->
+<li id="notifLi" class="notif-li hidden">
+  <button id="btnNotifInasistencias" type="button" class="icon-btn nudge-up">
+    <span class="material-icons">notifications</span>
+    <span id="badgeNotifIna" class="badge hide">0</span>
+  </button>
+</li>
+
+
+
                     <li>
                         <a
                             href="#"
@@ -99,7 +110,7 @@
                         ></a>
                         <div
                             id="userDropdownMenu"
-                            class="dropdown-menu"
+                            class="dropdown-menu scrollbox"
                             style="display: none"
                         >
                             <!-- Los botones se agregan dinámicamente con JS -->

@@ -116,7 +116,7 @@ body {
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 30px;
+    gap: 20px;
 }
 
 .nav-link {
@@ -2984,4 +2984,138 @@ button#btnAsignarServidores.waves-effect:focus {
 /* Materialize genera un ripple que a veces deja bordes raros */
 .waves-effect .waves-ripple{
   display:none !important;
+}
+
+.notif-btn{
+  position: relative;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.notif-btn i{
+  font-size: 26px;
+  color: #333;
+}
+#badgeNotifIna{
+  position: absolute;
+  top: -4px;
+  right: -4px;
+}
+.badge.hide{
+  display:none;
+}
+
+/* Resalte rojo del evento con inasistencia */
+.evento-alerta .collapsible-header.btn-ev-servidor{
+  background:#ef9a9a !important;          /* red lighten-3 */
+}
+.evento-alerta .collapsible-body{
+  background:#ffebee !important;           /* red lighten-5 */
+  border-left:4px solid #e53935 !important;
+}
+
+.hidden{ display:none !important; }
+
+.notif-li{ display:flex; align-items:center; }
+.icon-btn{
+  position:relative; background:transparent; border:none; cursor:pointer;
+  padding:4px; line-height:0; display:flex; align-items:center; justify-content:center;
+}
+.icon-btn .material-icons{ font-size:26px; color:#1a1a2e; }
+.badge{
+  position:absolute; top:-4px; right:-4px; background:#e53935; color:#fff;
+  font-size:11px; width:18px; height:18px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+}
+.badge.hide{ display:none; }
+
+
+.nudge-up{
+  position: relative;
+  top: -6px;              /* súbelo; ajusta -2px, -6px, etc. */
+  /* o usa: transform: translateY(-4px); */
+}
+
+/* Opcional: no mover en móvil */
+@media (max-width: 992px){
+  .nudge-up{ top: 0; transform:none; }
+}
+
+.roles-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:24px;
+}
+.role-column h3{
+  margin-bottom:12px;
+}
+.user-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+.user-item{
+  padding:10px 12px;
+  background:#fafafa;
+  border:1px solid #ddd;
+  border-radius:8px;
+  margin-bottom:8px;
+}
+.user-line{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.user-name{
+  font-weight:500;
+  font-size:0.95rem;
+}
+.area-wrapper{
+  margin-top:8px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.area-wrapper label{
+  font-size:0.85rem;
+  color:#555;
+}
+
+/* Fuerza el scroll en el menú */
+.scrollbox{
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-orange) transparent;
+}
+
+/* WebKit (Chrome/Edge/Safari) SOLO para este menú */
+#userDropdownMenu::-webkit-scrollbar{
+  width: 6px;
+}
+#userDropdownMenu::-webkit-scrollbar-track{
+  background: transparent;
+}
+#userDropdownMenu::-webkit-scrollbar-thumb{
+  background: var(--primary-orange);
+  border-radius: 4px;
+  border: 2px solid transparent;   /* quita esas punticas arriba/abajo */
+  background-clip: padding-box;
+}
+#userDropdownMenu::-webkit-scrollbar-thumb:hover{
+  background: #c54a2c;
+}
+#userDropdownMenu::-webkit-scrollbar-button{
+  display:none; height:0; width:0; /* sin flechitas */
 }

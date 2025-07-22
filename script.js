@@ -7,6 +7,18 @@ let faqData = [];
 let questions = [];
 let attendeeForms = [];
 let predicas = [];
+let __msgEl = null;
+let __msgTimer = null;
+
+const AREAS_SERVICIO = [
+  "alabanza",
+  "staff",
+  "intercesión",
+  "180°",
+  "audiovisuales y medios",
+  "kids"
+];
+
 
 
 
@@ -63,6 +75,10 @@ async function loadUserProfile(userId) {
         role: perfil.rol,
     };
     updateUIForLoggedInUser();
+    initNotifInasistencias();
+
+    
+    
 }
 
 // 2) (Ya la tienes) Función que carga tus eventos
@@ -83,6 +99,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     } else {
         currentUser = null;
         updateUIForLoggedOutUser();
+        initNotifInasistencias();
     }
 });
 
@@ -1236,16 +1253,27 @@ async function submitAttendeeForm(event) {
 }
 
 // Funciones de Utilidad
-function showMessage(message, type) {
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML = message;
+//Mostrar mensajes
+function showMessage(message, type = "info", ms = 6000) {
+  // Cerrar el anterior si existe
+  if (__msgEl) {
+    clearTimeout(__msgTimer);
+    __msgEl.remove();
+    __msgEl = null;
+  }
 
-    document.body.appendChild(messageDiv);
+  const div = document.createElement("div");
+  div.className = `message ${type}`;
+  div.innerHTML = message; // usa textContent si no quieres HTML
 
-    setTimeout(() => {
-        messageDiv.remove();
-    }, 6000);
+  document.body.appendChild(div);
+
+  // Guarda referencias para poder cerrar el próximo
+  __msgEl = div;
+  __msgTimer = setTimeout(() => {
+    div.remove();
+    if (__msgEl === div) __msgEl = null;
+  }, ms);
 }
 
 async function loadSampleData() {
@@ -2181,7 +2209,7 @@ function exportarEncuestasAExcel() {
 
 
 // --- abrirCalendarioServidores() ---
-async function abrirCalendarioServidores() {
+async function abrirCalendarioServidores(eventoFocusId = null) {
   openModal("asignarServidorModal");
 
   if (!currentUser) {
@@ -2200,7 +2228,7 @@ async function abrirCalendarioServidores() {
     listaEventosSrv.style.display  = "block";
     btnAsignar.style.display       = "none";  // ← ocultar botón global
 
-    await cargarEventosAsignadosServidor();
+    await cargarEventosAsignadosServidor(eventoFocusId);
   } else {
     bloqueServidores.style.display = "block";
     listaEventosSrv.style.display  = "none";
@@ -2220,17 +2248,16 @@ async function abrirCalendarioServidores() {
 
 
 
-async function cargarEventosAsignadosServidor() {
+async function cargarEventosAsignadosServidor(focusId = null) {
   const ul = document.getElementById("eventosServidorCollapsible");
   if (!ul) return;
 
   ul.innerHTML = `<li style="text-align:center;padding:12px;">Cargando...</li>`;
 
-  // 1) Asignaciones del servidor
   const { data: asigns, error: e1 } = await supabase
-    .from("asignaciones_servidores")          // ← tabla real
+    .from("asignaciones_servidores")
     .select("id, evento_id")
-    .eq("servidor_id", currentUser.id);        // ← columna real
+    .eq("servidor_id", currentUser.id);
 
   if (e1) {
     console.error(e1);
@@ -2243,9 +2270,7 @@ async function cargarEventosAsignadosServidor() {
     return;
   }
 
-  // 2) Eventos (alias en español para no tocar el resto del código)
   const ids = asigns.map(a => a.evento_id);
-
   const { data: eventos, error: e2 } = await supabase
     .from("eventos")
     .select(`
@@ -2266,60 +2291,65 @@ async function cargarEventosAsignadosServidor() {
   }
 
   const eventosPorId = Object.fromEntries(eventos.map(ev => [ev.id, ev]));
+  ul.innerHTML = "";
 
-  // 3) Render
-// ... después de obtener eventosPorId
+  asigns.forEach(a => {
+    const ev = eventosPorId[a.evento_id];
+    if (!ev) return;
 
-ul.innerHTML = "";
-asigns.forEach(a => {
-  const ev = eventosPorId[a.evento_id];
-  if (!ev) return;
+    const fechaIni = ev.fecha ? formateaFecha(ev.fecha) : "—";
+    const [horaIni, horaFin] = dividirHora(ev.hora);
 
-  const fechaIni = ev.fecha ? formateaFecha(ev.fecha) : "—";
-  const [horaIni, horaFin] = dividirHora(ev.hora);
+    const chipHTML  = ev.audiencia ? `<span class="chip">${ev.audiencia}</span>` : "";
+    const lugarHTML = ev.lugar ? `<p><strong>Lugar:</strong> ${ev.lugar}</p>` : "";
+    const descHTML  = ev.descripcion ? `<p><strong>Descripción:</strong> ${ev.descripcion}</p>` : "";
+    const rangoHora = horaFin ? ` - ${horaFin}` : "";
 
-  const chipHTML  = ev.audiencia ? `<span class="chip">${ev.audiencia}</span>` : "";
-  const lugarHTML = ev.lugar ? `<p><strong>Lugar:</strong> ${ev.lugar}</p>` : "";
-  const descHTML  = ev.descripcion ? `<p><strong>Descripción:</strong> ${ev.descripcion}</p>` : "";
-  const rangoHora = horaFin ? ` - ${horaFin}` : "";
-
-  const li = document.createElement("li");
-  li.innerHTML = `
-    <div class="collapsible-header btn-ev-servidor" data-evento-id="${ev.id}">
-      <i class="material-icons">event</i>
-      <span>${fechaIni} - ${ev.titulo}</span>
-      ${chipHTML}
-      <i class="material-icons rotate-icon">expand_more</i>
-    </div>
-    <div class="collapsible-body">
-      <p><strong>Hora:</strong> ${horaIni}${rangoHora}</p>
-      ${lugarHTML}
-      ${descHTML}
-      <div class="inasistencia-box">
-        <button class="btn-inasistencia waves-effect waves-light" onclick="informarInasistencia(${ev.id})">
-          <i class="material-icons left">report_problem</i>
-          Informar inasistencia
-        </button>
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div class="collapsible-header btn-ev-servidor" data-evento-id="${ev.id}">
+        <i class="material-icons">event</i>
+        <span>${fechaIni} - ${ev.titulo}</span>
+        ${chipHTML}
+        <i class="material-icons rotate-icon">expand_more</i>
       </div>
-    </div>
-  `;
-  ul.appendChild(li);
-});
+      <div class="collapsible-body">
+        <p><strong>Hora:</strong> ${horaIni}${rangoHora}</p>
+        ${lugarHTML}
+        ${descHTML}
+        <div class="inasistencia-box">
+          <button class="btn-inasistencia waves-effect waves-light" onclick="informarInasistencia(${ev.id})">
+            <i class="material-icons left">report_problem</i>
+            Informar inasistencia
+          </button>
+        </div>
+      </div>
+    `;
 
-// Reinit Collapsible (después de pintar)
-if (window.M) {
-  const old = M.Collapsible.getInstance(ul);
-  if (old) old.destroy();
-  // espera al siguiente frame por si el modal recién se abrió
-  requestAnimationFrame(() => {
-    M.Collapsible.init(ul, { accordion: false });
+    // Resaltar si coincide con el focus
+    if (focusId && ev.id === focusId) {
+      li.classList.add("evento-alerta");
+      // Abrir el acordeón para que se vea
+      setTimeout(() => {
+        const header = li.querySelector(".collapsible-header");
+        header && header.click();
+      }, 150);
+    }
+
+    ul.appendChild(li);
   });
-} else {
-  // Fallback simple si Materialize no está
-  initAccordionFallback(ul);
+
+  if (window.M) {
+    const old = M.Collapsible.getInstance(ul);
+    if (old) old.destroy();
+    requestAnimationFrame(() => {
+      M.Collapsible.init(ul, { accordion: false });
+    });
+  } else {
+    initAccordionFallback(ul);
+  }
 }
 
-}
 
 function initAccordionFallback(ul){
   ul.querySelectorAll('.collapsible-body').forEach(b => b.style.display = 'none');
@@ -2351,14 +2381,109 @@ function dividirHora(h){
   return [h.trim(), ""];
 }
 
-function informarInasistencia(eventoId){
-  if (window.M?.toast) {
-    M.toast({ html: 'Función aún no activa', displayLength: 2500 });
-  } else {
-    alert('Función aún no activa');
+async function informarInasistencia(eventoId){
+  const motivo = prompt("¿Deseas añadir un motivo? (opcional)");
+  const { data, error } = await supabase
+    .from("inasistencias")
+    .insert({
+      servidor_id: currentUser.id,
+      evento_id: eventoId,
+      motivo
+    })
+    .select("id");
+
+  if (error) {
+    console.error(error);
+    window.M?.toast ? M.toast({html:"Error al informar inasistencia"}) : showMessage("Error","error");
+    return;
+  }
+  window.M?.toast ? M.toast({html:"Inasistencia informada"}) : showMessage("Inasistencia informada","success");
+}
+
+const NOTIF_ROLES = ["pastor","lider","líder","admin","administrador"];
+
+function normalizeRole(r=""){
+  return r.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,""); // quita acentos
+}
+
+function initNotifInasistencias(){
+  const li    = document.getElementById("notifLi");
+  const btn   = document.getElementById("btnNotifInasistencias");
+  const badge = document.getElementById("badgeNotifIna");
+  if (!li || !btn || !badge) return;
+
+  const role = normalizeRole(currentUser?.role || "");
+  const esLP = NOTIF_ROLES.map(normalizeRole).includes(role);
+
+  // Mostrar/ocultar LI completo
+  li.classList.toggle("hidden", !esLP);
+  if (!esLP) {
+    badge.classList.add("hide");
+    btn.onclick = null;
+    return;
+  }
+
+  // Mostrar botón
+  btn.style.display = "inline-flex";
+
+  btn.onclick = async () => {
+    const noti = await obtenerPrimeraNotificacionNoVista();
+    if (!noti) {
+      window.M?.toast
+        ? M.toast({ html:"Sin inasistencias nuevas" })
+        : showMessage("Sin inasistencias nuevas","success");
+      return;
+    }
+
+    await supabase.from("inasistencias")
+      .update({ visto: true })
+      .eq("id", noti.id);
+
+    abrirCalendarioServidores(noti.evento_id); // asegúrate de aceptar el parámetro
+  };
+
+  // Primera carga del badge
+  refrescarBadgeInasistencias();
+
+  // Realtime (evita suscribirte varias veces)
+  if (!window._inaChannel){
+    window._inaChannel = supabase
+      .channel("inasistencias-ch")
+      .on("postgres_changes",
+          { event: "INSERT", schema:"public", table:"inasistencias" },
+          () => refrescarBadgeInasistencias())
+      .subscribe();
   }
 }
 
+async function refrescarBadgeInasistencias(){
+  const badge = document.getElementById("badgeNotifIna");
+  const li    = document.getElementById("notifLi");
+  if (!badge || !li || li.classList.contains("hidden")) return;
+
+  const { count, error } = await supabase
+    .from("inasistencias")
+    .select("id", { count: "exact", head: true })
+    .eq("visto", false);
+
+  if (error){ console.error(error); return; }
+
+  badge.textContent = count || 0;
+  badge.classList.toggle("hide", !count);
+}
+
+async function obtenerPrimeraNotificacionNoVista(){
+  const { data, error } = await supabase
+    .from("inasistencias")
+    .select("id, evento_id")
+    .eq("visto", false)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  if (error){ console.error(error); return null; }
+  return data || null;
+}
 
 
 
@@ -3601,4 +3726,44 @@ function toggleNoDevocionalMsg(visible) {
 
 
 
+
+function buildUserItem(u){
+  const isServidor = u.role === "servidor";
+  const li = document.createElement("li");
+  li.className = "user-item";
+  li.dataset.id = u.id;
+  li.dataset.role = u.role;
+
+  // Select rol (si ya lo tienes en otro lado, reutiliza)
+  const roleSelect = `
+    <select class="role-select" data-id="${u.id}">
+      <option value="miembro"   ${u.role==="miembro"?"selected":""}>Miembro</option>
+      <option value="servidor"  ${u.role==="servidor"?"selected":""}>Servidor</option>
+      <option value="lider"     ${u.role==="lider"?"selected":""}>Líder</option>
+      <option value="pastor"    ${u.role==="pastor"?"selected":""}>Pastor</option>
+    </select>
+  `;
+
+  const areaSelect = `
+    <div class="area-wrapper" style="${isServidor?'':'display:none'}">
+      <label>Área:</label>
+      <select class="area-select" data-id="${u.id}">
+        <option value="">-- Área --</option>
+        ${AREAS_SERVICIO.map(a =>
+          `<option value="${a}" ${u.area_servicio===a?"selected":""}>${a}</option>`
+        ).join("")}
+      </select>
+    </div>
+  `;
+
+  li.innerHTML = `
+    <div class="user-line">
+      <span class="user-name">${u.nombre || u.email || u.id}</span>
+      ${roleSelect}
+    </div>
+    ${areaSelect}
+  `;
+
+  return li;
+}
 
