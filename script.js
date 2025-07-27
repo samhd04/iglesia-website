@@ -893,7 +893,7 @@ function updateUIForLoggedInUser() {
 
         }
 
-        if (currentUser.role === "servidor" || currentUser.role === "miembro") {
+        if (currentUser.role === "servidor" || currentUser.role === "miembro" || currentUser.role === "pastor") {
             menuHTML += `<a href="#" id="verDevocionalBtn" onclick="viewDevocionalCreado()">Ver devocional</a>`;
         }
 
@@ -917,10 +917,14 @@ function updateUIForLoggedInUser() {
         }
 
 
-        if (currentUser.role !== "pastor") {
+        /*if (currentUser.role !== "pastor") {
             menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
             menuHTML += `<a href="#" onclick="abrirEncuestaSatisfaccion()">Encuesta de satisfacción</a>`;
-        }
+        }*/
+            menuHTML += `<a href="#" onclick="openModal('miembroModal')">Completar información</a>`;
+            menuHTML += `<a href="#" onclick="abrirEncuestaSatisfaccion()">Encuesta de satisfacción</a>`;
+
+
 
         menuHTML += `<a href="#" onclick="cerrarSesion()">Cerrar sesión</a>`;
         userDropdownMenu.innerHTML = menuHTML;
